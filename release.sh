@@ -7,7 +7,9 @@ APP_VERSION=$(yq -r '.version' ./pubspec.yaml | sed -e 's/\+/_/')
 RELEASE_NAME="cards-${APP_VERSION}"
 echo "[INFO] Building $RELEASE_NAME.apk"
 flutter clean
-flutter build apk -v --debug
+flutter pub get
+dart fix --apply
+flutter build apk --debug
 APK_PATH="./build/app/outputs/flutter-apk/app-release.apk"
 
 # create a new github release
