@@ -7,23 +7,22 @@ class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        color: ThemeColors.gray3,
-        alignment: Alignment.center,
-        child: Expanded(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text("Hello, world",
-                  textDirection: TextDirection.ltr,
-                  style: TextStyle(fontSize: 24, color: ThemeColors.white2)),
-              Container(
-                margin: const EdgeInsets.all(12),
-                child: const Text("one two three four five",
-                    textDirection: TextDirection.ltr,
-                    style: TextStyle(fontSize: 18, color: ThemeColors.white3)),
-              )
-            ],
-          ),
-        ));
+      color: ThemeColors.gray3,
+      alignment: Alignment.center,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text("Hello, world",
+              textDirection: TextDirection.ltr,
+              style: TextStyle(fontSize: 24, color: ThemeColors.white2)),
+          Container(
+            margin: const EdgeInsets.all(12),
+            child: const Text("one two three four five",
+                textDirection: TextDirection.ltr,
+                style: TextStyle(fontSize: 18, color: ThemeColors.white3)),
+          )
+        ],
+      ),
+    );
   }
 }
