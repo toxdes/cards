@@ -17,7 +17,7 @@ class Home extends StatelessWidget {
               style: TextStyle(fontSize: 24, color: ThemeColors.white2)),
           Container(
             margin: const EdgeInsets.all(12),
-            child: const Text("one two three four five",
+            child: const Text("one two three four",
                 textDirection: TextDirection.ltr,
                 style: TextStyle(fontSize: 18, color: ThemeColors.white3)),
           )
