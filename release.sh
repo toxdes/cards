@@ -11,7 +11,7 @@ echo "[INFO] Building $RELEASE_NAME.apk"
 flutter clean
 flutter pub get
 dart fix --apply
-flutter build apk --debug
+flutter build apk --release
 APK_PATH="./build/app/outputs/flutter-apk/app-release.apk"
 
 # create a new github release
