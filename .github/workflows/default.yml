@@ -7,9 +7,14 @@ on:
     branches: ["main"]
 
 jobs:
-  build:
+  build_apk:
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v3
-      - name: build and release apk
-        run: ./release.sh
+      - uses: actions/checkout@v4
+      - name: build debug apk
+        run: flutter build apk --debug
+      - name: Archive artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cards-debug.apk
+          path: ./build/app/outputs/flutter-apk/app-debug.apk

@@ -5,6 +5,8 @@ set -eux pipefail
 APP_VERSION=$(yq -r '.version' ./pubspec.yaml | sed -e 's/\+/_/')
 # flutter build apk
 RELEASE_NAME="cards-${APP_VERSION}"
+echo "[INFO] Generating source tar.gz"
+git archive --format=tar.gz -o /tmp/cards.tar.gz --prefix=cards/ main
 echo "[INFO] Building $RELEASE_NAME.apk"
 flutter clean
 flutter pub get
