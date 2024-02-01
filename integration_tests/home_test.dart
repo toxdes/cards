@@ -25,7 +25,7 @@ void main() {
       await tester.pumpWidget(const Home());
 
       // Verify sub text is rendered.
-      expect(find.text('one two three four'), findsOneWidget);
+      expect(find.text('one two three 1234567890'), findsOneWidget);
     });
   });
 }
