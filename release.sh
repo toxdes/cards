@@ -22,12 +22,12 @@ CREATE_RELEASE_RES=$(curl -L \
   -H "Authorization: Bearer $GH_TOKEN" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
   https://api.github.com/repos/toxdes/cards/releases \
-  -d "{\"tag_name\":\"internal\",\"target_commitish\":\"main\",\"name\":\"$RELEASE_NAME\",\"body\":\"## Release Notes\n This is currently work in progress, more detailed release notes will be added later.\",\"draft\":false,\"prerelease\":false,\"generate_release_notes\":false}")
+  -d "{\"tag_name\":\"internal-$RELEASE_NAME\",\"target_commitish\":\"main\",\"name\":\"$RELEASE_NAME\",\"body\":\"## Release Notes\n This is currently work in progress, more detailed release notes will be added later.\",\"draft\":false,\"prerelease\":false,\"generate_release_notes\":false}")
 RELEASE_ID=$(echo $CREATE_RELEASE_RES | jq -r '.id')
 echo "RELEASE ID: $RELEASE_ID"
 
 # upload assets
-echo "[INFO] Uploading APK"
+echo "[INFO] Uploading APKs"
 UPLOAD_URL="https://uploads.github.com/repos/toxdes/cards/releases/$RELEASE_ID/assets?name=$RELEASE_NAME.apk&label=$RELEASE_NAME.apk"
 curl -L \
   -X POST \
