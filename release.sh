@@ -8,7 +8,7 @@ APP_VERSION=$(yq -r '.version' ./pubspec.yaml | sed -e 's/\+/_/')
 RELEASE_NAME="cards-release-${APP_VERSION}"
 TAG_NAME="internal-$APP_VERSION"
 echo "[INFO] Tagging most recent commit with tag: $TAG_NAME"
-git tag -a $TAG_NAME -m "tag message"
+git tag -a $TAG_NAME HEAD -m "release $APP_VERSION"
 echo "[INFO] Generating source tar.gz"
 git archive --format=tar.gz -o /tmp/cards.tar.gz --prefix=cards/ main
 echo "[INFO] Building $RELEASE_NAME.apk"
