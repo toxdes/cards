@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-set -eux pipefail
+# set -euxo pipefail
+set -eu pipefail
 source ./.env
 # echo $GH_TOKEN
 APP_VERSION=$(yq -r '.version' ./pubspec.yaml | sed -e 's/\+/_/')
