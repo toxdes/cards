@@ -3,11 +3,22 @@ import 'package:flutter/material.dart';
 
 class Button extends StatefulWidget {
   const Button(
-      {super.key, required this.onTap, required this.text, buttonType});
+      {super.key,
+      required this.onTap,
+      required this.text,
+      this.buttonType = ButtonType.primary,
+      this.disabled = false,
+      this.width,
+      this.height,
+      this.alignment});
 
   final String text;
-  final ButtonType buttonType = ButtonType.primary;
+  final ButtonType buttonType;
   final VoidCallback onTap;
+  final bool disabled;
+  final double? width;
+  final double? height;
+  final Alignment? alignment;
 
   @override
   State<Button> createState() => _ButtonState();
@@ -24,7 +35,7 @@ class _ButtonState extends State<Button> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-        onTap: widget.onTap,
+        onTap: widget.disabled ? () {} : widget.onTap,
         onTapDown: (TapDownDetails _) {
           setActive(true);
         },
@@ -42,17 +53,30 @@ class _ButtonState extends State<Button> {
             // props
             // width: 160,
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            width: widget.width,
+            height: widget.height,
+            alignment: widget.alignment,
             decoration: BoxDecoration(
-                color: ThemeColors.blue,
+                color: ThemeColors.blue
+                    .withOpacity(widget.buttonType == ButtonType.ghost
+                        ? 0
+                        : widget.disabled
+                            ? 0.4
+                            : 1),
                 borderRadius: BorderRadius.circular(8)),
             child: Text(widget.text,
                 textDirection: TextDirection.ltr,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                    color: ThemeColors.white1,
+                style: TextStyle(
+                    decoration: widget.buttonType == ButtonType.ghost
+                        ? TextDecoration.underline
+                        : TextDecoration.none,
+                    decorationColor: ThemeColors.white1,
+                    color: ThemeColors.white1
+                        .withOpacity(widget.disabled ? 0.4 : 1),
                     fontSize: 14,
                     fontWeight: FontWeight.w600))));
   }
 }
 
-enum ButtonType { primary }
+enum ButtonType { primary, ghost }

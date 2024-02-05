@@ -1,22 +1,17 @@
 import 'dart:math';
 
-class CardModel {
-  CardType cardType;
-  CardProvider provider;
-  String cardName;
-  String number;
-  String cvv;
-  String expiry;
-  String ownerName;
+import 'package:cards/models/card/card.dart';
 
+class CardModelFactory {
   static final Random rnd = Random();
-
-  CardModel(this.cardType, this.provider, this.cardName, this.number, this.cvv,
-      this.expiry, this.ownerName);
 
   static T _pickRandom<T>(List<T> items) {
     int index = rnd.nextInt(items.length);
     return items[index];
+  }
+
+  static CardModel blank() {
+    return CardModel();
   }
 
   static CardModel random() {
@@ -44,7 +39,7 @@ class CardModel {
 
     CardProvider provider = _pickRandom<CardProvider>(CardProvider.values);
 
-    const cardNames = <String>[
+    const titles = <String>[
       "Amazon pay ICICI credit card",
       "Flipkart Axis card",
       "One card",
@@ -53,13 +48,16 @@ class CardModel {
       "Axis Neo",
       "IndianOil fuel",
     ];
-    String cardName = _pickRandom<String>(cardNames);
+    String title = _pickRandom<String>(titles);
 
-    return CardModel(
-        cardType, provider, cardName, number, cvv, expiry, ownerName);
+    return CardModelFactory.blank()
+      ..setTitle(title)
+      ..setNumber(number)
+      ..setCVV(cvv)
+      ..setExpiry(expiry)
+      ..setOwnerName(ownerName)
+      ..setCardType(cardType)
+      ..setProvider(provider);
+    ;
   }
 }
-
-enum CardType { debit, credit }
-
-enum CardProvider { visa, rupay, mastercard }

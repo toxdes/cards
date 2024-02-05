@@ -3,7 +3,7 @@ import 'package:cards/components/shared/button.dart';
 import 'package:cards/components/shared/cardview.dart';
 import 'package:cards/config/colors.dart';
 import 'package:cards/config/fonts.dart';
-import 'package:cards/models/card.dart';
+import 'package:cards/models/card/card.dart';
 import 'package:flutter/material.dart';
 
 class Home extends StatefulWidget {

@@ -12,4 +12,5 @@ final class ThemeColors {
   static const Color yellow = Color.fromARGB(255, 255, 229, 127);
   static const Color green = Color.fromARGB(255, 146, 211, 117);
   static const Color teal = Color.fromARGB(255, 80, 202, 216);
+  static const Color transparent = Color.fromARGB(0, 0, 0, 0);
 }

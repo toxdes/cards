@@ -1,6 +1,6 @@
 import 'package:cards/config/colors.dart';
 import 'package:cards/config/fonts.dart';
-import 'package:cards/models/card.dart';
+import 'package:cards/models/card/card.dart';
 import 'package:flutter/material.dart';
 
 class CardView extends StatefulWidget {
@@ -25,7 +25,7 @@ class _CardViewState extends State<CardView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              widget.card.cardName,
+              widget.card.getTitle(),
               textDirection: TextDirection.ltr,
               style: const TextStyle(
                   color: ThemeColors.teal,
@@ -35,7 +35,7 @@ class _CardViewState extends State<CardView> {
             ),
             const SizedBox(height: 8),
             Text(
-              widget.card.number,
+              widget.card.getNumberView(),
               textDirection: TextDirection.ltr,
               style: const TextStyle(
                   color: ThemeColors.white2,
@@ -49,7 +49,7 @@ class _CardViewState extends State<CardView> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.card.expiry,
+                    widget.card.getExpiryView(),
                     textDirection: TextDirection.ltr,
                     textAlign: TextAlign.left,
                     style: const TextStyle(
@@ -60,7 +60,7 @@ class _CardViewState extends State<CardView> {
                   ),
                   const SizedBox(width: 24),
                   Text(
-                    widget.card.cvv,
+                    widget.card.getCVV(),
                     textDirection: TextDirection.ltr,
                     textAlign: TextAlign.right,
                     style: const TextStyle(
@@ -77,7 +77,7 @@ class _CardViewState extends State<CardView> {
                     children: [
                   Expanded(
                       child: Text(
-                    widget.card.ownerName.toUpperCase(),
+                    widget.card.getOwnerName().toUpperCase(),
                     textDirection: TextDirection.ltr,
                     textAlign: TextAlign.left,
                     style: const TextStyle(
@@ -88,17 +88,13 @@ class _CardViewState extends State<CardView> {
                         fontSize: 14),
                   )),
                   Text(
-                    widget.card.provider == CardProvider.visa
-                        ? "VISA"
-                        : widget.card.provider == CardProvider.rupay
-                            ? "RuPay"
-                            : "Mastercard",
+                    widget.card.getProviderView(),
                     textDirection: TextDirection.ltr,
                     textAlign: TextAlign.right,
                     style: TextStyle(
-                        color: widget.card.provider == CardProvider.visa
+                        color: widget.card.getProvider() == CardProvider.visa
                             ? ThemeColors.yellow
-                            : widget.card.provider == CardProvider.rupay
+                            : widget.card.getProvider() == CardProvider.rupay
                                 ? ThemeColors.green
                                 : ThemeColors.red,
                         fontFamily: Fonts.rubik,
