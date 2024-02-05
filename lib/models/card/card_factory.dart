@@ -58,6 +58,5 @@ class CardModelFactory {
       ..setOwnerName(ownerName)
       ..setCardType(cardType)
       ..setProvider(provider);
-    ;
   }
 }

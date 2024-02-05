@@ -1,4 +1,3 @@
-import 'dart:math';
 
 class CardModel {
   CardType? type;
