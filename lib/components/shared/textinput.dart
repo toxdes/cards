@@ -4,17 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class TextInputField extends StatefulWidget {
-  const TextInputField({
-    super.key,
-    required this.title,
-    required this.helper,
-    required this.hint,
-    required this.keyboardType,
-    required this.validator,
-    required this.updateFormStatus,
-    this.inputFormatters,
-    this.controller,
-  });
+  const TextInputField(
+      {super.key,
+      required this.title,
+      required this.helper,
+      required this.hint,
+      required this.keyboardType,
+      required this.validator,
+      required this.updateFormStatus,
+      this.inputFormatters,
+      this.controller,
+      this.textCapitalization,
+      this.labelColor,
+      this.color});
 
   final String title;
   final String helper;
@@ -23,6 +25,9 @@ class TextInputField extends StatefulWidget {
   final String? Function(String?) validator;
   final List<TextInputFormatter>? inputFormatters;
   final TextEditingController? controller;
+  final TextCapitalization? textCapitalization;
+  final Color? labelColor;
+  final Color? color;
   final void Function() updateFormStatus;
   @override
   State<TextInputField> createState() => _TextInputFieldState();
@@ -70,10 +75,10 @@ class _TextInputFieldState extends State<TextInputField> {
           floatingLabelAlignment: FloatingLabelAlignment.start,
           floatingLabelBehavior: FloatingLabelBehavior.never);
 
-  static const TextStyle _textStyle = TextStyle(
-    fontFamily: Fonts.rubik,
-    color: ThemeColors.white2,
-  );
+  TextStyle _buildTextStyle(Color? color) => TextStyle(
+        fontFamily: Fonts.rubik,
+        color: color ?? ThemeColors.white2,
+      );
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -82,10 +87,10 @@ class _TextInputFieldState extends State<TextInputField> {
       children: [
         Text(widget.title,
             textAlign: TextAlign.left,
-            style: const TextStyle(
+            style: TextStyle(
                 fontFamily: Fonts.rubik,
                 fontSize: 14,
-                color: ThemeColors.white3)),
+                color: widget.labelColor ?? ThemeColors.white3)),
         const SizedBox(height: 8),
         TextFormField(
           validator: (String? value) {
@@ -95,11 +100,13 @@ class _TextInputFieldState extends State<TextInputField> {
             widget.updateFormStatus();
           },
           selectionControls: null,
-          style: _textStyle,
+          style: _buildTextStyle(widget.color),
           autovalidateMode: AutovalidateMode.always,
           inputFormatters: widget.inputFormatters,
           keyboardType: widget.keyboardType,
           controller: widget.controller,
+          textCapitalization:
+              widget.textCapitalization ?? TextCapitalization.none,
           decoration: _buildTextfieldDecoration(
               title: widget.title, helper: widget.helper, hint: widget.hint),
         ),

@@ -1,4 +1,3 @@
-
 class CardModel {
   CardType? type;
   CardProvider? provider;

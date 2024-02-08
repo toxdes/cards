@@ -1,8 +1,11 @@
-import 'dart:math';
 import 'package:cards/components/shared/button.dart';
 import 'package:cards/components/shared/textinput.dart';
+import 'package:cards/config/colors.dart';
 import 'package:cards/models/card/card.dart';
 import 'package:cards/models/card/card_factory.dart';
+import 'package:cards/models/card/card_fields_formatter.dart';
+import 'package:cards/models/card/card_fields_validator.dart';
+import 'package:cards/utils/string_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -13,155 +16,17 @@ class AddNewCardForm extends StatefulWidget {
   State<AddNewCardForm> createState() => _AddNewCardFormState();
 }
 
-class FieldsValidator {
-  static String? title(String? maybeTitle) {
-    if (maybeTitle == null || maybeTitle.isEmpty) {
-      return "title shouldn't be empty";
-    }
-    return null;
-  }
-
-  static bool isWhitespace(String s) {
-    return s == ' ' || s == '\t' || s == '\n';
-  }
-
-  static bool isDigit(String s) {
-    int? res = int.tryParse(s);
-    return s.length == 1 && res != null && res >= 0 && res <= 9;
-  }
-
-  static bool _isOnlyDigits(String input, {bool ignoreWhitespace = true}) {
-    bool hasOnlyDigits = true;
-    for (int i = 0; i < input.length; ++i) {
-      if (ignoreWhitespace && isWhitespace(input[i])) continue;
-      if (!isDigit(input[i])) {
-        hasOnlyDigits = false;
-        break;
-      }
-    }
-    return hasOnlyDigits;
-  }
-
-  static String removeAll(String input, String pat) {
-    return input.replaceAll(pat, '');
-  }
-
-  static String? number(String? maybeNumber) {
-    if (maybeNumber == null || maybeNumber.isEmpty) {
-      return "number shouldn't be empty";
-    }
-    if (!_isOnlyDigits(maybeNumber)) {
-      return "number should only contain digits";
-    }
-    if (removeAll(maybeNumber, ' ').length != 16) {
-      return "number should be exactly 16 digits";
-    }
-    return null;
-  }
-
-  static String? expiry(String? maybeExpiry) {
-    if (maybeExpiry == null || maybeExpiry.isEmpty) {
-      return "shouldn't be empty";
-    }
-    String processedExpiry = removeAll(removeAll(maybeExpiry, ' '), '/');
-    if (processedExpiry.length != 4) {
-      return "should match MM/YY";
-    }
-    int? month = int.tryParse("${processedExpiry[0]}${processedExpiry[1]}");
-    if (month == null || month < 1 || month > 12) {
-      return "invalid month(MM)";
-    }
-    int? year = int.tryParse("${processedExpiry[2]}${processedExpiry[3]}");
-    if (year == null) {
-      return "invalid year(YY)";
-    }
-    return null;
-  }
-
-  static String? cvv(String? maybeCvv) {
-    if (maybeCvv == null || maybeCvv.isEmpty) {
-      return "shouldn't be empty";
-    }
-    String processedCvv = removeAll(maybeCvv, ' ');
-    if (processedCvv.length != 3) {
-      return "should be 3 digits";
-    }
-    for (int i = 0; i < processedCvv.length; ++i) {
-      if (!isDigit(processedCvv[i])) {
-        return "only digits allowed";
-      }
-    }
-    return null;
-  }
-}
-
-class CardNumberFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue, TextEditingValue newValue) {
-    String textWithoutWhitespace =
-        FieldsValidator.removeAll(newValue.text.toString(), ' ');
-
-    StringBuffer buf = StringBuffer();
-    for (int i = 1; i <= min<int>(textWithoutWhitespace.length, 16); ++i) {
-      if (FieldsValidator.isDigit(textWithoutWhitespace[i - 1])) {
-        buf.write(textWithoutWhitespace[i - 1]);
-      }
-    }
-    String modifiedText = buf.toString();
-    return newValue.copyWith(
-        text: modifiedText,
-        selection: TextSelection.collapsed(offset: modifiedText.length));
-  }
-}
-
-class ExpiryFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue, TextEditingValue newValue) {
-    String textWithoutWhitespace =
-        FieldsValidator.removeAll(newValue.text.toString(), ' ');
-    String textWithoutSlash =
-        FieldsValidator.removeAll(textWithoutWhitespace, '/');
-    StringBuffer buf = StringBuffer();
-    for (int i = 1; i <= min<int>(textWithoutSlash.length, 4); ++i) {
-      if (FieldsValidator.isDigit(textWithoutSlash[i - 1])) {
-        buf.write(textWithoutSlash[i - 1]);
-      }
-    }
-    String modifiedText = buf.toString();
-    return newValue.copyWith(
-        text: modifiedText,
-        selection: TextSelection.collapsed(offset: modifiedText.length));
-  }
-}
-
-class CvvFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue, TextEditingValue newValue) {
-    String textWithoutWhitespace =
-        FieldsValidator.removeAll(newValue.text.toString(), ' ');
-    StringBuffer buf = StringBuffer();
-    for (int i = 1; i <= min<int>(textWithoutWhitespace.length, 3); ++i) {
-      if (FieldsValidator.isDigit(textWithoutWhitespace[i - 1])) {
-        buf.write(textWithoutWhitespace[i - 1]);
-      }
-    }
-    String modifiedText = buf.toString();
-    return newValue.copyWith(
-        text: modifiedText,
-        selection: TextSelection.collapsed(offset: modifiedText.length));
-  }
-}
-
 class _AddNewCardFormState extends State<AddNewCardForm> {
   final _formKey = GlobalKey<FormState>();
   bool _isFormValid = false;
 
-  final CardNumberFormatter _cardNumberFormatter = CardNumberFormatter();
-  final ExpiryFormatter _expiryFormatter = ExpiryFormatter();
-  final CvvFormatter _cvvFormatter = CvvFormatter();
+  final TextInputFormatter _cardNumberFormatter =
+      CardFieldsFormatter.numberFormatter();
+  final TextInputFormatter _expiryFormatter =
+      CardFieldsFormatter.expiryFormatter();
+  final TextInputFormatter _cvvFormatter = CardFieldsFormatter.cvvFormatter();
+  final TextInputFormatter _ownerNameFormatter =
+      CardFieldsFormatter.ownerNameFormatter();
 
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _numberController = TextEditingController();
@@ -203,26 +68,16 @@ class _AddNewCardFormState extends State<AddNewCardForm> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   TextInputField(
-                    title: "Title",
-                    helper: "All good!",
-                    hint: "e.g. Amazon Pay ICICI card",
-                    keyboardType: TextInputType.name,
-                    validator: FieldsValidator.title,
-                    controller: _titleController,
-                    updateFormStatus: updateFormValidationStatus,
-                  ),
-                  const SizedBox(height: 16),
-                  TextInputField(
                     title: "Card number",
                     helper: "All good!",
                     hint: "XXXX XXXX XXXX XXXX",
                     keyboardType: TextInputType.number,
                     inputFormatters: [_cardNumberFormatter],
-                    validator: FieldsValidator.number,
+                    validator: CardFieldsValidator.number,
                     controller: _numberController,
                     updateFormStatus: updateFormValidationStatus,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -233,18 +88,18 @@ class _AddNewCardFormState extends State<AddNewCardForm> {
                           hint: "MM/YY",
                           keyboardType: TextInputType.number,
                           inputFormatters: [_expiryFormatter],
-                          validator: FieldsValidator.expiry,
+                          validator: CardFieldsValidator.expiry,
                           controller: _expiryController,
                           updateFormStatus: updateFormValidationStatus,
                         ),
                       ),
-                      const SizedBox(width: 24),
+                      const SizedBox(width: 16),
                       Expanded(
                         child: TextInputField(
                           title: "CVV",
                           helper: "All good!",
                           hint: "XXX",
-                          validator: FieldsValidator.cvv,
+                          validator: CardFieldsValidator.cvv,
                           inputFormatters: [_cvvFormatter],
                           keyboardType: TextInputType.number,
                           controller: _cvvController,
@@ -253,14 +108,40 @@ class _AddNewCardFormState extends State<AddNewCardForm> {
                       )
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 8),
+                  TextInputField(
+                    title: "Owner Name",
+                    helper: "All good!",
+                    hint: "Card holder name",
+                    validator: CardFieldsValidator.ownerName,
+                    keyboardType: TextInputType.name,
+                    controller: _ownerNameController,
+                    inputFormatters: [_ownerNameFormatter],
+                    textCapitalization: TextCapitalization.characters,
+                    updateFormStatus: updateFormValidationStatus,
+                  ),
+                  const SizedBox(height: 8),
+                  TextInputField(
+                    title: "Save card as",
+                    helper: "All good!",
+                    hint: "e.g. Amazon Pay ICICI card",
+                    keyboardType: TextInputType.name,
+                    validator: CardFieldsValidator.title,
+                    controller: _titleController,
+                    labelColor: ThemeColors.teal,
+                    color: ThemeColors.teal,
+                    updateFormStatus: updateFormValidationStatus,
+                  ),
+                  const SizedBox(height: 16),
                   Button(
                       onTap: () {
                         if (_isFormValid) {
                           CardModel card = CardModelFactory.random()
                             ..setTitle(_titleController.text)
-                            ..setNumber(_numberController.text)
+                            ..setNumber(StringUtils.removeAll(
+                                _numberController.text, ' '))
                             ..setExpiry(_expiryController.text)
+                            ..setOwnerName(_ownerNameController.text)
                             ..setCVV(_cvvController.text);
                           widget.onSubmit(card);
                         }
