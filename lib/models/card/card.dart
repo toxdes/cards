@@ -1,3 +1,5 @@
+import 'package:cards/utils/string_utils.dart';
+
 class CardModel {
   CardType? type;
   CardProvider? provider;
@@ -22,7 +24,7 @@ class CardModel {
   }
 
   void setNumber(String number) {
-    this.number = number;
+    this.number = StringUtils.removeAll(number, ' ');
 
     StringBuffer buf = StringBuffer();
     for (int i = 1; i <= number.length; ++i) {

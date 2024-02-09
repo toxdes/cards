@@ -47,15 +47,6 @@ class _HomeState extends State<Home> {
                                       fontSize: 24,
                                       fontWeight: FontWeight.w600,
                                       color: ThemeColors.white2)),
-                              Button(
-                                text: "Add +",
-                                buttonType: ButtonType.primary,
-                                onTap: () {
-                                  setState(() {
-                                    _addNewCardFormVisible = true;
-                                  });
-                                },
-                              ),
                             ]),
                         const SizedBox(height: 12),
                         Expanded(
@@ -82,6 +73,17 @@ class _HomeState extends State<Home> {
                                   );
                                 }).toList(),
                         )),
+                        Button(
+                          text: "Add new card",
+                          buttonType: ButtonType.primary,
+                          alignment: Alignment.center,
+                          height: 48,
+                          onTap: () {
+                            setState(() {
+                              _addNewCardFormVisible = true;
+                            });
+                          },
+                        ),
                       ],
                     ))),
             AddNewCardModal(
