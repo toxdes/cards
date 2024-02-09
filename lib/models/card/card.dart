@@ -1,8 +1,9 @@
+import 'package:cards/utils/card_utils.dart';
 import 'package:cards/utils/string_utils.dart';
 
 class CardModel {
-  CardType? type;
-  CardProvider? provider;
+  CardType type = CardType.unknown;
+  CardProvider provider = CardProvider.unknown;
   String? title;
   String? number;
   String? cvv;
@@ -34,6 +35,7 @@ class CardModel {
       }
     }
     _numberView = buf.toString();
+    _updateProvider();
   }
 
   void setCVV(String cvv) {
@@ -57,19 +59,39 @@ class CardModel {
   }
 
   CardType getCardType() {
-    return type ?? CardType.credit;
+    return type;
+  }
+
+  String getCardTypeView() {
+    switch (type) {
+      case CardType.debit:
+        return "Debit";
+      case CardType.credit:
+        return "Credit";
+      case CardType.unknown:
+        return 'Unknown';
+    }
   }
 
   CardProvider getProvider() {
-    return provider ?? CardProvider.visa;
+    return provider;
   }
 
   String getProviderView() {
-    return provider == CardProvider.visa
-        ? "VISA"
-        : provider == CardProvider.rupay
-            ? "RuPay"
-            : "Mastercard";
+    switch (provider) {
+      case CardProvider.visa:
+        return "VISA";
+      case CardProvider.mastercard:
+        return "MasterCard";
+      case CardProvider.amex:
+        return "Amex";
+      case CardProvider.discover:
+        return "Discover";
+      case CardProvider.rupay:
+        return "RuPay";
+      case CardProvider.unknown:
+        return "Unknown";
+    }
   }
 
   String getTitle() {
@@ -99,8 +121,31 @@ class CardModel {
   String getOwnerName() {
     return ownerName ?? "";
   }
+
+  void _updateProvider() {
+    provider = CardUtils.getProviderFromNumber(number ?? "");
+  }
+
+  @override
+  String toString() {
+    return toJson();
+  }
+
+  String toJson() {
+    return """
+{
+  "title": "$title",
+  "number": "$number",
+  "provider":"${getProviderView()}",
+  "cvv":"$cvv",
+  "type":"${getCardTypeView()}",
+  "expiry":"$expiry",
+  "ownerName":"$ownerName"
+}
+    """;
+  }
 }
 
-enum CardType { debit, credit }
+enum CardType { debit, credit, unknown }
 
-enum CardProvider { visa, rupay, mastercard }
+enum CardProvider { visa, mastercard, amex, discover, rupay, unknown }

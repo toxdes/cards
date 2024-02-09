@@ -4,6 +4,7 @@ import 'package:cards/components/shared/cardview.dart';
 import 'package:cards/config/colors.dart';
 import 'package:cards/config/fonts.dart';
 import 'package:cards/models/card/card.dart';
+import 'package:cards/models/cardlist/cardlist.dart';
 import 'package:flutter/material.dart';
 
 class Home extends StatefulWidget {
@@ -13,13 +14,36 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  List<CardModel> _cards = <CardModel>[];
+  CardListModel _cards = CardListModel();
   bool _addNewCardFormVisible = false;
 
   void addCard(CardModel c) {
     setState(() {
-      _cards = [..._cards, c];
+      _cards.add(c, sync: true);
+      // _addNewCardFormVisible = false;
     });
+  }
+
+  void removeCard(CardModel c) {
+    setState(() {
+      _cards.remove(c, sync: true);
+    });
+  }
+
+  @override
+  void initState() {
+    // _cards.clearStorage();
+    _read();
+    super.initState();
+  }
+
+  void _read() async {
+    CardListModel existingCards = await CardListModel().readFromStorage();
+    if (existingCards.length != 0) {
+      setState(() {
+        _cards = existingCards;
+      });
+    }
   }
 
   @override
@@ -54,7 +78,7 @@ class _HomeState extends State<Home> {
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
                           scrollDirection: Axis.vertical,
                           shrinkWrap: true,
-                          children: _cards.isEmpty
+                          children: _cards.length == 0
                               ? [
                                   Container(
                                       margin: const EdgeInsets.fromLTRB(
@@ -67,10 +91,12 @@ class _HomeState extends State<Home> {
                                               fontWeight: FontWeight.w400,
                                               color: ThemeColors.white2)))
                                 ]
-                              : _cards.map((CardModel card) {
+                              : _cards.getAll().map((CardModel card) {
                                   return CardView(
-                                    card: card,
-                                  );
+                                      card: card,
+                                      onLongPress: (CardModel c) {
+                                        removeCard(c);
+                                      });
                                 }).toList(),
                         )),
                         Button(
@@ -87,13 +113,14 @@ class _HomeState extends State<Home> {
                       ],
                     ))),
             AddNewCardModal(
-                isVisible: _addNewCardFormVisible,
-                onClose: () {
-                  setState(() {
-                    _addNewCardFormVisible = false;
-                  });
-                },
-                onAddNewCard: addCard),
+              isVisible: _addNewCardFormVisible,
+              onClose: () {
+                setState(() {
+                  _addNewCardFormVisible = false;
+                });
+              },
+              onAddNewCard: addCard,
+            ),
           ])),
     );
   }

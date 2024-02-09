@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:cards/models/card/card.dart';
+import 'package:cards/utils/card_utils.dart';
 
 class CardModelFactory {
   static final Random rnd = Random();
@@ -58,5 +59,16 @@ class CardModelFactory {
       ..setOwnerName(ownerName)
       ..setCardType(cardType)
       ..setProvider(provider);
+  }
+
+  static CardModel fromJson(Map<String, dynamic> record) {
+    CardModel card = CardModelFactory.blank();
+    return card
+      ..setNumber(record['number'] as String)
+      ..setCVV(record['cvv'] as String)
+      ..setExpiry(record['expiry'] as String)
+      ..setCardType(CardUtils.getCardTypeFromString(record['type'] as String))
+      ..setTitle(record['title'] as String)
+      ..setOwnerName(record['ownerName'] as String);
   }
 }
