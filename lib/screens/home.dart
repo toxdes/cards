@@ -6,6 +6,8 @@ import 'package:cards/config/fonts.dart';
 import 'package:cards/models/card/card.dart';
 import 'package:cards/models/cardlist/cardlist.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -16,7 +18,6 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   CardListModel _cards = CardListModel();
   bool _addNewCardFormVisible = false;
-
   void addCard(CardModel c) {
     setState(() {
       _cards.add(c, sync: true);
@@ -100,7 +101,7 @@ class _HomeState extends State<Home> {
                                 }).toList(),
                         )),
                         Button(
-                          text: "Add new card",
+                          text: "Add new card +",
                           buttonType: ButtonType.primary,
                           alignment: Alignment.center,
                           height: 48,
@@ -109,7 +110,17 @@ class _HomeState extends State<Home> {
                               _addNewCardFormVisible = true;
                             });
                           },
-                        ),
+                        )
+                            .animate(
+                                autoPlay: true,
+                                onComplete: (controller) {
+                                  controller.loop(count: 3);
+                                })
+                            .then(delay: 10.seconds)
+                            .shake(
+                              duration: 600.ms,
+                              rotation: 0.02,
+                            ),
                       ],
                     ))),
             AddNewCardModal(
