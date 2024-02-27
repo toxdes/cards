@@ -5,6 +5,7 @@ import 'package:cards/config/colors.dart';
 import 'package:cards/config/fonts.dart';
 import 'package:cards/models/card/card.dart';
 import 'package:cards/models/cardlist/cardlist.dart';
+import 'package:cards/services/toast_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -23,12 +24,14 @@ class _HomeState extends State<Home> {
       _cards.add(c, sync: true);
       // _addNewCardFormVisible = false;
     });
+    ToastService.show(status: ToastStatus.success, message: "card saved");
   }
 
   void removeCard(CardModel c) {
     setState(() {
       _cards.remove(c, sync: true);
     });
+    ToastService.show(status: ToastStatus.success, message: "card deleted");
   }
 
   @override

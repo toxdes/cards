@@ -2,6 +2,7 @@ import 'package:cards/components/shared/button.dart';
 import 'package:cards/config/colors.dart';
 import 'package:cards/config/fonts.dart';
 import 'package:cards/models/card/card.dart';
+import 'package:cards/services/toast_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -29,6 +30,8 @@ class _CardViewState extends State<CardView> {
     return GestureDetector(
       onTap: () {
         Clipboard.setData(ClipboardData(text: widget.card.getNumber()));
+        ToastService.show(
+            message: "number copied to clipboard", status: ToastStatus.success);
       },
       onTapDown: (TapDownDetails _) {
         setActive(true);
