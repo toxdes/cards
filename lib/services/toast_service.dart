@@ -31,8 +31,8 @@ class ToastService {
           ? Toast.LENGTH_SHORT
           : Toast.LENGTH_LONG,
       gravity: ToastGravity.BOTTOM,
-      backgroundColor: ThemeColors.blue,
-      textColor: ThemeColors.white2,
+      backgroundColor: ThemeColors.white2,
+      textColor: ThemeColors.gray2,
     );
   }
 }
