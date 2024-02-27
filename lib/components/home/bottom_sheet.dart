@@ -4,6 +4,8 @@ import 'package:cards/config/colors.dart';
 import 'package:cards/config/fonts.dart';
 import 'package:cards/models/card/card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class AddNewCardModal extends StatefulWidget {
   const AddNewCardModal(
@@ -32,11 +34,17 @@ class _AddNewFormModalState extends State<AddNewCardModal> {
           child: Stack(children: [
             Positioned.fill(
               child: Container(
-                decoration: const BoxDecoration(color: ThemeColors.gray1),
+                decoration:
+                    BoxDecoration(color: ThemeColors.gray1.withOpacity(0.94)),
+                padding: const EdgeInsets.only(top: 60),
                 child: Container(
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                         color: ThemeColors.gray1,
-                        borderRadius: BorderRadius.only(
+                        border: Border(
+                            top: BorderSide(
+                                width: 2,
+                                color: ThemeColors.blue.withOpacity(0.8))),
+                        borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(24),
                             topRight: Radius.circular(24))),
                     margin: const EdgeInsets.only(top: 0),
@@ -72,6 +80,8 @@ class _AddNewFormModalState extends State<AddNewCardModal> {
               ),
             ),
           ])),
-    );
+    )
+        .animate(autoPlay: true)
+        .slideY(duration: 240.ms, curve: Curves.easeOutExpo, begin: 1, end: 0);
   }
 }
