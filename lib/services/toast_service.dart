@@ -1,7 +1,7 @@
 import 'package:cards/config/colors.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-enum ToastStatus { success, info, error, warning }
+enum ToastStatus { success, info, error, warning, unknown }
 
 enum ToastDuration { short, long }
 
@@ -15,7 +15,8 @@ class ToastService {
       case ToastStatus.warning:
         return "⚠️";
       case ToastStatus.info:
-        return "🛈";
+        return "";
+      case ToastStatus.unknown:
       default:
         return '';
     }
