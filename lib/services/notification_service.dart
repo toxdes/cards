@@ -66,9 +66,7 @@ class NotificationService {
   }
 
   void _onDidReceiveLocalNotification(
-      int id, String? title, String? body, String? payload) {
-    debugPrint('notification $id : $title | $body | $payload');
-  }
+      int id, String? title, String? body, String? payload) {}
 
   static Future<void> _onDidReceiveBackgroundNotificationResponse(
       NotificationResponse response) async {

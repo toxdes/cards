@@ -59,7 +59,6 @@ class CardListModel {
   }
 
   Future<void> writeToStorage() async {
-    debugPrint("SAVING TO STORAGE");
     await _storage.write(key: cardListStorageKey, value: toJson());
   }
 

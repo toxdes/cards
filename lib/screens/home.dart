@@ -5,6 +5,7 @@ import 'package:cards/config/colors.dart';
 import 'package:cards/config/fonts.dart';
 import 'package:cards/models/card/card.dart';
 import 'package:cards/models/cardlist/cardlist.dart';
+import 'package:cards/services/sentry_service.dart';
 import 'package:cards/services/toast_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -21,8 +22,11 @@ class _HomeState extends State<Home> {
   bool _addNewCardFormVisible = false;
   void addCard(CardModel c) {
     setState(() {
-      _cards.add(c, sync: true);
-      // _addNewCardFormVisible = false;
+      try {
+        _cards.add(c, sync: true);
+      } catch (e, stackTrace) {
+        SentryService.error(e, stackTrace);
+      }
     });
     ToastService.show(status: ToastStatus.success, message: "card saved");
   }
