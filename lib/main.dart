@@ -1,15 +1,19 @@
 import 'package:cards/config/colors.dart';
 import 'package:cards/screens/home.dart';
 import 'package:cards/services/notification_service.dart';
+import 'package:cards/services/sentry_service.dart';
 import 'package:flutter/material.dart';
 
-Widget app = const MaterialApp(
-    home: Scaffold(
-  body: Home(),
-  backgroundColor: ThemeColors.gray1,
-));
+Widget app = MaterialApp(
+  home: const Scaffold(
+    body: Home(),
+    backgroundColor: ThemeColors.gray1,
+  ),
+  navigatorObservers: [SentryService.getNavigatorObserver()],
+);
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await NotificationService().initialize();
+  await SentryService.init();
   runApp(app);
 }
