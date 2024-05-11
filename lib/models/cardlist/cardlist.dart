@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:cards/models/card/card.dart';
 import 'package:cards/models/card/card_factory.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class CLMErrorCodes {

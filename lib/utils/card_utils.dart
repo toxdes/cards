@@ -23,11 +23,11 @@ class CardUtils {
     if (amexRegExp.hasMatch(number)) {
       return CardProvider.amex;
     }
-    if (discoverRegExp.hasMatch(number)) {
-      return CardProvider.discover;
-    }
     if (rupayRegExp.hasMatch(number)) {
       return CardProvider.rupay;
+    }
+    if (discoverRegExp.hasMatch(number)) {
+      return CardProvider.discover;
     }
     return CardProvider.unknown;
   }
