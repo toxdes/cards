@@ -16,6 +16,7 @@ dependencies:
   fluttertoast: ^8.2.4
   sentry_flutter: ^8.1.0
   package_info_plus: ^8.0.0
+  pointycastle: ^3.9.1
 
 dev_dependencies:
   flutter_test:
