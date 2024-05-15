@@ -1,5 +1,6 @@
 import 'package:cards/config/colors.dart';
 import 'package:cards/screens/home.dart';
+import 'package:cards/services/backup_service.dart';
 import 'package:cards/services/notification_service.dart';
 import 'package:cards/services/sentry_service.dart';
 import 'package:flutter/material.dart';
@@ -15,5 +16,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await NotificationService().initialize();
   await SentryService.init();
+  await BackupService.init();
   runApp(app);
 }
