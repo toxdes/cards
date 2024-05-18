@@ -12,7 +12,7 @@ void main() {
     assert(keyRegex.hasMatch(key));
   });
 
-  test("backup service encryption and decryption works", () async {
+  test("encrypt-decrypt: escape charaters and emojis", () async {
     await BackupService.init();
     String key = await BackupService.generateKey();
     String secretInput =
@@ -26,5 +26,59 @@ void main() {
     for (int i = 0; i < secretInputBytes.length; ++i) {
       assert(secretInputBytes[i] == decrypted[i]);
     }
+    String output = StringUtils.fromBytes(decrypted);
+    assert(output == secretInput);
+  });
+
+  test("encrypt-decrypt: text smaller than 1 block", () async {
+    await BackupService.init();
+    String key = await BackupService.generateKey();
+    String secretInput = "hell";
+    Uint8List secretInputBytes = StringUtils.toBytes(secretInput);
+    Uint8List encrypted = await BackupService.encrypt(
+        key: key, data: StringUtils.toBytes(secretInput));
+    Uint8List decrypted =
+        await BackupService.decrypt(key: key, data: encrypted);
+    assert(secretInputBytes.length == decrypted.length);
+    for (int i = 0; i < secretInputBytes.length; ++i) {
+      assert(secretInputBytes[i] == decrypted[i]);
+    }
+    String output = StringUtils.fromBytes(decrypted);
+    assert(output == secretInput);
+  });
+
+  test("encrypt-decrypt: empty text", () async {
+    await BackupService.init();
+    String key = await BackupService.generateKey();
+    String secretInput = "";
+    Uint8List secretInputBytes = StringUtils.toBytes(secretInput);
+    Uint8List encrypted = await BackupService.encrypt(
+        key: key, data: StringUtils.toBytes(secretInput));
+    Uint8List decrypted =
+        await BackupService.decrypt(key: key, data: encrypted);
+    assert(secretInputBytes.length == decrypted.length);
+    for (int i = 0; i < secretInputBytes.length; ++i) {
+      assert(secretInputBytes[i] == decrypted[i]);
+    }
+    String output = StringUtils.fromBytes(decrypted);
+    assert(output == secretInput);
+  });
+
+  test("encrypt-decrypt: accent characters", () async {
+    await BackupService.init();
+    String key = await BackupService.generateKey();
+    String secretInput =
+        "This contains accent characters: \u00eb \u00ef केजरीवाल";
+    Uint8List secretInputBytes = StringUtils.toBytes(secretInput);
+    Uint8List encrypted = await BackupService.encrypt(
+        key: key, data: StringUtils.toBytes(secretInput));
+    Uint8List decrypted =
+        await BackupService.decrypt(key: key, data: encrypted);
+    assert(secretInputBytes.length == decrypted.length);
+    for (int i = 0; i < secretInputBytes.length; ++i) {
+      assert(secretInputBytes[i] == decrypted[i]);
+    }
+    String output = StringUtils.fromBytes(decrypted);
+    assert(output == secretInput);
   });
 }
