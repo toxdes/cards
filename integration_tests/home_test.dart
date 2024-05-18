@@ -27,7 +27,7 @@ void main() {
       await tester.pumpWidget(app);
 
       // Verify add new card button is rendered.
-      expect(find.text('Add new card'), findsOneWidget);
+      expect(find.text('Add new card +'), findsOneWidget);
     });
 
     testWidgets(
@@ -36,12 +36,12 @@ void main() {
       // Load app widget.
       await tester.pumpWidget(app);
 
-      await tester.tap(find.widgetWithText(Button, "Add new card"));
+      await tester.tap(find.widgetWithText(Button, "Add new card +"));
 
       await tester.pumpAndSettle();
 
       expect(find.byType(TextInputField, skipOffstage: true), findsNWidgets(5));
-      expect(find.widgetWithText(Button, "Add new card"), findsNWidgets(1));
+      expect(find.widgetWithText(Button, "Add new card +"), findsNWidgets(1));
       expect(find.widgetWithText(Button, "Close"), findsNWidgets(1));
     });
   });
