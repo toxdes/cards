@@ -4,12 +4,41 @@ import 'package:flutter/foundation.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test("encrypt, decrypt and generateSalt throw for invalid key", () async {
+    await BackupService.init();
+    String invalidKey = "hello world";
+    Uint8List input = StringUtils.toBytes("hello world");
+    // key is invalid
+    assert(BackupService.isKeyValid(invalidKey) == false);
+
+    // generateSalt throws
+    expect(() async {
+      await BackupService.generateSalt(invalidKey);
+    },
+        throwsA(predicate((e) =>
+            e is BackupServiceException &&
+            e.errorCode == BackupServiceErrorCodes.invalidKey)));
+
+    // encrypt throws
+    expect(() async {
+      await BackupService.encrypt(key: invalidKey, data: input);
+    },
+        throwsA(predicate((e) =>
+            e is BackupServiceException &&
+            e.errorCode == BackupServiceErrorCodes.invalidKey)));
+
+    // decrypt throws
+    expect(() async {
+      await BackupService.decrypt(key: invalidKey, data: input);
+    },
+        throwsA(predicate((e) =>
+            e is BackupServiceException &&
+            e.errorCode == BackupServiceErrorCodes.invalidKey)));
+  });
   test("generateKey generates a valid key", () async {
     await BackupService.init();
     String key = await BackupService.generateKey();
-    assert(key.length == BackupService.keyLength);
-    RegExp keyRegex = RegExp(r'^[0-9]{12}$');
-    assert(keyRegex.hasMatch(key));
+    assert(BackupService.isKeyValid(key));
   });
 
   test("encrypt-decrypt: escape charaters and emojis", () async {
