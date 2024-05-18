@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:cards/utils/crypto_utils.dart';
+import 'package:cards/utils/crypto/crypto_utils.dart';
 import 'package:cards/utils/string_utils.dart';
 import 'package:pointycastle/export.dart';
 

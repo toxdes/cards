@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:cards/utils/aes_cbc.dart';
+import 'package:cards/utils/crypto/aes_cbc.dart';
 import 'package:cards/utils/string_utils.dart';
 import 'package:pointycastle/export.dart';
 

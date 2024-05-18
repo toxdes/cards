@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
-import 'package:cards/utils/aes_cbc.dart';
-import 'package:cards/utils/crypto_utils.dart';
+import 'package:cards/utils/crypto/aes_cbc.dart';
+import 'package:cards/utils/crypto/crypto_utils.dart';
 import 'package:cards/utils/string_utils.dart';
 import 'package:test/test.dart';
 
