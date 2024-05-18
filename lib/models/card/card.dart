@@ -1,9 +1,11 @@
+import 'package:cards/models/card/card_json_encoder.dart';
 import 'package:cards/utils/card_utils.dart';
 import 'package:cards/utils/string_utils.dart';
 
 class CardModel {
   CardType type = CardType.unknown;
   CardProvider provider = CardProvider.unknown;
+  CardModelJsonEncoder encoder = CardModelJsonEncoder();
   String? title;
   String? number;
   String? cvv;
@@ -132,17 +134,18 @@ class CardModel {
   }
 
   String toJson() {
-    return """
-{
-  "title": "$title",
-  "number": "$number",
-  "provider":"${getProviderView()}",
-  "cvv":"$cvv",
-  "type":"${getCardTypeView()}",
-  "expiry":"$expiry",
-  "ownerName":"$ownerName"
-}
-    """;
+    return encoder.encode(this);
+  }
+
+  bool equals(CardModel other) {
+    // FIXME: overload == operator and hashcode instead of using this method
+    return type == other.type &&
+        provider == other.provider &&
+        title == other.title &&
+        number == other.number &&
+        cvv == other.cvv &&
+        expiry == other.expiry &&
+        ownerName == other.ownerName;
   }
 }
 

@@ -1,11 +1,23 @@
+import 'package:cards/core/storage/storage.dart';
 import 'package:cards/models/card/card.dart';
 import 'package:cards/models/card/card_factory.dart';
 import 'package:cards/models/cardlist/cardlist.dart';
+import 'package:flutter/material.dart';
 import 'package:test/test.dart';
 
+import 'mocks/mock_storage.dart';
+
 void main() {
-  test('Should raise exception when adding same card number twice', () {
-    CardListModel list = CardListModel();
+  setUp(() {});
+  tearDown(() async {
+    Storage storage = MockStorage();
+    await storage.delete(key: CardListModelStorageKeys.testStorage);
+  });
+
+  test('raises exception when adding same card number twice', () {
+    CardListModel list = CardListModel(
+        storageKey: CardListModelStorageKeys.testStorage,
+        storage: MockStorage());
     CardModel c = CardModelFactory.random();
     expect(() {
       list.add(c);
@@ -17,8 +29,12 @@ void main() {
             e.errorCode == CLMErrorCodes.notUnique)));
   });
 
-  test('Should raise exception when removing a card that doesn\'t exist', () {
-    CardListModel list = CardListModel();
+  test('raises exception when removing a card that doesn\'t exist', () {
+    WidgetsFlutterBinding.ensureInitialized();
+
+    CardListModel list = CardListModel(
+        storageKey: CardListModelStorageKeys.testStorage,
+        storage: MockStorage());
     CardModel c = CardModelFactory.random();
 
     expect(() {
@@ -31,8 +47,10 @@ void main() {
             e.errorCode == CLMErrorCodes.doesNotExist)));
   });
 
-  test('Should raise exception when removing a card from empty list', () {
-    CardListModel list = CardListModel();
+  test('raises exception when removing a card from empty list', () {
+    CardListModel list = CardListModel(
+        storageKey: CardListModelStorageKeys.testStorage,
+        storage: MockStorage());
     expect(() {
       CardModel c1 = CardModelFactory.random();
       list.remove(c1);
@@ -42,8 +60,10 @@ void main() {
             e.errorCode == CLMErrorCodes.doesNotExist)));
   });
 
-  test('Should remove item correctly.', () {
-    CardListModel list = CardListModel();
+  test('removes item correctly.', () {
+    CardListModel list = CardListModel(
+        storageKey: CardListModelStorageKeys.testStorage,
+        storage: MockStorage());
     expect(() {
       assert(list.getAll().isEmpty);
       CardModel c1 = CardModelFactory.random();
@@ -62,5 +82,29 @@ void main() {
       list.remove(c3);
       assert(list.getAll().isEmpty);
     }, returnsNormally);
+  });
+
+  test('cardlist_json_encoder works correctly', () async {
+    CardListModel cardsModel = CardListModel(
+        storageKey: CardListModelStorageKeys.testStorage,
+        storage: MockStorage());
+    CardModel c1 = CardModelFactory.random();
+    CardModel c2 = CardModelFactory.random();
+    CardModel c3 = CardModelFactory.random();
+    cardsModel.add(c1);
+    cardsModel.add(c2);
+    cardsModel.add(c3);
+    await cardsModel.save();
+    CardListModel decodedCardsModel = CardListModel(
+        storageKey: CardListModelStorageKeys.testStorage,
+        storage: MockStorage());
+    await decodedCardsModel.readFromStorage();
+    List<CardModel> cards = cardsModel.getAll();
+    List<CardModel> decodedCards =
+        (await cardsModel.readFromStorage()).getAll();
+    assert(cards.length == decodedCards.length);
+    for (int i = 0; i < cards.length; ++i) {
+      assert(cards[i].equals(decodedCards[i]));
+    }
   });
 }

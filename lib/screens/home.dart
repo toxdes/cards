@@ -7,6 +7,7 @@ import 'package:cards/models/card/card.dart';
 import 'package:cards/models/cardlist/cardlist.dart';
 import 'package:cards/services/sentry_service.dart';
 import 'package:cards/services/toast_service.dart';
+import 'package:cards/utils/secure_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -18,24 +19,47 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  CardListModel _cards = CardListModel();
+  CardListModel _cards = CardListModel(
+      storageKey: CardListModelStorageKeys.mainStorage,
+      storage: const SecureStorage());
   bool _addNewCardFormVisible = false;
   void addCard(CardModel c) {
     setState(() {
       try {
-        _cards.add(c, sync: true);
+        _cards.add(c);
+        _cards.save();
+        ToastService.show(status: ToastStatus.success, message: "card saved");
       } catch (e, stackTrace) {
         SentryService.error(e, stackTrace);
+        String message = "couldn't save card";
+        if (e is CardListModelException) {
+          if (e.errorCode == CLMErrorCodes.notUnique) {
+            message =
+                "failed to save. You already have a card with same number";
+          }
+        }
+        ToastService.show(status: ToastStatus.error, message: message);
       }
     });
-    ToastService.show(status: ToastStatus.success, message: "card saved");
   }
 
   void removeCard(CardModel c) {
     setState(() {
-      _cards.remove(c, sync: true);
+      try {
+        _cards.remove(c);
+        _cards.save();
+        ToastService.show(status: ToastStatus.success, message: "card deleted");
+      } catch (e, stackTrace) {
+        SentryService.error(e, stackTrace);
+        String message = "couldn't delete card";
+        if (e is CardListModelException) {
+          if (e.errorCode == CLMErrorCodes.doesNotExist) {
+            message = "card does not exist";
+          }
+        }
+        ToastService.show(status: ToastStatus.error, message: message);
+      }
     });
-    ToastService.show(status: ToastStatus.success, message: "card deleted");
   }
 
   @override
@@ -46,7 +70,10 @@ class _HomeState extends State<Home> {
   }
 
   void _read() async {
-    CardListModel existingCards = await CardListModel().readFromStorage();
+    CardListModel existingCards = await CardListModel(
+            storageKey: CardListModelStorageKeys.mainStorage,
+            storage: const SecureStorage())
+        .readFromStorage();
     if (existingCards.length != 0) {
       setState(() {
         _cards = existingCards;

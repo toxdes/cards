@@ -1,9 +1,9 @@
 import 'dart:collection';
-import 'dart:convert';
 
+import 'package:cards/core/encoder/encoder.dart';
+import 'package:cards/core/storage/storage.dart';
 import 'package:cards/models/card/card.dart';
-import 'package:cards/models/card/card_factory.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:cards/models/cardlist/cardlist_json_encoder.dart';
 
 class CLMErrorCodes {
   static const int notUnique = 0x100;
@@ -20,14 +20,22 @@ class CardListModelException implements Exception {
   }
 }
 
+class CardListModelStorageKeys {
+  static const mainStorage = "cards";
+  static const testStorage = "cards-tests";
+}
+
 class CardListModel {
   final List<CardModel> _cards = [];
   final Set<String> _cardNumbers = {};
-  final _storage = const FlutterSecureStorage();
-  static const cardListStorageKey = "cards";
+  final String storageKey;
+  final Storage storage;
+  CardListModel({required this.storageKey, required this.storage});
+  // should encoder be private?
+  final Encoder encoder = CardListModelJsonEncoder();
   int length = 0;
 
-  void add(CardModel c, {bool sync = false}) {
+  void add(CardModel c) {
     if (_cardNumbers.contains(c.getNumber())) {
       throw CardListModelException(CLMErrorCodes.notUnique,
           "Cannot add card, card number is not unique.");
@@ -35,7 +43,6 @@ class CardListModel {
     _cards.add(c);
     _cardNumbers.add(c.getNumber());
     _updateLength();
-    if (sync) writeToStorage();
   }
 
   void remove(CardModel c, {bool sync = false}) {
@@ -46,7 +53,6 @@ class CardListModel {
     _cardNumbers.remove(c.getNumber());
     _cards.remove(c);
     _updateLength();
-    if (sync) writeToStorage();
   }
 
   UnmodifiableListView<CardModel> getAll() {
@@ -57,24 +63,30 @@ class CardListModel {
     length = _cards.length;
   }
 
-  Future<void> writeToStorage() async {
-    await _storage.write(key: cardListStorageKey, value: toJson());
+  Future<void> _writeToStorage() async {
+    await storage.write(key: storageKey, value: toJson());
+  }
+
+  Future<void> save() async {
+    await _writeToStorage();
   }
 
   void clearStorage() {
-    _storage.delete(key: cardListStorageKey);
+    storage.delete(key: storageKey);
   }
 
   Future<CardListModel> readFromStorage() async {
-    String? dataJson = await _storage.read(key: cardListStorageKey);
-    List<dynamic> cardsData = jsonDecode(dataJson ?? "[]");
-    CardListModel result = CardListModel();
-    for (int i = 0; i < cardsData.length; ++i) {
-      CardModel c =
-          CardModelFactory.fromJson(cardsData[i] as Map<String, dynamic>);
-      result.add(c);
-    }
-    return result;
+    String? dataJson = await storage.read(key: storageKey);
+    CardListModel decodedCards = encoder.decode(dataJson ?? "[]");
+    _cardNumbers.clear();
+    _cards.clear();
+    decodedCards.getAll().forEach((card) {
+      _cardNumbers.add(card.getNumber());
+      _cards.add(card);
+    });
+
+    _updateLength();
+    return this;
   }
 
   @override
@@ -83,14 +95,6 @@ class CardListModel {
   }
 
   String toJson() {
-    StringBuffer buf = StringBuffer();
-    for (int i = 0; i < _cards.length; ++i) {
-      buf.write(_cards[i].toJson());
-      if (i != _cards.length - 1) buf.write(',');
-    }
-    String items = buf.toString();
-    return """
-[$items]
-""";
+    return encoder.encode(this);
   }
 }
