@@ -2,6 +2,11 @@
 
 A new Flutter project.
 
+# deps
+
+1. java - sdk 21
+2. android - api 34
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
