@@ -1,4 +1,5 @@
 import 'package:cards/config/colors.dart';
+import 'package:cards/config/fonts.dart';
 import 'package:flutter/material.dart';
 
 class Button extends StatefulWidget {
@@ -6,6 +7,7 @@ class Button extends StatefulWidget {
       {super.key,
       required this.onTap,
       required this.text,
+      required this.color,
       this.buttonType = ButtonType.primary,
       this.disabled = false,
       this.width,
@@ -19,6 +21,8 @@ class Button extends StatefulWidget {
   final double? width;
   final double? height;
   final Alignment? alignment;
+  final double scaleFactor = 0.90;
+  final Color color;
 
   @override
   State<Button> createState() => _ButtonState();
@@ -48,7 +52,8 @@ class _ButtonState extends State<Button> {
             curve: Curves.fastOutSlowIn,
             transformAlignment: Alignment.center,
             transform: _active
-                ? (Matrix4.identity()..scale(0.95, 0.95))
+                ? (Matrix4.identity()
+                  ..scale(widget.scaleFactor, widget.scaleFactor))
                 : (Matrix4.identity()),
             // props
             // width: 160,
@@ -57,7 +62,7 @@ class _ButtonState extends State<Button> {
             height: widget.height,
             alignment: widget.alignment,
             decoration: BoxDecoration(
-                color: ThemeColors.blue
+                color: widget.color
                     .withOpacity(widget.buttonType == ButtonType.ghost
                         ? 0
                         : widget.disabled
@@ -68,13 +73,14 @@ class _ButtonState extends State<Button> {
                 textDirection: TextDirection.ltr,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                    decoration: widget.buttonType == ButtonType.ghost
-                        ? TextDecoration.underline
-                        : TextDecoration.none,
+                    decoration: TextDecoration.none,
                     decorationColor: ThemeColors.white1,
-                    color: ThemeColors.white1
-                        .withOpacity(widget.disabled ? 0.4 : 1),
+                    color: widget.buttonType == ButtonType.ghost
+                        ? widget.color
+                        : ThemeColors.white1
+                            .withOpacity(widget.disabled ? 0.4 : 1),
                     fontSize: 14,
+                    fontFamily: Fonts.rubik,
                     fontWeight: FontWeight.w600))));
   }
 }

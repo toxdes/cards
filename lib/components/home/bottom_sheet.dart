@@ -64,6 +64,7 @@ class _AddNewFormModalState extends State<AddNewCardModal> {
                                       fontWeight: FontWeight.w600,
                                       color: ThemeColors.white2)),
                               Button(
+                                color: ThemeColors.red,
                                 text: "Close",
                                 onTap: widget.onClose,
                                 buttonType: ButtonType.ghost,
