@@ -2,7 +2,7 @@ import 'package:cards/screens/backup_restore/backup_main.dart';
 import 'package:cards/components/home/bottom_sheet.dart';
 import 'package:cards/components/shared/button.dart';
 import 'package:cards/components/shared/cardview.dart';
-import "package:cards/components/shared/icon_button.dart" as ui;
+import "package:cards/components/shared/icon_button.dart";
 import 'package:cards/config/colors.dart';
 import 'package:cards/config/fonts.dart';
 import 'package:cards/models/card/card.dart';
@@ -11,7 +11,7 @@ import 'package:cards/services/sentry_service.dart';
 import 'package:cards/services/toast_service.dart';
 import 'package:cards/utils/secure_storage.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text, IconButton;
 import 'package:flutter_animate/flutter_animate.dart';
 
 class Home extends StatefulWidget {
@@ -110,7 +110,7 @@ class _HomeState extends State<Home> {
                                         fontSize: 24,
                                         fontWeight: FontWeight.w600,
                                         color: ThemeColors.white2)),
-                                ui.IconButton(
+                                IconButton(
                                     onTap: () {
                                       debugPrint("pressed");
                                       Navigator.push(

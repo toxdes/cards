@@ -42,7 +42,6 @@ class _HelpScreenState extends State<HelpScreen> {
                 buttonType: ButtonType.ghost,
                 onTap: () {
                   Navigator.pop(context);
-                  Navigator.pop(context);
                 },
               )
             ],

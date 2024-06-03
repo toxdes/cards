@@ -42,7 +42,6 @@ class _RestoreScreenState extends State<RestoreScreen> {
                 buttonType: ButtonType.ghost,
                 onTap: () {
                   Navigator.pop(context);
-                  Navigator.pop(context);
                 },
               )
             ],
