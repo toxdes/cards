@@ -8,6 +8,7 @@ import 'package:cards/screens/backup_restore/backup.dart';
 import 'package:cards/services/toast_service.dart';
 import 'package:flutter/material.dart' hide Step, IconButton;
 import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class BackupStepContent extends StatefulWidget {
   final BackupStep step;
@@ -186,7 +187,33 @@ class _BackupStepContentState extends State<BackupStepContent> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text("File generated: ${widget.backupFile}",
+                  const Icon(Icons.check_circle,
+                          color: ThemeColors.green, size: 84)
+                      .animate()
+                      .fadeIn(duration: 800.ms, curve: Curves.easeOutExpo)
+                      .scaleXY(begin: 2, end: 1, duration: 800.ms)
+                      .rotate(
+                        begin: 0.1,
+                        end: 0,
+                        curve: Curves.easeOutExpo,
+                        duration: 800.ms,
+                        delay: 0.ms,
+                      )
+                      .shimmer(
+                        delay: 1400.ms,
+                        duration: 1400.ms,
+                      ),
+                  const SizedBox(height: 16),
+                  const Text("Backup generated",
+                      style: TextStyle(
+                        fontFamily: Fonts.rubik,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w600,
+                        decoration: TextDecoration.none,
+                        color: ThemeColors.white1,
+                      )),
+                  const SizedBox(height: 4),
+                  Text("${widget.backupFile}",
                       style: const TextStyle(
                         fontFamily: Fonts.rubik,
                         fontSize: 16,
@@ -194,15 +221,32 @@ class _BackupStepContentState extends State<BackupStepContent> {
                         decoration: TextDecoration.none,
                         color: ThemeColors.white2,
                       )),
-                  Button(
-                      onTap: () {
-                        if (widget.actionCallback != null) {
-                          widget.actionCallback!(
-                              BackupCallbackAction.shareBackup, widget.step);
-                        }
-                      },
-                      text: "Share",
-                      color: ThemeColors.blue),
+                  const SizedBox(height: 24),
+                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                    Button(
+                        onTap: () {
+                          if (widget.actionCallback != null) {
+                            widget.actionCallback!(
+                                BackupCallbackAction.saveBackupToDownloads,
+                                widget.step);
+                          }
+                        },
+                        text: "Save to downloads",
+                        color: ThemeColors.blue),
+                    Container(
+                        margin: const EdgeInsets.only(left: 12),
+                        child: Button(
+                            onTap: () {
+                              if (widget.actionCallback != null) {
+                                widget.actionCallback!(
+                                    BackupCallbackAction.shareBackup,
+                                    widget.step);
+                              }
+                            },
+                            text: "Share",
+                            textColor: ThemeColors.gray1,
+                            color: ThemeColors.white2)),
+                  ])
                 ]));
       }
     }

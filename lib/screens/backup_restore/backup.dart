@@ -9,6 +9,7 @@ import 'package:cards/config/fonts.dart';
 import 'package:cards/core/step/step.dart';
 import 'package:cards/models/cardlist/cardlist.dart';
 import 'package:cards/services/backup_service.dart';
+import 'package:cards/services/toast_service.dart';
 import 'package:cards/utils/secure_storage.dart';
 import 'package:cards/utils/string_utils.dart';
 import 'package:flutter/material.dart' hide Step, IconButton;
@@ -34,7 +35,13 @@ class BackupStep extends Step {
       required this.desc});
 }
 
-enum BackupCallbackAction { generateKey, saveKey, generateBackup, shareBackup }
+enum BackupCallbackAction {
+  generateKey,
+  saveKey,
+  generateBackup,
+  shareBackup,
+  saveBackupToDownloads
+}
 
 class _BackupScreenState extends State<BackupScreen> {
   final List<BackupStep> _steps = <BackupStep>[];
@@ -62,7 +69,7 @@ class _BackupScreenState extends State<BackupScreen> {
     setState(() {
       for (int i = 0; i < _steps.length; ++i) {
         if (_steps[i].id == stepId) {
-          if (_steps[i].status == StepStatus.completed) continue;
+          if (_steps[i].status != StepStatus.active) continue;
           _steps[i].expanded = !_steps[i].expanded;
         }
       }
@@ -122,7 +129,7 @@ class _BackupScreenState extends State<BackupScreen> {
     final Directory documentsDir = await getApplicationDocumentsDirectory();
     final DateTime now = DateTime.now();
     final String filePath =
-        "${documentsDir.path}/cards-${now.year}${now.month.toString().padLeft(2)}${now.day.toString().padLeft(2)}.db";
+        "${documentsDir.path}/cards-${now.year}${now.month.toString().padLeft(2, "0")}${now.day.toString().padLeft(2, "0")}.bin";
     File file = File(filePath);
     file = await file.writeAsBytes(encrypted, mode: FileMode.write);
     // update UI
@@ -143,8 +150,48 @@ class _BackupScreenState extends State<BackupScreen> {
     });
   }
 
+  String getFileName(File file) {
+    return file.uri.pathSegments.last;
+  }
+
   void shareBackup(int stepId) async {
-    Share.shareXFiles([XFile(backupFile!.path)], text: "how does this look?");
+    Share.shareXFiles([XFile(backupFile!.path)],
+        text: "Share cards backup file...");
+  }
+
+  void saveBackupToDownloads(int stepId) async {
+    try {
+      Directory? downloadsDir;
+      if (Platform.isAndroid) {
+        String downloadsPath = "/storage/emulated/0/Download";
+        bool dirExists = Directory(downloadsPath).existsSync();
+        if (dirExists) {
+          downloadsDir = Directory(downloadsPath);
+        } else {
+          downloadsPath = "storage/emulated/0/Downloads";
+          downloadsDir = Directory(downloadsPath);
+        }
+      } else {
+        downloadsDir = await getDownloadsDirectory();
+      }
+      if (downloadsDir == null) {
+        throw UnsupportedError("");
+      }
+      downloadsDir = await downloadsDir.create();
+      String fileName = getFileName(backupFile!);
+      File file = File('${downloadsDir.path}/$fileName');
+      await file.writeAsBytes(backupFile!.readAsBytesSync());
+      ToastService.show(
+          message: "Saved to downloads", status: ToastStatus.success);
+    } catch (e) {
+      String message = "";
+      if (e is UnsupportedError) {
+        message = "Feature is not available on this platform.";
+      } else {
+        message = e.toString();
+      }
+      ToastService.show(status: ToastStatus.error, message: message);
+    }
   }
 
   void act(BackupCallbackAction action, Step step) {
@@ -168,6 +215,11 @@ class _BackupScreenState extends State<BackupScreen> {
       case BackupCallbackAction.shareBackup:
         {
           shareBackup(step.id);
+          return;
+        }
+      case BackupCallbackAction.saveBackupToDownloads:
+        {
+          saveBackupToDownloads(step.id);
           return;
         }
     }
@@ -229,7 +281,9 @@ class _BackupScreenState extends State<BackupScreen> {
                               step: step,
                               actionCallback: act,
                               encryptionKey: _key,
-                              backupFile: backupFile.toString())
+                              backupFile: backupFile == null
+                                  ? ''
+                                  : getFileName(backupFile!))
                         ],
                       );
                     }),

@@ -8,6 +8,7 @@ class Button extends StatefulWidget {
       required this.onTap,
       required this.text,
       required this.color,
+      this.textColor,
       this.buttonType = ButtonType.primary,
       this.disabled = false,
       this.width,
@@ -23,6 +24,7 @@ class Button extends StatefulWidget {
   final Alignment? alignment;
   final double scaleFactor = 0.90;
   final Color color;
+  final Color? textColor;
 
   @override
   State<Button> createState() => _ButtonState();
@@ -77,7 +79,7 @@ class _ButtonState extends State<Button> {
                     decorationColor: ThemeColors.white1,
                     color: widget.buttonType == ButtonType.ghost
                         ? widget.color
-                        : ThemeColors.white1
+                        : (widget.textColor ?? ThemeColors.white1)
                             .withOpacity(widget.disabled ? 0.4 : 1),
                     fontSize: 14,
                     fontFamily: Fonts.rubik,
