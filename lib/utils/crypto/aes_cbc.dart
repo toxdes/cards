@@ -36,9 +36,8 @@ class AesCbc {
   static const int blockSize = 128;
   static const int blockSizeInBytes = blockSize ~/ 8;
   final Uint8List iv;
-  final Uint8List salt;
   int _paddedBytesCount = 0;
-  AesCbc({required this.iv, required this.salt});
+  AesCbc({required this.iv});
 
   /// encrypt a block of size 128 bits
   Uint8List encryptBlock(Uint8List key, Uint8List text) {

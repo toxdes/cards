@@ -5,50 +5,42 @@ import 'package:cards/config/colors.dart';
 import 'package:cards/config/fonts.dart';
 import 'package:cards/core/step/step.dart';
 import 'package:cards/screens/backup_restore/backup.dart';
+import 'package:cards/services/backup_service.dart';
 import 'package:cards/services/toast_service.dart';
+import 'package:cards/utils/string_utils.dart';
 import 'package:flutter/material.dart' hide Step, IconButton;
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
-class BackupStepContent extends StatefulWidget {
+class BackupStepContent extends StatelessWidget {
   final BackupStep step;
   final String encryptionKey;
+  final String encryptionSecret;
   final Function(BackupCallbackAction action, Step step)? actionCallback;
-  final String? backupFile;
+  final String? backupFileName;
   const BackupStepContent(
       {super.key,
       required this.step,
       this.actionCallback,
-      this.backupFile,
-      required this.encryptionKey});
-
-  @override
-  State<StatefulWidget> createState() => _BackupStepContentState();
-}
-
-class _BackupStepContentState extends State<BackupStepContent> {
-  _formatKey(String key) {
-    StringBuffer buf = StringBuffer();
-    for (int i = 0; i < key.length; ++i) {
-      if (i != 0 && i != key.length && i % 4 == 0) {
-        buf.write('  ');
-      }
-      buf.write(key[i]);
-    }
-    return buf.toString();
-  }
+      this.backupFileName,
+      required this.encryptionKey,
+      required this.encryptionSecret});
 
   @override
   Widget build(BuildContext context) {
-    BackupStepDesc desc = widget.step.desc;
-    if (widget.step.expanded) {
-      if (desc == BackupStepDesc.generateKey) {
+    BackupStepDesc desc = step.desc;
+    String formattedEncryptionSecret =
+        StringUtils.formatKey(encryptionSecret, BackupService.keySeparator);
+    String formattedEncryptionKey =
+        StringUtils.formatKey(encryptionKey, BackupService.keySeparator);
+    if (step.expanded) {
+      if (desc == BackupStepDesc.generateCreds) {
         return Container(
             padding: const EdgeInsets.all(12),
             child: Column(
               children: [
                 const Text(
-                    "A 12-digit key will be generated and used for data encryption. The key will be visible one-time during this step, and this key should be kept private.",
+                    "A ${BackupService.saltLength} characters long secret, and ${BackupService.keyLength} characters long key will be generated and will be used as credentials for data encryption.",
                     style: TextStyle(
                         color: ThemeColors.white2,
                         decoration: TextDecoration.none,
@@ -58,9 +50,19 @@ class _BackupStepContentState extends State<BackupStepContent> {
                         fontSize: 16)),
                 const SizedBox(height: 12),
                 const Text(
-                    "If you lose the key, you won't be able to restore the backup.",
+                    "If you lose these creds, you won't be able to restore the backup.",
                     style: TextStyle(
                         color: ThemeColors.white2,
+                        decoration: TextDecoration.none,
+                        textBaseline: TextBaseline.alphabetic,
+                        fontFamily: Fonts.rubik,
+                        fontWeight: FontWeight.w400,
+                        fontSize: 16)),
+                const SizedBox(height: 12),
+                const Text(
+                    "These creds will be visible one-time during this step, and should be kept private.",
+                    style: TextStyle(
+                        color: ThemeColors.red2,
                         decoration: TextDecoration.none,
                         textBaseline: TextBaseline.alphabetic,
                         fontFamily: Fonts.rubik,
@@ -71,9 +73,9 @@ class _BackupStepContentState extends State<BackupStepContent> {
                   alignment: Alignment.centerRight,
                   child: Button(
                       onTap: () {
-                        if (widget.actionCallback != null) {
-                          widget.actionCallback!(
-                              BackupCallbackAction.generateKey, widget.step);
+                        if (actionCallback != null) {
+                          actionCallback!(
+                              BackupCallbackAction.generateCreds, step);
                         }
                       },
                       text: "I understand, continue",
@@ -82,15 +84,15 @@ class _BackupStepContentState extends State<BackupStepContent> {
               ],
             ));
       }
-      if (desc == BackupStepDesc.saveKey) {
+      if (desc == BackupStepDesc.saveCreds) {
         return Container(
             padding: const EdgeInsets.all(12),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.max,
               children: [
-                const Text(
-                    "Following 12-digit key will be used for encryption.",
+                const Text("Following creds will be used for encryption.",
                     textAlign: TextAlign.left,
                     style: TextStyle(
                         color: ThemeColors.white2,
@@ -100,41 +102,96 @@ class _BackupStepContentState extends State<BackupStepContent> {
                         decoration: TextDecoration.none)),
                 const SizedBox(height: 16),
                 Container(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-                    decoration: const BoxDecoration(
-                        color: ThemeColors.gray3,
-                        borderRadius: BorderRadius.all(Radius.circular(12))),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(_formatKey(widget.encryptionKey),
-                            style: const TextStyle(
-                                fontFamily: Fonts.rubik,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 24,
-                                color: ThemeColors.white1,
-                                decoration: TextDecoration.none)),
-                        Container(
-                          margin: const EdgeInsets.only(left: 12),
-                          child: IconButton(
-                              onTap: () {
-                                Clipboard.setData(
-                                    ClipboardData(text: widget.encryptionKey));
-                                ToastService.show(
-                                    status: ToastStatus.success,
-                                    message: "copied to clipboard");
-                              },
-                              iconData: Icons.copy_outlined,
-                              color: ThemeColors.blue,
-                              buttonType: ButtonType.ghost,
-                              size: 32),
-                        )
-                      ],
-                    )),
+                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+                  decoration: const BoxDecoration(
+                      color: ThemeColors.gray3,
+                      borderRadius: BorderRadius.all(Radius.circular(12))),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      const Text("Secret",
+                          textAlign: TextAlign.left,
+                          style: TextStyle(
+                              color: ThemeColors.white2,
+                              fontSize: 12,
+                              fontFamily: Fonts.rubik,
+                              fontWeight: FontWeight.w400,
+                              decoration: TextDecoration.none)),
+                      const SizedBox(height: 4),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          Text(formattedEncryptionSecret,
+                              style: const TextStyle(
+                                  fontFamily: Fonts.rubik,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 18,
+                                  color: ThemeColors.white1,
+                                  decoration: TextDecoration.none)),
+                          Container(
+                            margin: const EdgeInsets.only(left: 12),
+                            child: IconButton(
+                                onTap: () {
+                                  Clipboard.setData(ClipboardData(
+                                      text: formattedEncryptionSecret));
+                                  ToastService.show(
+                                      status: ToastStatus.success,
+                                      message: "secret copied to clipboard");
+                                },
+                                iconData: Icons.copy_outlined,
+                                color: ThemeColors.blue,
+                                buttonType: ButtonType.ghost,
+                                size: 32),
+                          )
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      const Text("Key",
+                          textAlign: TextAlign.left,
+                          style: TextStyle(
+                              color: ThemeColors.white2,
+                              fontSize: 12,
+                              fontFamily: Fonts.rubik,
+                              fontWeight: FontWeight.w400,
+                              decoration: TextDecoration.none)),
+                      const SizedBox(height: 4),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          Text(formattedEncryptionKey,
+                              style: const TextStyle(
+                                  fontFamily: Fonts.rubik,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 18,
+                                  color: ThemeColors.white1,
+                                  decoration: TextDecoration.none)),
+                          Container(
+                            margin: const EdgeInsets.only(left: 12),
+                            child: IconButton(
+                                onTap: () {
+                                  Clipboard.setData(ClipboardData(
+                                      text: formattedEncryptionKey));
+                                  ToastService.show(
+                                      status: ToastStatus.success,
+                                      message: "key copied to clipboard");
+                                },
+                                iconData: Icons.copy_outlined,
+                                color: ThemeColors.blue,
+                                buttonType: ButtonType.ghost,
+                                size: 32),
+                          )
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 16),
-                const Text("Keep this key safe with you.",
+                const Text("Keep this creds safe with you.",
                     textAlign: TextAlign.left,
                     style: TextStyle(
                         color: ThemeColors.white2,
@@ -148,9 +205,8 @@ class _BackupStepContentState extends State<BackupStepContent> {
                   alignment: Alignment.centerRight,
                   child: Button(
                       onTap: () {
-                        if (widget.actionCallback != null) {
-                          widget.actionCallback!(
-                              BackupCallbackAction.saveKey, widget.step);
+                        if (actionCallback != null) {
+                          actionCallback!(BackupCallbackAction.saveCreds, step);
                         }
                       },
                       text: "I saved the key, continue",
@@ -213,7 +269,7 @@ class _BackupStepContentState extends State<BackupStepContent> {
                         color: ThemeColors.white1,
                       )),
                   const SizedBox(height: 4),
-                  Text("${widget.backupFile}",
+                  Text("$backupFileName",
                       style: const TextStyle(
                         fontFamily: Fonts.rubik,
                         fontSize: 16,
@@ -225,10 +281,10 @@ class _BackupStepContentState extends State<BackupStepContent> {
                   Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                     Button(
                         onTap: () {
-                          if (widget.actionCallback != null) {
-                            widget.actionCallback!(
+                          if (actionCallback != null) {
+                            actionCallback!(
                                 BackupCallbackAction.saveBackupToDownloads,
-                                widget.step);
+                                step);
                           }
                         },
                         text: "Save to downloads",
@@ -237,10 +293,9 @@ class _BackupStepContentState extends State<BackupStepContent> {
                         margin: const EdgeInsets.only(left: 12),
                         child: Button(
                             onTap: () {
-                              if (widget.actionCallback != null) {
-                                widget.actionCallback!(
-                                    BackupCallbackAction.shareBackup,
-                                    widget.step);
+                              if (actionCallback != null) {
+                                actionCallback!(
+                                    BackupCallbackAction.shareBackup, step);
                               }
                             },
                             text: "Share",

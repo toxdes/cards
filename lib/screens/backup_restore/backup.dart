@@ -10,6 +10,7 @@ import 'package:cards/core/step/step.dart';
 import 'package:cards/models/cardlist/cardlist.dart';
 import 'package:cards/services/backup_service.dart';
 import 'package:cards/services/toast_service.dart';
+import 'package:cards/utils/file_utils.dart';
 import 'package:cards/utils/secure_storage.dart';
 import 'package:cards/utils/string_utils.dart';
 import 'package:flutter/material.dart' hide Step, IconButton;
@@ -23,7 +24,7 @@ class BackupScreen extends StatefulWidget {
   State<StatefulWidget> createState() => _BackupScreenState();
 }
 
-enum BackupStepDesc { generateKey, saveKey, generateBackup, shareBackup }
+enum BackupStepDesc { generateCreds, saveCreds, generateBackup, shareBackup }
 
 class BackupStep extends Step {
   final BackupStepDesc desc;
@@ -36,8 +37,8 @@ class BackupStep extends Step {
 }
 
 enum BackupCallbackAction {
-  generateKey,
-  saveKey,
+  generateCreds,
+  saveCreds,
   generateBackup,
   shareBackup,
   saveBackupToDownloads
@@ -46,6 +47,7 @@ enum BackupCallbackAction {
 class _BackupScreenState extends State<BackupScreen> {
   final List<BackupStep> _steps = <BackupStep>[];
   String _key = "";
+  String _secret = "";
   File? backupFile;
 
   @override
@@ -56,9 +58,9 @@ class _BackupScreenState extends State<BackupScreen> {
         status: StepStatus.active,
         title: "Generate key",
         expanded: true,
-        desc: BackupStepDesc.generateKey));
+        desc: BackupStepDesc.generateCreds));
     _steps.add(
-        BackupStep(id: 2, title: "Save key", desc: BackupStepDesc.saveKey));
+        BackupStep(id: 2, title: "Save key", desc: BackupStepDesc.saveCreds));
     _steps.add(BackupStep(
         id: 3, title: "Generate backup", desc: BackupStepDesc.generateBackup));
     _steps.add(BackupStep(
@@ -76,9 +78,12 @@ class _BackupScreenState extends State<BackupScreen> {
     });
   }
 
-  void generateKey(int stepId) async {
+  void generateCreds(int stepId) async {
     // generate key
     _key = await BackupService.generateKey();
+
+    // generate secret (salt)
+    _secret = await BackupService.generateSalt();
 
     // update ui
     setState(() {
@@ -97,7 +102,7 @@ class _BackupScreenState extends State<BackupScreen> {
     });
   }
 
-  void saveKey(int stepId) {
+  void saveCreds(int stepId) {
     setState(() {
       for (int i = 0; i < _steps.length; ++i) {
         if (stepId == _steps[i].id) {
@@ -123,7 +128,7 @@ class _BackupScreenState extends State<BackupScreen> {
     await cards.readFromStorage();
     // generate backup
     Uint8List encrypted = await BackupService.encrypt(
-        key: _key, data: StringUtils.toBytes(cards.toJson()));
+        key: _key, data: StringUtils.toBytes(cards.toJson()), salt: _secret);
 
     // write to file
     final Directory documentsDir = await getApplicationDocumentsDirectory();
@@ -150,10 +155,6 @@ class _BackupScreenState extends State<BackupScreen> {
     });
   }
 
-  String getFileName(File file) {
-    return file.uri.pathSegments.last;
-  }
-
   void shareBackup(int stepId) async {
     Share.shareXFiles([XFile(backupFile!.path)],
         text: "Share cards backup file...");
@@ -178,7 +179,7 @@ class _BackupScreenState extends State<BackupScreen> {
         throw UnsupportedError("");
       }
       downloadsDir = await downloadsDir.create();
-      String fileName = getFileName(backupFile!);
+      String fileName = FileUtils.getFileName(backupFile!);
       File file = File('${downloadsDir.path}/$fileName');
       await file.writeAsBytes(backupFile!.readAsBytesSync());
       ToastService.show(
@@ -196,14 +197,14 @@ class _BackupScreenState extends State<BackupScreen> {
 
   void act(BackupCallbackAction action, Step step) {
     switch (action) {
-      case BackupCallbackAction.generateKey:
+      case BackupCallbackAction.generateCreds:
         {
-          generateKey(step.id);
+          generateCreds(step.id);
           return;
         }
-      case BackupCallbackAction.saveKey:
+      case BackupCallbackAction.saveCreds:
         {
-          saveKey(step.id);
+          saveCreds(step.id);
           act(BackupCallbackAction.generateBackup, _steps[step.id]);
           return;
         }
@@ -226,8 +227,12 @@ class _BackupScreenState extends State<BackupScreen> {
   }
 
   void stepActionCallback(StepAction action, int stepId) {
-    if (action == StepAction.expand) {
-      requestToggleExpand(stepId);
+    switch (action) {
+      case StepAction.expand:
+        {
+          requestToggleExpand(stepId);
+          return;
+        }
     }
   }
 
@@ -281,9 +286,10 @@ class _BackupScreenState extends State<BackupScreen> {
                               step: step,
                               actionCallback: act,
                               encryptionKey: _key,
-                              backupFile: backupFile == null
+                              encryptionSecret: _secret,
+                              backupFileName: backupFile == null
                                   ? ''
-                                  : getFileName(backupFile!))
+                                  : FileUtils.getFileName(backupFile!))
                         ],
                       );
                     }),

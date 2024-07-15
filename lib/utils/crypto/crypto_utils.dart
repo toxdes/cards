@@ -33,12 +33,11 @@ class CryptoUtils {
   static bool _initialized = false;
   static Future<void> init() async {
     rnd = Random.secure();
-    Uint8List salt = StringUtils.toBytes("todo-figure-out-salt");
     Uint8List iv = Uint8List(AesCbc.blockSizeInBytes);
     for (int i = 0; i < iv.length; ++i) {
       iv[i] = rnd!.nextInt(255);
     }
-    aes = AesCbc(iv: iv, salt: salt);
+    aes = AesCbc(iv: iv);
     _initialized = true;
   }
 

@@ -4,9 +4,11 @@ import 'dart:typed_data';
 import 'package:cards/utils/crypto/aes_cbc.dart';
 import 'package:cards/utils/crypto/crypto_utils.dart';
 import 'package:cards/utils/string_utils.dart';
+import 'package:pointycastle/export.dart';
 
 class BackupServiceErrorCodes {
   static const int invalidKey = 0x100;
+  static const int calledWithoutInit = 0x101;
 }
 
 class BackupServiceException implements Exception {
@@ -20,69 +22,98 @@ class BackupServiceException implements Exception {
 }
 
 class BackupService {
-  static Random _random = Random();
+  static SecureRandom? _random;
   static const int keyLength = 12;
+  static const int saltLength = 8;
   static const _encryptionKeyInBytes = 32;
   static bool _initialized = false;
-
+  static String keySeparator = "-";
+  static String allowedChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   static Future<void> init() async {
-    _random = Random.secure();
+    Random r = Random.secure();
+    Uint8List bytes = Uint8List(32);
+    for (int i = 0; i < 32; ++i) {
+      bytes[i] = r.nextInt(allowedChars.length);
+    }
+    _random = FortunaRandom()..seed(KeyParameter(bytes));
     await CryptoUtils.init();
     _initialized = true;
   }
 
   static Future<String> generateKey() async {
-    // key is a 12 digit number
+    // key is a string of length BackupService.keyLength
     if (!_initialized) {
-      throw Exception("Backup service is not initialized");
+      throw BackupServiceException(BackupServiceErrorCodes.calledWithoutInit,
+          "Backup service is not initialized");
     }
+
     StringBuffer buf = StringBuffer();
     for (int i = 0; i < keyLength; ++i) {
-      int num = _random.nextInt(10);
-      buf.write(num.toString());
+      int num = _random!.nextUint32();
+      buf.write(allowedChars[num % allowedChars.length]);
     }
     return buf.toString();
   }
 
-  static bool isKeyValid(String key) {
-    RegExp keyRegex = RegExp(r'^[0-9]{12}');
-    return key.length == BackupService.keyLength && keyRegex.hasMatch(key);
+  static bool isKeyValid(String maybeKey) {
+    RegExp keyRegex = RegExp("^[A-Z0-9]{$keyLength}\$");
+    return maybeKey.length == BackupService.keyLength &&
+        keyRegex.hasMatch(maybeKey);
   }
 
-  static Future<String> generateSalt(String key) async {
-    if (!BackupService.isKeyValid(key)) {
-      throw BackupServiceException(BackupServiceErrorCodes.invalidKey,
-          "cannot generate salt, key is invalid.");
-    }
+  static bool isSaltValid(String maybeSalt) {
+    RegExp saltRegex = RegExp("^[A-Z0-9]{$saltLength}\$");
+    return maybeSalt.length == BackupService.saltLength &&
+        saltRegex.hasMatch(maybeSalt);
+  }
 
-    // NOTE: currently we don't have a good way to associate a key with a salt that would not require the user to remember more information than the key. figure a way to fix this.
-    return '${key[1]}${key[2]}${key[3]}${key[5]}${key[7]}';
+  static Future<String> generateSalt() async {
+    if (!_initialized) {
+      throw BackupServiceException(BackupServiceErrorCodes.calledWithoutInit,
+          "Backup service is not initialized");
+    }
+    StringBuffer buf = StringBuffer();
+    for (int i = 0; i < saltLength; ++i) {
+      int num = _random!.nextUint32();
+      buf.write(allowedChars[num % allowedChars.length]);
+    }
+    return buf.toString();
   }
 
   static Future<Uint8List> encrypt(
-      {required String key, required Uint8List data}) async {
+      {required String key,
+      required Uint8List data,
+      required String salt}) async {
+    if (!_initialized) {
+      throw BackupServiceException(BackupServiceErrorCodes.calledWithoutInit,
+          "Backup service is not initialized");
+    }
     if (!BackupService.isKeyValid(key)) {
       throw BackupServiceException(
           BackupServiceErrorCodes.invalidKey, "cannot encrypt, key is invalid");
     }
 
-    Uint8List salt = StringUtils.toBytes(await BackupService.generateSalt(key));
-    Uint8List encryptionKey = CryptoUtils.deriveKey(
-        _encryptionKeyInBytes, StringUtils.toBytes(key), salt);
+    Uint8List encryptionKey = CryptoUtils.deriveKey(_encryptionKeyInBytes,
+        StringUtils.toBytes(key), StringUtils.toBytes(salt));
     AesResult encrypted = CryptoUtils.aesEncrypt(encryptionKey, data);
     return encrypted.data;
   }
 
   static Future<Uint8List> decrypt(
-      {required String key, required Uint8List data}) async {
+      {required String key,
+      required Uint8List data,
+      required String salt}) async {
+    if (!_initialized) {
+      throw BackupServiceException(BackupServiceErrorCodes.calledWithoutInit,
+          "Backup service is not initialized");
+    }
     if (!BackupService.isKeyValid(key)) {
       throw BackupServiceException(
           BackupServiceErrorCodes.invalidKey, "cannot decrypt, key is invalid");
     }
 
-    Uint8List salt = StringUtils.toBytes(await BackupService.generateSalt(key));
-    Uint8List decryptionKey = CryptoUtils.deriveKey(
-        _encryptionKeyInBytes, StringUtils.toBytes(key), salt);
+    Uint8List decryptionKey = CryptoUtils.deriveKey(_encryptionKeyInBytes,
+        StringUtils.toBytes(key), StringUtils.toBytes(salt));
     AesResult decrypted = CryptoUtils.aesDecrypt(decryptionKey, data);
     return decrypted.data;
   }
