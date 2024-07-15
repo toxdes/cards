@@ -15,7 +15,8 @@ Widget app = MaterialApp(
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await NotificationService().initialize();
-  await SentryService.init();
+  // TODO: disable sentry until it can be made opt-in, also consider privacy implications
+  // await SentryService.init();
   await BackupService.init();
   runApp(app);
 }
