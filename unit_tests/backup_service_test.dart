@@ -1,4 +1,5 @@
 import 'package:cards/services/backup_service.dart';
+import 'package:cards/utils/crypto/crypto_utils.dart';
 import 'package:cards/utils/string_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:test/test.dart';
@@ -47,6 +48,7 @@ void main() {
   });
 
   test("encrypt, decrypt throw for invalid key", () async {
+    await CryptoUtils.init();
     await BackupService.init();
     String invalidKey = "hello world";
     Uint8List input = StringUtils.toBytes("hello world");
@@ -72,18 +74,21 @@ void main() {
   });
 
   test("generateKey generates a valid key", () async {
+    await CryptoUtils.init();
     await BackupService.init();
     String key = await BackupService.generateKey();
     assert(BackupService.isKeyValid(key));
   });
 
   test("generateSalt generates a valid salt", () async {
+    await CryptoUtils.init();
     await BackupService.init();
     String salt = await BackupService.generateSalt();
     assert(BackupService.isSaltValid(salt));
   });
 
   test("encrypt-decrypt: escape charaters and emojis", () async {
+    await CryptoUtils.init();
     await BackupService.init();
     String key = await BackupService.generateKey();
     String salt = await BackupService.generateSalt();
@@ -103,6 +108,7 @@ void main() {
   });
 
   test("encrypt-decrypt: text smaller than 1 block", () async {
+    await CryptoUtils.init();
     await BackupService.init();
     String key = await BackupService.generateKey();
     String salt = await BackupService.generateSalt();
@@ -121,6 +127,7 @@ void main() {
   });
 
   test("encrypt-decrypt: empty text", () async {
+    await CryptoUtils.init();
     await BackupService.init();
     String key = await BackupService.generateKey();
     String salt = await BackupService.generateSalt();
@@ -139,6 +146,7 @@ void main() {
   });
 
   test("encrypt-decrypt: accent characters", () async {
+    await CryptoUtils.init();
     await BackupService.init();
     String key = await BackupService.generateKey();
     String salt = await BackupService.generateSalt();
@@ -155,5 +163,48 @@ void main() {
     }
     String output = StringUtils.fromBytes(decrypted);
     assert(output == secretInput);
+  });
+
+  test("decrypt fails for valid but incorrect key", () async {
+    await CryptoUtils.init();
+    await BackupService.init();
+    String correctKey = await BackupService.generateKey();
+    String correctSalt = await BackupService.generateSalt();
+    String incorrectKey = await BackupService.generateKey();
+    String incorrectSalt = await BackupService.generateSalt();
+    Uint8List secretInput = StringUtils.toBytes("hello-world");
+    Uint8List encrypted = await BackupService.encrypt(
+        key: correctKey, data: secretInput, salt: correctSalt);
+
+    // decrypts for correctKey - correctSalt
+    await BackupService.decrypt(
+        data: encrypted, key: correctKey, salt: correctSalt);
+
+    // throws for incorrectKey - correctSalt
+    expect(() async {
+      await BackupService.decrypt(
+          key: incorrectKey, data: encrypted, salt: correctSalt);
+    },
+        throwsA(predicate((e) =>
+            e is BackupServiceException &&
+            e.errorCode == BackupServiceErrorCodes.incorrectCreds)));
+
+    // throws for correctKey - incorrectSalt
+    expect(() async {
+      await BackupService.decrypt(
+          key: correctKey, data: encrypted, salt: incorrectSalt);
+    },
+        throwsA(predicate((e) =>
+            e is BackupServiceException &&
+            e.errorCode == BackupServiceErrorCodes.incorrectCreds)));
+
+    // throws for incorrectKey - incorrectSalt
+    expect(() async {
+      await BackupService.decrypt(
+          key: incorrectKey, data: encrypted, salt: incorrectSalt);
+    },
+        throwsA(predicate((e) =>
+            e is BackupServiceException &&
+            e.errorCode == BackupServiceErrorCodes.incorrectCreds)));
   });
 }

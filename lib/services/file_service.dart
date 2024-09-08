@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 
+import 'package:file_selector/file_selector.dart';
+
 class WriteResult {
   final int bytesWritten;
   final String filePath;
@@ -15,5 +17,11 @@ class FileService {
       required String fileName,
       Function? onProgress}) async {
     return WriteResult(bytesWritten: 0, filePath: "TODO");
+  }
+
+  static Future<XFile?> chooseFile() async {
+    const XTypeGroup typeGroup =
+        XTypeGroup(label: "Cards backup file", extensions: ["bin"]);
+    return await openFile(acceptedTypeGroups: [typeGroup]);
   }
 }

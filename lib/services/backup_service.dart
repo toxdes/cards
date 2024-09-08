@@ -9,6 +9,7 @@ import 'package:pointycastle/export.dart';
 class BackupServiceErrorCodes {
   static const int invalidKey = 0x100;
   static const int calledWithoutInit = 0x101;
+  static const int incorrectCreds = 0x102;
 }
 
 class BackupServiceException implements Exception {
@@ -36,8 +37,15 @@ class BackupService {
       bytes[i] = r.nextInt(allowedChars.length);
     }
     _random = FortunaRandom()..seed(KeyParameter(bytes));
-    await CryptoUtils.init();
     _initialized = true;
+  }
+
+  static String getKeyShape() {
+    return "XXXX-XXXX-XXXX";
+  }
+
+  static String getSecretShape() {
+    return "XXXX-XXXX";
   }
 
   static Future<String> generateKey() async {
@@ -114,7 +122,16 @@ class BackupService {
 
     Uint8List decryptionKey = CryptoUtils.deriveKey(_encryptionKeyInBytes,
         StringUtils.toBytes(key), StringUtils.toBytes(salt));
-    AesResult decrypted = CryptoUtils.aesDecrypt(decryptionKey, data);
-    return decrypted.data;
+    try {
+      AesResult decrypted = CryptoUtils.aesDecrypt(decryptionKey, data);
+      return decrypted.data;
+    } catch (e) {
+      if (e is CryptoUtilsException &&
+          e.errorCode == CryptoUtilsErrorCodes.invalidCredentials) {
+        throw BackupServiceException(BackupServiceErrorCodes.incorrectCreds,
+            "cannot decrypt, credentials are incorrect");
+      }
+      rethrow;
+    }
   }
 }

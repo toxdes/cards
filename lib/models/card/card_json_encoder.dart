@@ -13,6 +13,8 @@ class CardModelJsonEncoder implements Encoder<CardModel, String> {
     CardModel card = CardModelFactory.blank();
     return card
       ..setNumber(record['number'] as String)
+      ..setProvider(
+          CardUtils.getCardProviderFromString(record['provider'] as String))
       ..setCVV(record['cvv'] as String)
       ..setExpiry(record['expiry'] as String)
       ..setCardType(CardUtils.getCardTypeFromString(record['type'] as String))

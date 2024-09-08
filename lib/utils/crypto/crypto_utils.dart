@@ -9,6 +9,7 @@ import 'package:pointycastle/export.dart';
 class CryptoUtilsErrorCodes {
   static const invalidPadLength = 0x100;
   static const notInitialized = 0x101;
+  static const invalidCredentials = 0x103;
 }
 
 class CryptoUtilsException implements Exception {
@@ -28,17 +29,23 @@ class PadTextResult {
 }
 
 class CryptoUtils {
-  static AesCbc? aes;
   static Random? rnd;
   static bool _initialized = false;
+  static const _headerLength = 16;
+  // TODO: explore CMAC instead of this
+  static const String _magic = "enc453Xyz4512a4W";
+
   static Future<void> init() async {
     rnd = Random.secure();
+    _initialized = true;
+  }
+
+  static Uint8List getIV(Uint8List key) {
     Uint8List iv = Uint8List(AesCbc.blockSizeInBytes);
     for (int i = 0; i < iv.length; ++i) {
-      iv[i] = rnd!.nextInt(255);
+      iv[i] = key[i % key.length];
     }
-    aes = AesCbc(iv: iv);
-    _initialized = true;
+    return iv;
   }
 
   /// extrapolates a key of small length to the desired length using `argon_2_id` algorithm.
@@ -58,17 +65,23 @@ class CryptoUtils {
       throw CryptoUtilsException(CryptoUtilsErrorCodes.notInitialized,
           "Tried to call aesEncrypt from CryptoUtils without calling init() first.");
     }
+    BytesBuilder builder = BytesBuilder();
+    builder.add(StringUtils.toBytes(CryptoUtils._magic));
+    builder.add(text);
+    Uint8List textWithHeader = builder.toBytes();
     BytesBuilder encryptedText = BytesBuilder();
     Uint8List block = Uint8List(AesCbc.blockSizeInBytes);
     int i = 0;
     int bp = 0;
-    while (i < text.length) {
+    AesCbc aes = AesCbc();
+    aes.setIV(CryptoUtils.getIV(key));
+    while (i < textWithHeader.length) {
       if (bp == AesCbc.blockSizeInBytes) {
-        encryptedText.add(aes!.encryptBlock(key, block));
+        encryptedText.add(aes.encryptBlock(key, block));
         bp = 0;
         continue;
       }
-      block[bp] = text[i];
+      block[bp] = textWithHeader[i];
       ++bp;
       ++i;
     }
@@ -79,8 +92,8 @@ class CryptoUtils {
       for (int i = 0; i < bp; ++i) {
         lastBlock[i] = block[i];
       }
-      encryptedText.add(aes!.encryptBlock(key, lastBlock));
-      paddedBytesCount = aes!.getLastPaddedBytesCount();
+      encryptedText.add(aes.encryptBlock(key, lastBlock));
+      paddedBytesCount = aes.getLastPaddedBytesCount();
     }
     return AesResult(
         data: encryptedText.toBytes(), paddedBytesCount: paddedBytesCount);
@@ -95,9 +108,11 @@ class CryptoUtils {
     Uint8List block = Uint8List(AesCbc.blockSizeInBytes);
     int i = 0;
     int bp = 0;
+    AesCbc aes = AesCbc();
+    aes.setIV(CryptoUtils.getIV(key));
     while (i < text.length) {
       if (bp == block.length) {
-        decryptedText.add(aes!.decryptBlock(key, block));
+        decryptedText.add(aes.decryptBlock(key, block));
         bp = 0;
         continue;
       }
@@ -112,11 +127,29 @@ class CryptoUtils {
       for (int i = 0; i < bp; ++i) {
         lastBlock[i] = block[i];
       }
-      decryptedText.add(aes!.decryptBlock(key, lastBlock));
-      paddedBytesCount = aes!.getLastPaddedBytesCount();
+      decryptedText.add(aes.decryptBlock(key, lastBlock));
+      paddedBytesCount = aes.getLastPaddedBytesCount();
+    }
+    Uint8List decrypted = decryptedText.toBytes();
+    Uint8List header = StringUtils.toBytes(CryptoUtils._magic);
+    if (decrypted.length < CryptoUtils._headerLength) {
+      throw CryptoUtilsException(CryptoUtilsErrorCodes.invalidCredentials,
+          "cannot decrypt, invalid credentials");
+    }
+    for (int i = 0; i < CryptoUtils._headerLength; ++i) {
+      if (header[i] != decrypted[i]) {
+        throw CryptoUtilsException(CryptoUtilsErrorCodes.invalidCredentials,
+            "cannot decrypt, invalid credentials");
+      }
+    }
+    Uint8List decryptedWithoutHeader =
+        Uint8List(decryptedText.length - CryptoUtils._headerLength);
+    for (int i = 0; i < decrypted.length; ++i) {
+      if (i < CryptoUtils._headerLength) continue;
+      decryptedWithoutHeader[i - CryptoUtils._headerLength] = decrypted[i];
     }
     return AesResult(
-        data: decryptedText.toBytes(), paddedBytesCount: paddedBytesCount);
+        data: decryptedWithoutHeader, paddedBytesCount: paddedBytesCount);
   }
 
   static PadTextResult padText(Uint8List text, int length) {

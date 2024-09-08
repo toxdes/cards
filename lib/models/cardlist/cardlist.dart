@@ -97,4 +97,17 @@ class CardListModel {
   String toJson() {
     return encoder.encode(this);
   }
+
+  bool equals(CardListModel other) {
+    if (other.length != length) {
+      return false;
+    }
+    UnmodifiableListView<CardModel> otherCards = other.getAll();
+    for (int i = 0; i < length; ++i) {
+      if (!_cards[i].equals(otherCards[i])) {
+        return false;
+      }
+    }
+    return true;
+  }
 }

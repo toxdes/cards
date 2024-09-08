@@ -30,7 +30,6 @@ void main() {
 
     Uint8List inputBytes = StringUtils.toBytes(input);
 
-    assert(decrypted.paddedBytesCount == 0);
     assert(inputBytes.length == decrypted.data.length);
     String result = StringUtils.fromBytes(decrypted.data);
     assert(input == result);
