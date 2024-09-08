@@ -8,10 +8,10 @@ final class ThemeColors {
   static const Color white2 = Color(0xFFDFDEEE);
   static const Color white3 = Color(0xFF6E7793);
   static const Color blue = Color(0xFF1236FA);
-  static const Color red = Color.fromARGB(255, 255, 137, 101);
-  static const Color red2 = Color.fromARGB(255, 221, 37, 83);
-  static const Color yellow = Color.fromARGB(255, 255, 229, 127);
-  static const Color green = Color.fromARGB(255, 146, 211, 117);
-  static const Color teal = Color.fromARGB(255, 80, 202, 216);
-  static const Color transparent = Color.fromARGB(0, 0, 0, 0);
+  static const Color red = Color(0xFFFF8965);
+  static const Color red2 = Color(0xFFDD2553);
+  static const Color yellow = Color(0XFFFFE57F);
+  static const Color green = Color(0XFF92D375);
+  static const Color teal = Color(0XFF50CAD8);
+  static const Color transparent = Color(0x00000000);
 }
