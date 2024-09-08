@@ -1,7 +1,6 @@
 import 'package:cards/models/card/card.dart';
 import 'package:cards/models/card/card_factory.dart';
 import 'package:cards/models/card/card_json_encoder.dart';
-import 'package:flutter/material.dart';
 import 'package:test/test.dart';
 
 void main() {
