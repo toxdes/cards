@@ -112,7 +112,6 @@ class _HomeState extends State<Home> {
                                         color: ThemeColors.white2)),
                                 IconButton(
                                     onTap: () {
-                                      debugPrint("pressed");
                                       Navigator.push(
                                           context,
                                           CupertinoDialogRoute(
