@@ -3,9 +3,11 @@ import 'package:cards/components/backup_restore/restore_fields_formatter.dart';
 import 'package:cards/components/backup_restore/restore_fields_validator.dart';
 import 'package:cards/components/shared/button.dart';
 import 'package:cards/components/shared/select_from_options.dart';
+import 'package:cards/components/shared/spinner.dart';
 import 'package:cards/components/shared/textinput.dart';
 import 'package:cards/config/colors.dart';
 import 'package:cards/config/fonts.dart';
+import 'package:cards/core/restore/restore_strategy.dart';
 import 'package:cards/core/step/step.dart';
 import 'package:cards/models/cardlist/cardlist.dart';
 import 'package:cards/screens/backup_restore/restore.dart';
@@ -21,9 +23,9 @@ class RestoreStepContent extends StatefulWidget {
   final Function(String key, String secret)? validateCredsCallback;
   final XFile? backupFile;
   final CardListModelDiffResult? diffResult;
-  final List<SelectOption> restoreStrategyOptions;
-  final SelectOption? selectedRestoreStrategy;
-  final Function(SelectOption selectedOption) onSelectRestoreStragey;
+  final List<RestoreStrategy> restoreStrategyOptions;
+  final RestoreStrategy? selectedRestoreStrategy;
+  final Function(RestoreStrategy selectedStrategy) onSelectRestoreStrategy;
 
   const RestoreStepContent(
       {super.key,
@@ -33,7 +35,7 @@ class RestoreStepContent extends StatefulWidget {
       required this.backupFile,
       required this.restoreStrategyOptions,
       required this.selectedRestoreStrategy,
-      required this.onSelectRestoreStragey,
+      required this.onSelectRestoreStrategy,
       this.diffResult});
 
   @override
@@ -208,9 +210,34 @@ class _RestoreStepContentState extends State<RestoreStepContent> {
                       color: ThemeColors.white1),
                 ),
                 SelectFromOptions(
-                    options: widget.restoreStrategyOptions,
-                    selectedOption: widget.selectedRestoreStrategy,
-                    onSelectOption: widget.onSelectRestoreStragey),
+                    options: widget.restoreStrategyOptions
+                        .map((RestoreStrategy strategy) {
+                      return SelectOption(
+                          key: strategy.key,
+                          label: strategy.label,
+                          desc: strategy.desc);
+                    }).toList(),
+                    selectedOption: widget.selectedRestoreStrategy != null
+                        ? SelectOption(
+                            key: widget.selectedRestoreStrategy!.key,
+                            label: widget.selectedRestoreStrategy!.label,
+                            desc: widget.selectedRestoreStrategy!.desc)
+                        : null,
+                    onSelectOption: (SelectOption selected) {
+                      RestoreStrategy? res;
+                      for (int i = 0;
+                          i < widget.restoreStrategyOptions.length;
+                          ++i) {
+                        if (widget.restoreStrategyOptions[i].key ==
+                            selected.key) {
+                          res = widget.restoreStrategyOptions[i];
+                          break;
+                        }
+                      }
+                      if (res != null) {
+                        widget.onSelectRestoreStrategy(res);
+                      }
+                    }),
                 const SizedBox(height: 16),
                 Container(
                   alignment: Alignment.centerRight,
@@ -226,6 +253,38 @@ class _RestoreStepContentState extends State<RestoreStepContent> {
                 )
               ],
             ));
+      }
+      if (step.desc == RestoreStepDesc.restore) {
+        return Container(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Spinner(color: ThemeColors.white2, size: 14),
+                  const SizedBox(height: 24),
+                  const Text("Restoring backup...",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: ThemeColors.white1,
+                        fontSize: 16,
+                        decoration: TextDecoration.none,
+                        fontFamily: Fonts.rubik,
+                        fontWeight: FontWeight.w400,
+                        textBaseline: TextBaseline.alphabetic,
+                      )),
+                  const SizedBox(height: 8),
+                  Text("Strategy: ${widget.selectedRestoreStrategy!.label}",
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: ThemeColors.white2,
+                        fontSize: 12,
+                        decoration: TextDecoration.none,
+                        fontFamily: Fonts.rubik,
+                        fontWeight: FontWeight.w400,
+                        textBaseline: TextBaseline.alphabetic,
+                      ))
+                ]));
       }
     }
     return const SizedBox.shrink();

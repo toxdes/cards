@@ -1,11 +1,16 @@
 import 'dart:typed_data';
 
+import 'package:cards/components/backup_restore/restore_strategies/add_missing.dart';
+import 'package:cards/components/backup_restore/restore_strategies/auto.dart';
+import 'package:cards/components/backup_restore/restore_strategies/do_nothing.dart';
+import 'package:cards/components/backup_restore/restore_strategies/replace_entirely.dart';
 import 'package:cards/components/backup_restore/retore_step_content.dart';
 import 'package:cards/components/shared/button.dart';
-import 'package:cards/components/shared/select_from_options.dart';
 import 'package:cards/components/shared/step_header.dart';
 import 'package:cards/config/colors.dart';
 import 'package:cards/config/fonts.dart';
+import 'package:cards/core/restore/restore_strategy.dart';
+import 'package:cards/core/restore/restore_strategy_context.dart';
 import 'package:cards/core/step/step.dart';
 import 'package:cards/models/cardlist/cardlist.dart';
 import 'package:cards/models/cardlist/cardlist_json_encoder.dart';
@@ -37,13 +42,6 @@ class RestoreStep extends Step {
 
 enum RestoreCallbackAction { chooseBackupFile, nextStep }
 
-class RestoreStrategy {
-  static const String auto = "auto-recommended";
-  static const String addOnly = "add-only";
-  static const String completeRestore = "completeRestore";
-  static const String doNothing = "do-nothing";
-}
-
 class RestoreScreen extends StatefulWidget {
   const RestoreScreen({super.key});
   @override
@@ -54,8 +52,8 @@ class _RestoreScreenState extends State<RestoreScreen> {
   final List<RestoreStep> _steps = <RestoreStep>[];
   XFile? _backupFile;
   CardListModelDiffResult? _diffResult;
-  final List<SelectOption> _restoreStrategyOptions = [];
-  SelectOption? _selectedRestoreStrategy;
+  final List<RestoreStrategy> _restoreStrategyOptions = [];
+  RestoreStrategyContext restoreStrategyContext = RestoreStrategyContext();
 
   @override
   void initState() {
@@ -75,28 +73,13 @@ class _RestoreScreenState extends State<RestoreScreen> {
     _steps.add(
         RestoreStep(desc: RestoreStepDesc.restore, title: "Restore", id: 4));
 
-    _restoreStrategyOptions.add(const SelectOption(
-        key: RestoreStrategy.auto,
-        label: "Auto (Recommended)",
-        desc:
-            "Import new cards from the file, ignore deletions, pick most-recently updated card in case of conflict"));
+    _restoreStrategyOptions.add(AutoRestoreStrategy());
 
-    _restoreStrategyOptions.add(const SelectOption(
-        key: RestoreStrategy.addOnly,
-        label: "Add missing",
-        desc:
-            "Import new cards from the file, ignore deletions, ignore conflicts"));
+    _restoreStrategyOptions.add(AddMissingRestoreStrategy());
 
-    _restoreStrategyOptions.add(const SelectOption(
-        key: RestoreStrategy.completeRestore,
-        label: "Replace entirely",
-        desc:
-            "Delete existing cards entirely, and add everything from the backup file. Not recommended unless you are sure you want this."));
+    _restoreStrategyOptions.add(ReplaceEntirelyRestoreStrategy());
 
-    _restoreStrategyOptions.add(const SelectOption(
-        key: RestoreStrategy.doNothing,
-        label: "Do nothing",
-        desc: "Don't do anything. Exit."));
+    _restoreStrategyOptions.add(DoNothingRestoreStrategy());
   }
 
   void requestToggleExpand(int stepId) {
@@ -194,9 +177,9 @@ class _RestoreScreenState extends State<RestoreScreen> {
     }
   }
 
-  void onSelectRestoreStrategy(SelectOption selectedOption) {
+  void onSelectRestoreStrategy(RestoreStrategy selectedStrategy) {
     setState(() {
-      _selectedRestoreStrategy = selectedOption;
+      restoreStrategyContext.setRestoreStrategy(selectedStrategy);
     });
   }
 
@@ -258,8 +241,9 @@ class _RestoreScreenState extends State<RestoreScreen> {
                         validateCredsCallback: validateCredentials,
                         diffResult: _diffResult,
                         restoreStrategyOptions: _restoreStrategyOptions,
-                        selectedRestoreStrategy: _selectedRestoreStrategy,
-                        onSelectRestoreStragey: onSelectRestoreStrategy,
+                        selectedRestoreStrategy:
+                            restoreStrategyContext.getRestoreStrategy(),
+                        onSelectRestoreStrategy: onSelectRestoreStrategy,
                       )
                     ],
                   );
