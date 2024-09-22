@@ -1,10 +1,13 @@
+import 'package:cards/components/backup_restore/card_list_diff_summary.dart';
 import 'package:cards/components/backup_restore/restore_fields_formatter.dart';
 import 'package:cards/components/backup_restore/restore_fields_validator.dart';
 import 'package:cards/components/shared/button.dart';
+import 'package:cards/components/shared/select_from_options.dart';
 import 'package:cards/components/shared/textinput.dart';
 import 'package:cards/config/colors.dart';
 import 'package:cards/config/fonts.dart';
 import 'package:cards/core/step/step.dart';
+import 'package:cards/models/cardlist/cardlist.dart';
 import 'package:cards/screens/backup_restore/restore.dart';
 import 'package:cards/services/backup_service.dart';
 import 'package:cards/utils/string_utils.dart';
@@ -17,13 +20,21 @@ class RestoreStepContent extends StatefulWidget {
   final Function(RestoreCallbackAction action, Step step)? actionCallback;
   final Function(String key, String secret)? validateCredsCallback;
   final XFile? backupFile;
+  final CardListModelDiffResult? diffResult;
+  final List<SelectOption> restoreStrategyOptions;
+  final SelectOption? selectedRestoreStrategy;
+  final Function(SelectOption selectedOption) onSelectRestoreStragey;
 
   const RestoreStepContent(
       {super.key,
       required this.step,
       required this.actionCallback,
       required this.validateCredsCallback,
-      this.backupFile});
+      required this.backupFile,
+      required this.restoreStrategyOptions,
+      required this.selectedRestoreStrategy,
+      required this.onSelectRestoreStragey,
+      this.diffResult});
 
   @override
   State<RestoreStepContent> createState() => _RestoreStepContentState();
@@ -171,6 +182,50 @@ class _RestoreStepContentState extends State<RestoreStepContent> {
             ),
           ),
         );
+      }
+      if (step.desc == RestoreStepDesc.chooseRestoreStrategy) {
+        return Container(
+            padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text("Backup file we just decrypted has ",
+                    style: TextStyle(
+                        fontFamily: Fonts.rubik,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                        decoration: TextDecoration.none,
+                        color: ThemeColors.white1)),
+                CardListDiffSummary(result: widget.diffResult!),
+                const Text(
+                  "How would you like to restore the backup?",
+                  style: TextStyle(
+                      fontFamily: Fonts.rubik,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                      decoration: TextDecoration.none,
+                      color: ThemeColors.white1),
+                ),
+                SelectFromOptions(
+                    options: widget.restoreStrategyOptions,
+                    selectedOption: widget.selectedRestoreStrategy,
+                    onSelectOption: widget.onSelectRestoreStragey),
+                const SizedBox(height: 16),
+                Container(
+                  alignment: Alignment.centerRight,
+                  child: Button(
+                      color: ThemeColors.blue,
+                      text: "Continue",
+                      onTap: () {
+                        if (actionCallback != null) {
+                          actionCallback(RestoreCallbackAction.nextStep, step);
+                        }
+                      },
+                      disabled: widget.selectedRestoreStrategy == null),
+                )
+              ],
+            ));
       }
     }
     return const SizedBox.shrink();

@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:cards/components/backup_restore/retore_step_content.dart';
 import 'package:cards/components/shared/button.dart';
+import 'package:cards/components/shared/select_from_options.dart';
 import 'package:cards/components/shared/step_header.dart';
 import 'package:cards/config/colors.dart';
 import 'package:cards/config/fonts.dart';
@@ -11,6 +12,7 @@ import 'package:cards/models/cardlist/cardlist_json_encoder.dart';
 import 'package:cards/services/backup_service.dart';
 import 'package:cards/services/file_service.dart';
 import 'package:cards/services/toast_service.dart';
+import 'package:cards/utils/secure_storage.dart';
 import 'package:cards/utils/string_utils.dart';
 import 'package:flutter/material.dart' hide IconButton, Step;
 import 'package:cards/components/shared/icon_button.dart';
@@ -35,6 +37,13 @@ class RestoreStep extends Step {
 
 enum RestoreCallbackAction { chooseBackupFile, nextStep }
 
+class RestoreStrategy {
+  static const String auto = "auto-recommended";
+  static const String addOnly = "add-only";
+  static const String completeRestore = "completeRestore";
+  static const String doNothing = "do-nothing";
+}
+
 class RestoreScreen extends StatefulWidget {
   const RestoreScreen({super.key});
   @override
@@ -44,6 +53,9 @@ class RestoreScreen extends StatefulWidget {
 class _RestoreScreenState extends State<RestoreScreen> {
   final List<RestoreStep> _steps = <RestoreStep>[];
   XFile? _backupFile;
+  CardListModelDiffResult? _diffResult;
+  final List<SelectOption> _restoreStrategyOptions = [];
+  SelectOption? _selectedRestoreStrategy;
 
   @override
   void initState() {
@@ -62,6 +74,29 @@ class _RestoreScreenState extends State<RestoreScreen> {
         id: 3));
     _steps.add(
         RestoreStep(desc: RestoreStepDesc.restore, title: "Restore", id: 4));
+
+    _restoreStrategyOptions.add(const SelectOption(
+        key: RestoreStrategy.auto,
+        label: "Auto (Recommended)",
+        desc:
+            "Import new cards from the file, ignore deletions, pick most-recently updated card in case of conflict"));
+
+    _restoreStrategyOptions.add(const SelectOption(
+        key: RestoreStrategy.addOnly,
+        label: "Add missing",
+        desc:
+            "Import new cards from the file, ignore deletions, ignore conflicts"));
+
+    _restoreStrategyOptions.add(const SelectOption(
+        key: RestoreStrategy.completeRestore,
+        label: "Replace entirely",
+        desc:
+            "Delete existing cards entirely, and add everything from the backup file. Not recommended unless you are sure you want this."));
+
+    _restoreStrategyOptions.add(const SelectOption(
+        key: RestoreStrategy.doNothing,
+        label: "Do nothing",
+        desc: "Don't do anything. Exit."));
   }
 
   void requestToggleExpand(int stepId) {
@@ -119,20 +154,27 @@ class _RestoreScreenState extends State<RestoreScreen> {
           key: key, data: fileContent, salt: secret);
       String decrypted = StringUtils.fromBytes(decryptedBytes);
       CardListModelJsonEncoder encoder = CardListModelJsonEncoder();
-      CardListModel cards = encoder.decode(decrypted);
+      CardListModel existingCards = CardListModel(
+          storageKey: CardListModelStorageKeys.mainStorage,
+          storage: const SecureStorage());
+      await existingCards.readFromStorage();
+      CardListModel decodedCards = encoder.decode(decrypted);
       ToastService.show(
-          message: "Card has : ${cards.getAll().length} cards",
-          status: ToastStatus.success);
+          message: "Decrypted successfully", status: ToastStatus.success);
+      setState(() {
+        _diffResult = existingCards.getDiff(decodedCards);
+      });
     } catch (e) {
       String message = "Failed to decrypt ${_backupFile!.name}";
-      debugPrint("ERROR $e");
       if (e is BackupServiceException &&
           e.errorCode == BackupServiceErrorCodes.invalidKey) {
         message = "Cannot decrypt, credentials are invalid";
       }
-
+      if (e is BackupServiceException &&
+          e.errorCode == BackupServiceErrorCodes.incorrectCreds) {
+        message = "Cannot decrypt, credentials are incorrect";
+      }
       ToastService.show(message: message, status: ToastStatus.error);
-      ToastService.show(message: e.toString(), status: ToastStatus.error);
       rethrow;
     }
   }
@@ -150,6 +192,12 @@ class _RestoreScreenState extends State<RestoreScreen> {
           return;
         }
     }
+  }
+
+  void onSelectRestoreStrategy(SelectOption selectedOption) {
+    setState(() {
+      _selectedRestoreStrategy = selectedOption;
+    });
   }
 
   @override
@@ -208,6 +256,10 @@ class _RestoreScreenState extends State<RestoreScreen> {
                         actionCallback: act,
                         backupFile: _backupFile,
                         validateCredsCallback: validateCredentials,
+                        diffResult: _diffResult,
+                        restoreStrategyOptions: _restoreStrategyOptions,
+                        selectedRestoreStrategy: _selectedRestoreStrategy,
+                        onSelectRestoreStragey: onSelectRestoreStrategy,
                       )
                     ],
                   );

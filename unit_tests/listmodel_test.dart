@@ -107,4 +107,115 @@ void main() {
       assert(cards[i].equals(decodedCards[i]));
     }
   });
+
+  test('getDiff() with both empty', () {
+    CardListModel ours = CardListModel(
+        storage: MockStorage(),
+        storageKey: CardListModelStorageKeys.testStorage);
+
+    CardListModel theirs = CardListModel(
+        storage: MockStorage(),
+        storageKey: CardListModelStorageKeys.testStorage);
+
+    CardListModelDiffResult diffResult = ours.getDiff(theirs);
+
+    expect(diffResult.added, 0);
+    expect(diffResult.removed, 0);
+    expect(diffResult.changed, 0);
+  });
+
+  test('getDiff() with both equal', () {
+    CardListModel ours = CardListModel(
+        storage: MockStorage(),
+        storageKey: CardListModelStorageKeys.testStorage);
+
+    CardListModel theirs = CardListModel(
+        storage: MockStorage(),
+        storageKey: CardListModelStorageKeys.testStorage);
+
+    CardModel c1 = CardModelFactory.random();
+    CardModel c2 = CardModelFactory.random();
+    CardModel c3 = CardModelFactory.random();
+
+    ours.add(c1);
+    ours.add(c2);
+    ours.add(c3);
+
+    theirs.add(c1);
+    theirs.add(c2);
+    theirs.add(c3);
+    CardListModelDiffResult diffResult = ours.getDiff(theirs);
+
+    expect(diffResult.added, 0);
+    expect(diffResult.removed, 0);
+    expect(diffResult.changed, 0);
+  });
+
+  test('getDiff() with incoming-deletion', () {
+    CardListModel ours = CardListModel(
+        storage: MockStorage(),
+        storageKey: CardListModelStorageKeys.testStorage);
+
+    CardListModel theirs = CardListModel(
+        storage: MockStorage(),
+        storageKey: CardListModelStorageKeys.testStorage);
+
+    ours.add(CardModelFactory.random());
+    ours.add(CardModelFactory.random());
+    ours.add(CardModelFactory.random());
+
+    CardListModelDiffResult diffResult = ours.getDiff(theirs);
+
+    expect(diffResult.added, 0);
+    expect(diffResult.removed, 3);
+    expect(diffResult.changed, 0);
+  });
+
+  test('getDiff() with incoming-addition', () {
+    CardListModel ours = CardListModel(
+        storage: MockStorage(),
+        storageKey: CardListModelStorageKeys.testStorage);
+
+    CardListModel theirs = CardListModel(
+        storage: MockStorage(),
+        storageKey: CardListModelStorageKeys.testStorage);
+
+    theirs.add(CardModelFactory.random());
+    theirs.add(CardModelFactory.random());
+    theirs.add(CardModelFactory.random());
+
+    CardListModelDiffResult diffResult = ours.getDiff(theirs);
+
+    expect(diffResult.added, 3);
+    expect(diffResult.removed, 0);
+    expect(diffResult.changed, 0);
+  });
+
+  test('getDiff() with incoming-change', () {
+    CardListModel ours = CardListModel(
+        storage: MockStorage(),
+        storageKey: CardListModelStorageKeys.testStorage);
+
+    CardListModel theirs = CardListModel(
+        storage: MockStorage(),
+        storageKey: CardListModelStorageKeys.testStorage);
+
+    CardModel c1 = CardModelFactory.random();
+    ours.add(c1);
+    CardModel c2 = CardModelFactory.fromJson(c1.toJson());
+    c2.setCVV("200");
+    theirs.add(c2);
+
+    c1 = CardModelFactory.random();
+    c2 = CardModelFactory.fromJson(c1.toJson());
+    ours.add(c2);
+    c1.setOwnerName("meow");
+    theirs.add(c1);
+
+    CardListModelDiffResult diffResult = ours.getDiff(theirs);
+
+    expect(diffResult.added, 0);
+    expect(diffResult.removed, 0);
+    expect(diffResult.changed, 2);
+  });
 }
