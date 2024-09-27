@@ -45,7 +45,7 @@ curl -L \
   --data-binary "@$PROD_APK_PATH"
 
 
-echo "[INFO] Uploading Prod APK"
+echo "[INFO] Uploading Dev APK"
 UPLOAD_URL="https://uploads.github.com/repos/toxdes/cards/releases/$RELEASE_ID/assets?name=$RELEASE_NAME-dev.apk&label=$RELEASE_NAME-dev.apk"
 curl -L \
   -X POST \
