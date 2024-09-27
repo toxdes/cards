@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:cards/core/db/model.dart';
 import 'package:cards/core/diff/diff_result.dart';
 import 'package:cards/core/encoder/encoder.dart';
 import 'package:cards/core/storage/storage.dart';
@@ -54,12 +55,14 @@ class CardListModelDiffResult extends DiffResult {
   }
 }
 
-class CardListModel {
+class CardListModel extends Model {
+  CardListModel({required this.storageKey, required this.storage})
+      : super(schemaVersion: 1);
+
   final List<CardModel> _cards = [];
   final Set<String> _cardNumbers = {};
   final String storageKey;
   final Storage storage;
-  CardListModel({required this.storageKey, required this.storage});
   // should encoder be private?
   final Encoder encoder = CardListModelJsonEncoder();
   int length = 0;

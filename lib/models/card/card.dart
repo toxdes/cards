@@ -1,8 +1,13 @@
+import 'package:cards/core/db/model.dart';
 import 'package:cards/models/card/card_json_encoder.dart';
 import 'package:cards/utils/card_utils.dart';
 import 'package:cards/utils/string_utils.dart';
 
-class CardModel {
+class CardModel extends Model {
+  CardModel() : super(schemaVersion: 2);
+
+  CardModel.fromSchema(int schemaVersion) : super(schemaVersion: schemaVersion);
+
   CardType type = CardType.unknown;
   CardProvider provider = CardProvider.unknown;
   CardModelJsonEncoder encoder = CardModelJsonEncoder();
@@ -13,6 +18,29 @@ class CardModel {
   String? ownerName;
   String _numberView = "";
   String _expiryView = "";
+  String? billingCycle;
+
+  DateTime? createdAt;
+  DateTime? updatedAt;
+
+  DateTime? getCreatedAt() => createdAt;
+  DateTime? getUpdatedAt() => updatedAt;
+
+  void setUpdatedAt(DateTime? updatedAt) {
+    this.updatedAt = updatedAt;
+  }
+
+  void setCreatedAt(DateTime? createdAt) {
+    this.createdAt = createdAt;
+  }
+
+  void setBillingCycle(String? billingCycle) {
+    this.billingCycle = billingCycle;
+  }
+
+  String? getBillingCycle() {
+    return billingCycle;
+  }
 
   void setCardType(CardType type) {
     this.type = type;

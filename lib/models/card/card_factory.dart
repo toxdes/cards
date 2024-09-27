@@ -50,7 +50,7 @@ class CardModelFactory {
       "IndianOil fuel",
     ];
     String title = _pickRandom<String>(titles);
-
+    String billingCycle = "15";
     return CardModelFactory.blank()
       ..setTitle(title)
       ..setNumber(number)
@@ -58,11 +58,32 @@ class CardModelFactory {
       ..setExpiry(expiry)
       ..setOwnerName(ownerName)
       ..setCardType(cardType)
-      ..setProvider(provider);
+      ..setProvider(provider)
+      ..setBillingCycle(billingCycle)
+      ..setCreatedAt(DateTime.now())
+      ..setUpdatedAt(DateTime.now());
   }
 
   static CardModel fromJson(String cardJson) {
     CardModelJsonEncoder encoder = CardModelJsonEncoder();
     return encoder.decode(cardJson);
+  }
+
+  static CardModel fromSchema(int schemaVersion) {
+    return CardModel.fromSchema(schemaVersion);
+  }
+
+  static CardModel copyFrom(CardModel other, int schemaVersion) {
+    return CardModelFactory.fromSchema(schemaVersion)
+      ..setTitle(other.getTitle())
+      ..setNumber(other.getNumber())
+      ..setCVV(other.getCVV())
+      ..setExpiry(other.getExpiry())
+      ..setOwnerName(other.getCVV())
+      ..setCardType(other.getCardType())
+      ..setProvider(other.getProvider())
+      ..setBillingCycle(other.getBillingCycle())
+      ..setCreatedAt(other.getCreatedAt())
+      ..setUpdatedAt(other.getUpdatedAt());
   }
 }
