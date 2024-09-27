@@ -15,7 +15,8 @@ echo "[INFO] Building $RELEASE_NAME.apk"
 flutter clean
 flutter pub get
 dart fix --apply
-flutter build apk --release
+flutter build apk --flavor dev
+flutter build apk --flavor prod
 PROD_APK_PATH="./build/app/outputs/flutter-apk/app-prod-release.apk"
 DEV_APK_PATH="./build/app/outputs/flutter-apk/app-dev-release.apk"
 
