@@ -32,6 +32,23 @@ android {
     namespace "com.toxdes.cards"
     compileSdkVersion flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
+    flavorDimensions "dev"
+    
+    productFlavors {
+
+        dev {
+            dimension "dev"
+            resValue "string", "app_name", "[DEV] Cards"
+            applicationIdSuffix ".dev"
+        }
+
+         prod {
+            dimension "dev"
+            resValue "string", "app_name", "Cards"
+            applicationIdSuffix null
+        }
+        
+    }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8

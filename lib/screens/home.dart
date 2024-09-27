@@ -7,6 +7,7 @@ import 'package:cards/config/colors.dart';
 import 'package:cards/config/fonts.dart';
 import 'package:cards/models/card/card.dart';
 import 'package:cards/models/cardlist/cardlist.dart';
+import 'package:cards/services/flavor_service.dart';
 import 'package:cards/services/sentry_service.dart';
 import 'package:cards/services/toast_service.dart';
 import 'package:cards/utils/secure_storage.dart';
@@ -183,6 +184,17 @@ class _HomeState extends State<Home> {
                   });
                 },
                 onAddNewCard: addCard,
+              ),
+              Positioned(
+                bottom: 4,
+                right: 4,
+                child: Text("${FlavorService.getFlavor().getLabel()}",
+                    textAlign: TextAlign.left,
+                    style: const TextStyle(
+                        fontFamily: Fonts.rubik,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: ThemeColors.yellow)),
               ),
             ])),
       ),
