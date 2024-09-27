@@ -46,7 +46,7 @@ curl -L \
 
 
 echo "[INFO] Uploading Prod APK"
-UPLOAD_URL="https://uploads.github.com/repos/toxdes/cards/releases/$RELEASE_ID/assets?name=$RELEASE_NAME-dev.apk&label=$RELEASE_NAME.apk"
+UPLOAD_URL="https://uploads.github.com/repos/toxdes/cards/releases/$RELEASE_ID/assets?name=$RELEASE_NAME-dev.apk&label=$RELEASE_NAME-dev.apk"
 curl -L \
   -X POST \
   -H "Accept: application/vnd.github+json" \
