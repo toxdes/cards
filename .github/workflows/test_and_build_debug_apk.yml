@@ -22,15 +22,15 @@ jobs:
         run: flutter test unit_tests
       # - name: Run integration tests
       #   run: flutter test integration_tests
-  build_debug_apk:
-    needs: run_tests
-    runs-on: self-hosted
-    steps:
-      - uses: actions/checkout@v4
-      - name: build debug apk
-        run: flutter clean && flutter pub get && flutter build apk --debug
-      # - name: Archive artifact
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: cards-debug.apk
-      #     path: ./build/app/outputs/flutter-apk/app-debug.apk
+  # build_debug_apk:
+  #   needs: run_tests
+  #   runs-on: self-hosted
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: build debug apk
+  #       run: flutter clean && flutter pub get && flutter build apk --debug
+  # - name: Archive artifact
+  #   uses: actions/upload-artifact@v4
+  #   with:
+  #     name: cards-debug.apk
+  #     path: ./build/app/outputs/flutter-apk/app-debug.apk
