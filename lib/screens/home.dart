@@ -12,6 +12,7 @@ import 'package:cards/services/sentry_service.dart';
 import 'package:cards/services/toast_service.dart';
 import 'package:cards/utils/secure_storage.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Text, IconButton;
 import 'package:flutter_animate/flutter_animate.dart';
 
@@ -90,7 +91,7 @@ class _HomeState extends State<Home> {
       child: Center(
         child: Container(
             decoration: const BoxDecoration(color: ThemeColors.gray1),
-            constraints: const BoxConstraints(maxWidth: 800),
+            constraints: const BoxConstraints(maxWidth: 600),
             child: Stack(textDirection: TextDirection.ltr, children: [
               Container(
                   padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
@@ -111,19 +112,21 @@ class _HomeState extends State<Home> {
                                         fontSize: 24,
                                         fontWeight: FontWeight.w600,
                                         color: ThemeColors.white2)),
-                                IconButton(
-                                    onTap: () {
-                                      Navigator.push(
-                                          context,
-                                          CupertinoDialogRoute(
-                                              context: context,
-                                              builder: (context) =>
-                                                  const BackupMainScreen()));
-                                    },
-                                    size: 32,
-                                    color: ThemeColors.blue,
-                                    buttonType: ButtonType.primary,
-                                    iconData: Icons.share_rounded)
+                                kIsWeb
+                                    ? const SizedBox.shrink()
+                                    : IconButton(
+                                        onTap: () {
+                                          Navigator.push(
+                                              context,
+                                              CupertinoDialogRoute(
+                                                  context: context,
+                                                  builder: (context) =>
+                                                      const BackupMainScreen()));
+                                        },
+                                        size: 32,
+                                        color: ThemeColors.blue,
+                                        buttonType: ButtonType.primary,
+                                        iconData: Icons.share_rounded)
                               ]),
                           const SizedBox(height: 12),
                           Expanded(

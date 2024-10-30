@@ -54,6 +54,8 @@ class _CardViewState extends State<CardView> {
                   // alignment: Alignment.center,
                   child: Container(
                 height: 140,
+                width: 320,
+                constraints: const BoxConstraints(maxWidth: 400),
                 decoration: BoxDecoration(
                     color: ThemeColors.gray3,
                     border: Border.all(color: ThemeColors.white3),

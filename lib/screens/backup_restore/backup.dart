@@ -241,7 +241,7 @@ class _BackupScreenState extends State<BackupScreen> {
     return SafeArea(
         child: Container(
             decoration: const BoxDecoration(color: ThemeColors.gray1),
-            constraints: const BoxConstraints(maxWidth: 800),
+            constraints: const BoxConstraints(maxWidth: 600),
             padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
             child: SingleChildScrollView(
               scrollDirection: Axis.vertical,
