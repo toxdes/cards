@@ -1,0 +1,38 @@
+display_name: Cards
+package_name: cards
+
+maintainer:
+  name: Vaibhav Mali
+  email: malivp3494@gmail.com
+
+priority: optional
+
+section: x11
+
+installed_size: 15700
+
+dependencies:
+  - libappindicator3-1 | libaytana-appindicator3-1
+  - libsecret-1-0
+  - libnotify-bin
+  - libjsoncpp25
+  - xdg-user-dirs
+
+essential: false
+
+icon: linux/icons/icon256.png
+
+postuninstall_scripts:
+  - echo "Sorry to see you go."
+
+keywords:
+  - secure wallet
+  - credit-cards wallet
+
+generic_name: Cards wallet app
+
+categories:
+  - Productivity
+  - Utility
+
+startup_notify: true
