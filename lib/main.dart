@@ -1,3 +1,4 @@
+import 'package:cards/components/shared/toast.dart';
 import 'package:cards/config/colors.dart';
 import 'package:cards/screens/home.dart';
 import 'package:cards/services/backup_service.dart';
@@ -8,6 +9,7 @@ import 'package:cards/utils/crypto/crypto_utils.dart';
 import 'package:flutter/material.dart';
 
 Widget app = MaterialApp(
+  navigatorKey: ToastManager().navigatorKey,
   home: const Scaffold(
     body: Home(),
     backgroundColor: ThemeColors.gray1,
