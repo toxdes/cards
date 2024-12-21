@@ -3,7 +3,6 @@ import 'package:cards/components/shared/button.dart';
 import 'package:cards/config/colors.dart';
 import 'package:cards/config/fonts.dart';
 import 'package:cards/models/card/card.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
@@ -64,6 +63,7 @@ class _AddNewFormModalState extends State<AddNewCardModal> {
                                       fontWeight: FontWeight.w600,
                                       color: ThemeColors.white2)),
                               Button(
+                                color: ThemeColors.red,
                                 text: "Close",
                                 onTap: widget.onClose,
                                 buttonType: ButtonType.ghost,

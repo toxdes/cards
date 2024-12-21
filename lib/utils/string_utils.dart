@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
+
 class StringUtils {
   static bool isWhitespace(String s) {
     return s == ' ' || s == '\t' || s == '\n';
@@ -27,5 +30,31 @@ class StringUtils {
 
   static String removeAll(String input, String pat) {
     return input.replaceAll(pat, '');
+  }
+
+  static Uint8List toBytes(String input) {
+    return Uint8List.fromList(utf8.encode(input));
+  }
+
+  static String fromBytes(Uint8List bytes) {
+    return utf8.decode(bytes, allowMalformed: true);
+  }
+
+  static String printableBytes(Uint8List list) {
+    StringBuffer buf = StringBuffer();
+    buf.write("Bytes: ");
+    buf.write("${list.toList()}");
+    return buf.toString();
+  }
+
+  static formatKey(String key, String separator) {
+    StringBuffer buf = StringBuffer();
+    for (int i = 0; i < key.length; ++i) {
+      if (i != 0 && i != key.length && i % 4 == 0) {
+        buf.write(separator);
+      }
+      buf.write(key[i]);
+    }
+    return buf.toString();
   }
 }

@@ -54,6 +54,8 @@ class _CardViewState extends State<CardView> {
                   // alignment: Alignment.center,
                   child: Container(
                 height: 140,
+                width: 320,
+                constraints: const BoxConstraints(maxWidth: 400),
                 decoration: BoxDecoration(
                     color: ThemeColors.gray3,
                     border: Border.all(color: ThemeColors.white3),
@@ -72,7 +74,8 @@ class _CardViewState extends State<CardView> {
                     const SizedBox(height: 24),
                     Row(mainAxisAlignment: MainAxisAlignment.end, children: [
                       Button(
-                          buttonType: ButtonType.primary,
+                          color: ThemeColors.blue,
+                          buttonType: ButtonType.ghost,
                           text: "No",
                           height: 36,
                           onTap: () {
@@ -81,7 +84,8 @@ class _CardViewState extends State<CardView> {
                           }),
                       const SizedBox(width: 12),
                       Button(
-                          buttonType: ButtonType.primary,
+                          color: ThemeColors.red2,
+                          buttonType: ButtonType.ghost,
                           text: "Yes",
                           height: 36,
                           onTap: () {

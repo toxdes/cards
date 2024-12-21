@@ -134,6 +134,7 @@ class _AddNewCardFormState extends State<AddNewCardForm> {
                   ),
                   const SizedBox(height: 16),
                   Button(
+                      color: ThemeColors.blue,
                       onTap: () {
                         if (_isFormValid) {
                           CardModel card = CardModelFactory.random()

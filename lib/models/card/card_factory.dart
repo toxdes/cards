@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:cards/models/card/card.dart';
-import 'package:cards/utils/card_utils.dart';
+import 'package:cards/models/card/card_json_encoder.dart';
 
 class CardModelFactory {
   static final Random rnd = Random();
@@ -50,7 +50,7 @@ class CardModelFactory {
       "IndianOil fuel",
     ];
     String title = _pickRandom<String>(titles);
-
+    String billingCycle = "15";
     return CardModelFactory.blank()
       ..setTitle(title)
       ..setNumber(number)
@@ -58,17 +58,32 @@ class CardModelFactory {
       ..setExpiry(expiry)
       ..setOwnerName(ownerName)
       ..setCardType(cardType)
-      ..setProvider(provider);
+      ..setProvider(provider)
+      ..setBillingCycle(billingCycle)
+      ..setCreatedAt(DateTime.now())
+      ..setUpdatedAt(DateTime.now());
   }
 
-  static CardModel fromJson(Map<String, dynamic> record) {
-    CardModel card = CardModelFactory.blank();
-    return card
-      ..setNumber(record['number'] as String)
-      ..setCVV(record['cvv'] as String)
-      ..setExpiry(record['expiry'] as String)
-      ..setCardType(CardUtils.getCardTypeFromString(record['type'] as String))
-      ..setTitle(record['title'] as String)
-      ..setOwnerName(record['ownerName'] as String);
+  static CardModel fromJson(String cardJson) {
+    CardModelJsonEncoder encoder = CardModelJsonEncoder();
+    return encoder.decode(cardJson);
+  }
+
+  static CardModel fromSchema(int schemaVersion) {
+    return CardModel.fromSchema(schemaVersion);
+  }
+
+  static CardModel copyFrom(CardModel other, int schemaVersion) {
+    return CardModelFactory.fromSchema(schemaVersion)
+      ..setTitle(other.getTitle())
+      ..setNumber(other.getNumber())
+      ..setCVV(other.getCVV())
+      ..setExpiry(other.getExpiry())
+      ..setOwnerName(other.getCVV())
+      ..setCardType(other.getCardType())
+      ..setProvider(other.getProvider())
+      ..setBillingCycle(other.getBillingCycle())
+      ..setCreatedAt(other.getCreatedAt())
+      ..setUpdatedAt(other.getUpdatedAt());
   }
 }
