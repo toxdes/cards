@@ -10,7 +10,6 @@ import 'package:cards/models/cardlist/cardlist.dart';
 import 'package:cards/services/flavor_service.dart';
 import 'package:cards/services/sentry_service.dart';
 import 'package:cards/services/toast_service.dart';
-import 'package:cards/utils/secure_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Text, IconButton;
@@ -23,10 +22,15 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  CardListModel _cards = CardListModel(
-      storageKey: CardListModelStorageKeys.mainStorage,
-      storage: const SecureStorage());
+  CardListModel _cards = CardListModel.the();
   bool _addNewCardFormVisible = false;
+
+  void onCardListModelUpdate(CardListModel newModel) {
+    setState(() {
+      _cards = newModel;
+    });
+  }
+
   void addCard(CardModel c) {
     setState(() {
       try {
@@ -69,20 +73,13 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     // _cards.clearStorage();
-    _read();
+    _readFromStorage();
+    _cards.setUpdateListener(onCardListModelUpdate);
     super.initState();
   }
 
-  void _read() async {
-    CardListModel existingCards = await CardListModel(
-            storageKey: CardListModelStorageKeys.mainStorage,
-            storage: const SecureStorage())
-        .readFromStorage();
-    if (existingCards.length != 0) {
-      setState(() {
-        _cards = existingCards;
-      });
-    }
+  Future<void> _readFromStorage() async {
+    await _cards.readFromStorage();
   }
 
   @override

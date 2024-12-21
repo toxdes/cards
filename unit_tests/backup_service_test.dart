@@ -207,4 +207,51 @@ void main() {
             e is BackupServiceException &&
             e.errorCode == BackupServiceErrorCodes.incorrectCreds)));
   });
+
+  test('actual data', () async {
+    await CryptoUtils.init();
+    await BackupService.init();
+    String key = await BackupService.generateKey();
+    String salt = await BackupService.generateSalt();
+
+    String secretInput = """ [{
+        "schemaVersion":"2",
+        "title": "asd",
+        "number": "2412123223123342",
+        "provider": "Unknown",
+        "cvv": "203",
+        "type": "Unknown",
+        "expiry": "0892",
+        "ownerName": "VA",
+        "createdAt": "1734754654021640",
+        "updatedAt": "1734754654021649",
+        "billingCycle": "15"
+}
+     ,{
+   "schemaVersion":"2",
+   "title": "Apay",
+   "number": "4123324343434334",
+   "provider": "VISA",
+   "cvv": "509",
+   "type": "Unknown",
+   "expiry": "1124",
+   "ownerName": "VAIBHAV",
+   "createdAt": "1734750063860397",
+   "updatedAt": "1734750063860512",
+   "billingCycle": "15"
+ }
+  ]
+""";
+    Uint8List secretInputBytes = StringUtils.toBytes(secretInput);
+    Uint8List encrypted = await BackupService.encrypt(
+        key: key, data: StringUtils.toBytes(secretInput), salt: salt);
+    Uint8List decrypted =
+        await BackupService.decrypt(key: key, data: encrypted, salt: salt);
+    assert(secretInputBytes.length == decrypted.length);
+    for (int i = 0; i < secretInputBytes.length; ++i) {
+      assert(secretInputBytes[i] == decrypted[i]);
+    }
+    String output = StringUtils.fromBytes(decrypted);
+    assert(output == secretInput);
+  });
 }

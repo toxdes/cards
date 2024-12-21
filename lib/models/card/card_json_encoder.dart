@@ -53,9 +53,9 @@ class CardModelJsonEncoder implements Encoder<CardModel, String> {
   "type": "${c.getCardTypeView()}",
   "expiry": "${c.expiry}",
   "ownerName": "${c.ownerName}",
-  "createdAt": ${c.createdAt == null ? null : '"${c.createdAt!.toUtc().microsecondsSinceEpoch}"'},
-  "updatedAt": ${c.updatedAt == null ? null : '"${c.updatedAt!.toUtc().microsecondsSinceEpoch}"'},
-  "billingCycle": "${c.getBillingCycle() == null ? null : "${c.getBillingCycle()}"}"
+  "createdAt": ${c.createdAt == null ? 'null' : '"${c.createdAt!.toUtc().microsecondsSinceEpoch}"'},
+  "updatedAt": ${c.updatedAt == null ? 'null' : '"${c.updatedAt!.toUtc().microsecondsSinceEpoch}"'},
+  "billingCycle": "${c.getBillingCycle() == null ? 'null' : "${c.getBillingCycle()}"}"
 }
     """;
   }

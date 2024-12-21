@@ -11,7 +11,6 @@ import 'package:cards/models/cardlist/cardlist.dart';
 import 'package:cards/services/backup_service.dart';
 import 'package:cards/services/toast_service.dart';
 import 'package:cards/utils/file_utils.dart';
-import 'package:cards/utils/secure_storage.dart';
 import 'package:cards/utils/string_utils.dart';
 import 'package:flutter/material.dart' hide Step, IconButton;
 import 'package:cards/components/shared/icon_button.dart';
@@ -120,12 +119,8 @@ class _BackupScreenState extends State<BackupScreen> {
   }
 
   void generateBackup(int stepId) async {
-    CardListModel cards = CardListModel(
-        storageKey: CardListModelStorageKeys.mainStorage,
-        storage: const SecureStorage());
+    CardListModel cards = CardListModel.the();
     await Future.delayed(const Duration(milliseconds: 2000));
-
-    await cards.readFromStorage();
     // generate backup
     Uint8List encrypted = await BackupService.encrypt(
         key: _key, data: StringUtils.toBytes(cards.toJson()), salt: _secret);
@@ -178,10 +173,15 @@ class _BackupScreenState extends State<BackupScreen> {
       if (downloadsDir == null) {
         throw UnsupportedError("");
       }
-      downloadsDir = await downloadsDir.create();
+      downloadsDir = await downloadsDir.create(recursive: true);
       String fileName = FileUtils.getFileName(backupFile!);
       File file = File('${downloadsDir.path}/$fileName');
-      await file.writeAsBytes(backupFile!.readAsBytesSync());
+      if (file.existsSync()) {
+        await file.delete();
+        file = File('${downloadsDir.path}/$fileName');
+      }
+      Uint8List content = backupFile!.readAsBytesSync();
+      await file.writeAsBytes(content, mode: FileMode.writeOnly);
       ToastService.show(
           message: "Saved to downloads", status: ToastStatus.success);
     } catch (e) {

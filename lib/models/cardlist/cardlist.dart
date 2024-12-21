@@ -6,6 +6,7 @@ import 'package:cards/core/encoder/encoder.dart';
 import 'package:cards/core/storage/storage.dart';
 import 'package:cards/models/card/card.dart';
 import 'package:cards/models/cardlist/cardlist_json_encoder.dart';
+import 'package:cards/utils/secure_storage.dart';
 
 class CLMErrorCodes {
   static const int notUnique = 0x100;
@@ -56,16 +57,33 @@ class CardListModelDiffResult extends DiffResult {
 }
 
 class CardListModel extends Model {
-  CardListModel({required this.storageKey, required this.storage})
+  CardListModel(
+      {required this.storageKey, required this.storage, this.onUpdate})
       : super(schemaVersion: 1);
 
   final List<CardModel> _cards = [];
   final Set<String> _cardNumbers = {};
   final String storageKey;
   final Storage storage;
+  Function? onUpdate;
   // should encoder be private?
   final Encoder encoder = CardListModelJsonEncoder();
   int length = 0;
+  static CardListModel? _instance;
+
+  static CardListModel the() {
+    _instance ??= CardListModel(
+        storageKey: CardListModelStorageKeys.mainStorage,
+        storage: const SecureStorage());
+    return _instance!;
+  }
+
+  static void setThe(CardListModel newModel) {
+    _instance = newModel;
+    if (_instance!.onUpdate != null) {
+      _instance!.onUpdate!();
+    }
+  }
 
   void add(CardModel c) {
     if (_cardNumbers.contains(c.getNumber())) {
@@ -75,6 +93,9 @@ class CardListModel extends Model {
     _cards.add(c);
     _cardNumbers.add(c.getNumber());
     _updateLength();
+    if (onUpdate != null) {
+      onUpdate!(this);
+    }
   }
 
   void remove(CardModel c, {bool sync = false}) {
@@ -85,6 +106,13 @@ class CardListModel extends Model {
     _cardNumbers.remove(c.getNumber());
     _cards.remove(c);
     _updateLength();
+    if (onUpdate != null) {
+      onUpdate!(this);
+    }
+  }
+
+  void setUpdateListener(Function onUpdate) {
+    this.onUpdate = onUpdate;
   }
 
   UnmodifiableListView<CardModel> getAll() {
@@ -118,6 +146,9 @@ class CardListModel extends Model {
     });
 
     _updateLength();
+    if (onUpdate != null) {
+      onUpdate!(this);
+    }
     return this;
   }
 

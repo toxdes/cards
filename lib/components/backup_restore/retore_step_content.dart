@@ -13,9 +13,10 @@ import 'package:cards/models/cardlist/cardlist.dart';
 import 'package:cards/screens/backup_restore/restore.dart';
 import 'package:cards/services/backup_service.dart';
 import 'package:cards/utils/string_utils.dart';
+import 'package:flutter/material.dart' hide Step, IconButton;
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class RestoreStepContent extends StatefulWidget {
   final RestoreStep step;
@@ -246,7 +247,7 @@ class _RestoreStepContentState extends State<RestoreStepContent> {
                       text: "Continue",
                       onTap: () {
                         if (actionCallback != null) {
-                          actionCallback(RestoreCallbackAction.nextStep, step);
+                          actionCallback(RestoreCallbackAction.restore, step);
                         }
                       },
                       disabled: widget.selectedRestoreStrategy == null),
@@ -284,6 +285,52 @@ class _RestoreStepContentState extends State<RestoreStepContent> {
                         fontWeight: FontWeight.w400,
                         textBaseline: TextBaseline.alphabetic,
                       ))
+                ]));
+      }
+      if (step.desc == RestoreStepDesc.restoreCompleted) {
+        return Container(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Icon(Icons.check_circle,
+                          color: ThemeColors.green, size: 84)
+                      .animate()
+                      .fadeIn(duration: 800.ms, curve: Curves.easeOutExpo)
+                      .scaleXY(begin: 2, end: 1, duration: 800.ms)
+                      .rotate(
+                        begin: 0.1,
+                        end: 0,
+                        curve: Curves.easeOutExpo,
+                        duration: 800.ms,
+                        delay: 0.ms,
+                      )
+                      .shimmer(
+                        delay: 1400.ms,
+                        duration: 1400.ms,
+                      ),
+                  const SizedBox(height: 16),
+                  const Text("Restore successful",
+                      style: TextStyle(
+                        fontFamily: Fonts.rubik,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w600,
+                        decoration: TextDecoration.none,
+                        color: ThemeColors.white1,
+                      )),
+                  const SizedBox(height: 4),
+                  const Text(
+                      "Your backup has been restored. You can close this now.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: Fonts.rubik,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                        decoration: TextDecoration.none,
+                        color: ThemeColors.white2,
+                      )),
+                  const SizedBox(height: 24)
                 ]));
       }
     }

@@ -8,7 +8,7 @@ class AddMissingRestoreStrategy extends RestoreStrategy {
   AddMissingRestoreStrategy()
       : super(
             key: "add-missing",
-            label: "Add missing",
+            label: "Add missing (Recommended)",
             desc:
                 "Import new cards from the file, ignore deletions, ignore conflicts");
 

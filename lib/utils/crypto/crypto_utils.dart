@@ -31,13 +31,14 @@ class PadTextResult {
 class CryptoUtils {
   static Random? rnd;
   static bool _initialized = false;
-  static const _headerLength = 16;
   // TODO: explore CMAC instead of this
   static const String _magic = "enc453Xyz4512a4W";
+  static int _headerLength = _magic.length;
 
   static Future<void> init() async {
     rnd = Random.secure();
     _initialized = true;
+    _headerLength = StringUtils.toBytes(_magic).length;
   }
 
   static Uint8List getIV(Uint8List key) {
@@ -77,7 +78,7 @@ class CryptoUtils {
     aes.setIV(CryptoUtils.getIV(key));
     while (i < textWithHeader.length) {
       if (bp == AesCbc.blockSizeInBytes) {
-        encryptedText.add(aes.encryptBlock(key, block));
+        encryptedText.add(aes.encryptBlock(key, block, false));
         bp = 0;
         continue;
       }
@@ -92,7 +93,7 @@ class CryptoUtils {
       for (int i = 0; i < bp; ++i) {
         lastBlock[i] = block[i];
       }
-      encryptedText.add(aes.encryptBlock(key, lastBlock));
+      encryptedText.add(aes.encryptBlock(key, lastBlock, true));
       paddedBytesCount = aes.getLastPaddedBytesCount();
     }
     return AesResult(
@@ -104,6 +105,7 @@ class CryptoUtils {
       throw CryptoUtilsException(CryptoUtilsErrorCodes.notInitialized,
           "Tried to call aesDecrypt from CryptoUtils without calling init() first.");
     }
+
     BytesBuilder decryptedText = BytesBuilder();
     Uint8List block = Uint8List(AesCbc.blockSizeInBytes);
     int i = 0;
@@ -111,8 +113,8 @@ class CryptoUtils {
     AesCbc aes = AesCbc();
     aes.setIV(CryptoUtils.getIV(key));
     while (i < text.length) {
-      if (bp == block.length) {
-        decryptedText.add(aes.decryptBlock(key, block));
+      if (bp == AesCbc.blockSizeInBytes) {
+        decryptedText.add(aes.decryptBlock(key, block, false).toList());
         bp = 0;
         continue;
       }
@@ -127,7 +129,7 @@ class CryptoUtils {
       for (int i = 0; i < bp; ++i) {
         lastBlock[i] = block[i];
       }
-      decryptedText.add(aes.decryptBlock(key, lastBlock));
+      decryptedText.add(aes.decryptBlock(key, lastBlock, true));
       paddedBytesCount = aes.getLastPaddedBytesCount();
     }
     Uint8List decrypted = decryptedText.toBytes();

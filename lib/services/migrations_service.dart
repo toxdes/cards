@@ -18,10 +18,7 @@ class MigrationsService {
     CardMigrationContext context = CardMigrationContext();
     context.addMigration(AddTimeStampsMigration(id: 1));
     context.addMigration(AddBillingCycleMigration(id: 2));
-    CardListModel cardListModel = CardListModel(
-        storageKey: CardListModelStorageKeys.mainStorage,
-        storage: const SecureStorage());
-    await cardListModel.readFromStorage();
+    CardListModel cardListModel = CardListModel.the();
     UnmodifiableListView<CardModel> cards = cardListModel.getAll();
     if (cards.isEmpty) return;
     if (CardModelFactory.blank().schemaVersion != cards[0].schemaVersion) {
@@ -37,7 +34,7 @@ class MigrationsService {
       for (int i = 0; i < newCards.length; ++i) {
         newCardListModel.add(newCards[i]);
       }
-      await newCardListModel.save();
+      CardListModel.setThe(newCardListModel);
       ToastService.show(message: "DB updated", status: ToastStatus.success);
     }
   }

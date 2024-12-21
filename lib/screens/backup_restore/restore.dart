@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 
 import 'package:cards/components/backup_restore/restore_strategies/add_missing.dart';
-import 'package:cards/components/backup_restore/restore_strategies/auto.dart';
 import 'package:cards/components/backup_restore/restore_strategies/do_nothing.dart';
 import 'package:cards/components/backup_restore/restore_strategies/replace_entirely.dart';
 import 'package:cards/components/backup_restore/retore_step_content.dart';
@@ -17,7 +16,6 @@ import 'package:cards/models/cardlist/cardlist_json_encoder.dart';
 import 'package:cards/services/backup_service.dart';
 import 'package:cards/services/file_service.dart';
 import 'package:cards/services/toast_service.dart';
-import 'package:cards/utils/secure_storage.dart';
 import 'package:cards/utils/string_utils.dart';
 import 'package:flutter/material.dart' hide IconButton, Step;
 import 'package:cards/components/shared/icon_button.dart';
@@ -27,7 +25,8 @@ enum RestoreStepDesc {
   chooseBackupFile,
   enterCreds,
   chooseRestoreStrategy,
-  restore
+  restore,
+  restoreCompleted
 }
 
 class RestoreStep extends Step {
@@ -40,7 +39,7 @@ class RestoreStep extends Step {
       required this.desc});
 }
 
-enum RestoreCallbackAction { chooseBackupFile, nextStep }
+enum RestoreCallbackAction { chooseBackupFile, nextStep, restore }
 
 class RestoreScreen extends StatefulWidget {
   const RestoreScreen({super.key});
@@ -52,6 +51,7 @@ class _RestoreScreenState extends State<RestoreScreen> {
   final List<RestoreStep> _steps = <RestoreStep>[];
   XFile? _backupFile;
   CardListModelDiffResult? _diffResult;
+  CardListModel? _decryptedCards;
   final List<RestoreStrategy> _restoreStrategyOptions = [];
   RestoreStrategyContext restoreStrategyContext = RestoreStrategyContext();
 
@@ -72,8 +72,12 @@ class _RestoreScreenState extends State<RestoreScreen> {
         id: 3));
     _steps.add(
         RestoreStep(desc: RestoreStepDesc.restore, title: "Restore", id: 4));
+    _steps.add(RestoreStep(
+        desc: RestoreStepDesc.restoreCompleted,
+        title: "Restore Completed",
+        id: 5));
 
-    _restoreStrategyOptions.add(AutoRestoreStrategy());
+    // _restoreStrategyOptions.add(AutoRestoreStrategy());
 
     _restoreStrategyOptions.add(AddMissingRestoreStrategy());
 
@@ -130,23 +134,18 @@ class _RestoreScreenState extends State<RestoreScreen> {
     });
   }
 
-  void validateCredentials(String key, String secret) async {
+  Future<void> restoreBackup(stepId) async {
     try {
-      Uint8List fileContent = await _backupFile!.readAsBytes();
-      Uint8List decryptedBytes = await BackupService.decrypt(
-          key: key, data: fileContent, salt: secret);
-      String decrypted = StringUtils.fromBytes(decryptedBytes);
-      CardListModelJsonEncoder encoder = CardListModelJsonEncoder();
-      CardListModel existingCards = CardListModel(
-          storageKey: CardListModelStorageKeys.mainStorage,
-          storage: const SecureStorage());
-      await existingCards.readFromStorage();
-      CardListModel decodedCards = encoder.decode(decrypted);
-      ToastService.show(
-          message: "Decrypted successfully", status: ToastStatus.success);
-      setState(() {
-        _diffResult = existingCards.getDiff(decodedCards);
-      });
+      RestoreStrategy? restoreStrategy =
+          restoreStrategyContext.getRestoreStrategy();
+      if (restoreStrategy == null) return;
+      CardListModel ours = CardListModel.the();
+      if (_decryptedCards == null) {
+        throw Exception("Couldn't decrypt");
+      }
+      await restoreStrategy.restore(ours, _decryptedCards!);
+      await Future.delayed(const Duration(milliseconds: 1500));
+      nextStep(stepId);
     } catch (e) {
       String message = "Failed to decrypt ${_backupFile!.name}";
       if (e is BackupServiceException &&
@@ -162,7 +161,38 @@ class _RestoreScreenState extends State<RestoreScreen> {
     }
   }
 
-  void act(RestoreCallbackAction action, Step step) {
+  void validateCredentials(String key, String secret) async {
+    try {
+      Uint8List fileContent = await _backupFile!.readAsBytes();
+      Uint8List decryptedBytes = await BackupService.decrypt(
+          key: key, data: fileContent, salt: secret);
+      String decrypted = StringUtils.fromBytes(decryptedBytes);
+      CardListModelJsonEncoder encoder = CardListModelJsonEncoder();
+      CardListModel existingCards = CardListModel.the();
+      CardListModel decodedCards = encoder.decode(decrypted);
+      ToastService.show(
+          message: "Decrypted successfully", status: ToastStatus.success);
+      setState(() {
+        _diffResult = existingCards.getDiff(decodedCards);
+        _decryptedCards = decodedCards;
+      });
+    } catch (e) {
+      String message = "Failed to decrypt ${_backupFile!.name}";
+      if (e is BackupServiceException &&
+          e.errorCode == BackupServiceErrorCodes.invalidKey) {
+        message = "Cannot decrypt, credentials are invalid";
+      }
+      if (e is BackupServiceException &&
+          e.errorCode == BackupServiceErrorCodes.incorrectCreds) {
+        message = "Cannot decrypt, credentials are incorrect";
+      }
+      ToastService.show(message: message, status: ToastStatus.error);
+      ToastService.show(message: e.toString(), status: ToastStatus.error);
+      rethrow;
+    }
+  }
+
+  Future<void> act(RestoreCallbackAction action, Step step) async {
     switch (action) {
       case RestoreCallbackAction.chooseBackupFile:
         {
@@ -172,6 +202,13 @@ class _RestoreScreenState extends State<RestoreScreen> {
       case RestoreCallbackAction.nextStep:
         {
           nextStep(step.id);
+          return;
+        }
+      case RestoreCallbackAction.restore:
+        {
+          nextStep(step.id);
+          await restoreBackup(step.id);
+          nextStep(step.id + 1);
           return;
         }
     }

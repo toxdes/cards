@@ -25,13 +25,13 @@ class CardListModelJsonEncoder implements Encoder<CardListModel, String> {
   String encode(CardListModel input) {
     StringBuffer buf = StringBuffer();
     List<CardModel> cards = input.getAll();
+    buf.write('[');
     for (int i = 0; i < cards.length; ++i) {
       buf.write(cards[i].toJson());
       if (i != cards.length - 1) buf.write(',');
     }
+    buf.write(']');
     String items = buf.toString();
-    return """
-[$items]
-""";
+    return items;
   }
 }

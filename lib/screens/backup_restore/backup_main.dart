@@ -3,7 +3,6 @@ import 'package:cards/config/colors.dart';
 import 'package:cards/components/shared/icon_button.dart' as ui;
 import 'package:cards/config/fonts.dart';
 import 'package:cards/screens/backup_restore/backup.dart';
-import 'package:cards/screens/backup_restore/help.dart';
 import 'package:cards/screens/backup_restore/restore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -76,18 +75,6 @@ class _BackupScreenState extends State<BackupMainScreen> {
                       },
                       color: ThemeColors.blue,
                       text: "I already have a backup",
-                      buttonType: ButtonType.primary),
-                  const SizedBox(height: 24),
-                  Button(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            CupertinoDialogRoute(
-                                builder: (context) => const HelpScreen(),
-                                context: context));
-                      },
-                      color: ThemeColors.blue,
-                      text: "I have no idea",
                       buttonType: ButtonType.primary),
                 ]),
           ),

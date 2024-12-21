@@ -41,7 +41,7 @@ class AesCbc {
   AesCbc();
 
   /// encrypt a block of size 128 bits
-  Uint8List encryptBlock(Uint8List key, Uint8List text) {
+  Uint8List encryptBlock(Uint8List key, Uint8List text, bool isLastBlock) {
     if (!acceptedKeyLengths.contains(key.length * 8)) {
       throw AesCbcException(AesCbcErrorCodes.aesInvalidKeyLength,
           "Invalid key length ${key.length} for AES-CBC encryption. Accepted lengths are ${acceptedKeyLengths[0]}, ${acceptedKeyLengths[1]}, ${acceptedKeyLengths[2]} bits.");
@@ -58,23 +58,25 @@ class AesCbc {
       throw AesCbcException(AesCbcErrorCodes.aesInvalidTextLength,
           "Invalid text length ${text.length} for AES-CBC encryption. Accepted length is $blockSize.");
     }
-
-    PadTextResult paddedText = CryptoUtils.padText(text, blockSizeInBytes);
-    _paddedBytesCount = paddedText.paddedBytesCount;
-    if (paddedText.data.length != blockSizeInBytes) {
-      throw AesCbcException(AesCbcErrorCodes.aesIncorrectlyPaddedText,
-          "Incorrectly padded text length ${paddedText.data.length} for AES-CBC encryption. Accepted length is $blockSize.");
-    }
-
     final CBCBlockCipher cbc = CBCBlockCipher(AESEngine());
     final ParametersWithIV params = ParametersWithIV(KeyParameter(key), _iv!);
     cbc.init(true, params); // true -> encrypt
 
-    return cbc.process(paddedText.data);
+    if (isLastBlock) {
+      PadTextResult paddedText = CryptoUtils.padText(text, blockSizeInBytes);
+      _paddedBytesCount = paddedText.paddedBytesCount;
+      if (paddedText.data.length != blockSizeInBytes) {
+        throw AesCbcException(AesCbcErrorCodes.aesIncorrectlyPaddedText,
+            "Incorrectly padded text length ${paddedText.data.length} for AES-CBC encryption. Accepted length is $blockSize.");
+      }
+      return cbc.process(paddedText.data);
+    }
+
+    return cbc.process(text);
   }
 
   /// decrypt a block of size 128 bits
-  Uint8List decryptBlock(Uint8List key, Uint8List text) {
+  Uint8List decryptBlock(Uint8List key, Uint8List text, bool isLastBlock) {
     if (!acceptedKeyLengths.contains(key.length * 8)) {
       throw AesCbcException(AesCbcErrorCodes.aesInvalidKeyLength,
           "Invalid key length ${key.length} for AES-CBC encryption. Accepted lengths are ${acceptedKeyLengths[0]}, ${acceptedKeyLengths[1]}, ${acceptedKeyLengths[2]} bits.");
@@ -87,24 +89,22 @@ class AesCbc {
       throw AesCbcException(AesCbcErrorCodes.aesInvalidIVLength,
           "Invalid parameter IV length ${_iv!.length} for AES-CBC encryption. Accepted length is $blockSize.");
     }
-    PadTextResult paddedText = CryptoUtils.padText(text, blockSizeInBytes);
-    _paddedBytesCount = paddedText.paddedBytesCount;
-    if (paddedText.data.length != blockSizeInBytes) {
-      throw AesCbcException(AesCbcErrorCodes.aesIncorrectlyPaddedText,
-          "Incorrectly padded text length ${paddedText.data.length} for AES-CBC encryption. Accepted length is $blockSize.");
-    }
     final CBCBlockCipher cbc = CBCBlockCipher(AESEngine());
     final ParametersWithIV params = ParametersWithIV(KeyParameter(key), _iv!);
     cbc.init(false, params); // false -> decrypt
-    Uint8List result = cbc.process(paddedText.data);
-    // remove padding if exists
-    int padLength = result.length - result[result.length - 1];
-    if (padLength <= 0) return result;
-    BytesBuilder res = BytesBuilder();
-    for (int i = 0; i < padLength; ++i) {
-      res.addByte(result[i]);
+    Uint8List result = cbc.process(text);
+    if (isLastBlock) {
+      // remove padding if exists
+      int contentLength = result.length - result[result.length - 1];
+      if (contentLength <= 0) return result;
+      BytesBuilder res = BytesBuilder();
+      for (int i = 0; i < contentLength; ++i) {
+        res.addByte(result[i]);
+      }
+      return res.toBytes();
     }
-    return res.toBytes();
+
+    return result;
   }
 
   int getLastPaddedBytesCount() {
