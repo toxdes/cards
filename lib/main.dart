@@ -7,6 +7,7 @@ import 'package:cards/services/notification_service.dart';
 import 'package:cards/services/sentry_service.dart';
 import 'package:cards/utils/crypto/crypto_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:window_manager/window_manager.dart';
 
 Widget app = MaterialApp(
   navigatorKey: ToastManager().navigatorKey,
@@ -18,11 +19,23 @@ Widget app = MaterialApp(
 );
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await windowManager.ensureInitialized();
   await NotificationService().initialize();
   await CryptoUtils.init();
   await MigrationsService.runMigrations();
   // TODO: disable sentry until it can be made opt-in, also consider privacy implications
   // await SentryService.init();
   await BackupService.init();
+  WindowOptions windowOptions = const WindowOptions(
+    // size: Size(600, 600),
+    center: true,
+    backgroundColor: Colors.transparent,
+    skipTaskbar: false,
+    titleBarStyle: TitleBarStyle.normal,
+  );
+  windowManager.waitUntilReadyToShow(windowOptions, () async {
+    await windowManager.show();
+    await windowManager.focus();
+  });
   runApp(app);
 }

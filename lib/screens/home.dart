@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cards/screens/backup_restore/backup_main.dart';
 import 'package:cards/components/home/bottom_sheet.dart';
 import 'package:cards/components/shared/button.dart';
@@ -14,6 +16,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Text, IconButton;
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:tray_manager/tray_manager.dart';
+import 'package:window_manager/window_manager.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -21,7 +25,17 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
+var contextMenu = Menu(
+  items: [
+    MenuItem(
+      key: "show_window",
+      label: 'Show Cards',
+    ),
+    MenuItem(label: "Exit", key: 'exit')
+  ],
+);
+
+class _HomeState extends State<Home> with TrayListener, WindowListener {
   CardListModel _cards = CardListModel.the();
   bool _addNewCardFormVisible = false;
 
@@ -73,9 +87,42 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     // _cards.clearStorage();
+    trayManager.addListener(this);
+    windowManager.addListener(this);
+    windowManager.setPreventClose(true);
+    trayManager.setIcon(
+        Platform.isWindows ? 'assets/icon48.ico' : 'assets/icon48.png');
+    trayManager.setContextMenu(contextMenu);
     _readFromStorage();
     _cards.setUpdateListener(onCardListModelUpdate);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    trayManager.removeListener(this);
+    windowManager.removeListener(this);
+    super.dispose();
+  }
+
+  @override
+  void onWindowClose() async {
+    await windowManager.setSkipTaskbar(true);
+    await windowManager.hide();
+  }
+
+  @override
+  void onTrayIconMouseDown() {
+    trayManager.popUpContextMenu();
+  }
+
+  @override
+  void onTrayMenuItemClick(MenuItem menuItem) {
+    if (menuItem.key == 'show_window') {
+      windowManager.focus();
+    } else if (menuItem.key == 'exit') {
+      windowManager.destroy();
+    }
   }
 
   Future<void> _readFromStorage() async {
