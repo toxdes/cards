@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:cards/screens/backup_restore/backup_main.dart';
 import 'package:cards/components/home/bottom_sheet.dart';
@@ -10,6 +9,7 @@ import 'package:cards/config/fonts.dart';
 import 'package:cards/models/card/card.dart';
 import 'package:cards/models/cardlist/cardlist.dart';
 import 'package:cards/services/flavor_service.dart';
+import 'package:cards/services/platform_service.dart';
 import 'package:cards/services/sentry_service.dart';
 import 'package:cards/services/toast_service.dart';
 import 'package:flutter/cupertino.dart';
@@ -25,19 +25,21 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
-var contextMenu = Menu(
-  items: [
-    MenuItem(
-      key: "show_window",
-      label: 'Show Cards',
-    ),
-    MenuItem(label: "Exit", key: 'exit')
-  ],
-);
-
 class _HomeState extends State<Home> with TrayListener, WindowListener {
   CardListModel _cards = CardListModel.the();
   bool _addNewCardFormVisible = false;
+
+  Menu getContextMenuItems() {
+    return Menu(
+      items: [
+        MenuItem(
+          key: "show_window",
+          label: 'Show Cards',
+        ),
+        MenuItem(label: "Exit", key: 'exit')
+      ],
+    );
+  }
 
   void onCardListModelUpdate(CardListModel newModel) {
     setState(() {
@@ -87,12 +89,15 @@ class _HomeState extends State<Home> with TrayListener, WindowListener {
   @override
   void initState() {
     // _cards.clearStorage();
-    trayManager.addListener(this);
-    windowManager.addListener(this);
-    windowManager.setPreventClose(true);
-    trayManager.setIcon(
-        Platform.isWindows ? 'assets/icon48.ico' : 'assets/icon48.png');
-    trayManager.setContextMenu(contextMenu);
+    if (PlatformService.isDesktop()) {
+      trayManager.addListener(this);
+      windowManager.addListener(this);
+      windowManager.setPreventClose(true);
+      trayManager.setIcon(PlatformService.isWindows()
+          ? 'assets/icon48.ico'
+          : 'assets/icon48.png');
+      trayManager.setContextMenu(getContextMenuItems());
+    }
     _readFromStorage();
     _cards.setUpdateListener(onCardListModelUpdate);
     super.initState();

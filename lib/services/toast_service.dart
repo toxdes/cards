@@ -1,8 +1,7 @@
 import 'package:cards/components/shared/toast.dart';
 import 'package:cards/config/colors.dart';
-import 'package:flutter/foundation.dart';
+import 'package:cards/services/platform_service.dart';
 import 'package:fluttertoast/fluttertoast.dart' as ft;
-import 'dart:io';
 
 enum ToastStatus { success, info, error, warning, unknown }
 
@@ -20,7 +19,6 @@ class ToastService {
       case ToastStatus.info:
         return "";
       case ToastStatus.unknown:
-      default:
         return '';
     }
   }
@@ -29,7 +27,7 @@ class ToastService {
       {required String message,
       required ToastStatus status,
       ToastDuration duration = ToastDuration.long}) {
-    if (Platform.isAndroid || Platform.isIOS || kIsWeb) {
+    if (PlatformService.isPhone() || PlatformService.isWeb()) {
       ft.Fluttertoast.showToast(
         msg: "${_getStatusIcon(status)} $message",
         toastLength: duration == ToastDuration.short
