@@ -3,9 +3,12 @@ import 'package:cards/config/colors.dart';
 import 'package:cards/config/fonts.dart';
 import 'package:cards/models/card/card.dart';
 import 'package:cards/services/notification_service.dart';
+import 'package:cards/services/platform_service.dart';
 import 'package:cards/services/toast_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:tray_manager/tray_manager.dart';
+import 'package:window_manager/window_manager.dart';
 
 class CardView extends StatefulWidget {
   final CardModel card;
@@ -31,13 +34,17 @@ class _CardViewState extends State<CardView> {
     return GestureDetector(
       onTap: () {
         Clipboard.setData(ClipboardData(text: widget.card.getNumber()));
+        String notificationTitle = "Card details: ${widget.card.getTitle()}";
+        String notificationBody =
+            "Expiry: ${widget.card.getExpiryView()} | CVV: ${widget.card.getCVV()}\nCard number is copied to clipboard.";
+        if (PlatformService.isAndroid()) {
+          notificationBody =
+              "Expiry: <strong>${widget.card.getExpiryView()}</strong> | CVV: <strong>${widget.card.getCVV()}</strong><br/><i>Card number is copied to clipboard.</i>";
+        }
         ToastService.show(
             message: "Number copied to clipboard", status: ToastStatus.success);
-        NotificationService().showPersistentNotification(
-          title: "Card details: ${widget.card.getTitle()}",
-          body:
-              "Expiry: <strong>${widget.card.getExpiryView()}</strong> | CVV: <strong>${widget.card.getCVV()}</strong><br/><i>Card number is copied to clipboard.</i>",
-        );
+        NotificationService.showNotification(
+            title: notificationTitle, body: notificationBody);
       },
       onTapDown: (TapDownDetails _) {
         setActive(true);

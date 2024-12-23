@@ -21,7 +21,7 @@ Widget app = MaterialApp(
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await NotificationService().initialize();
+  await NotificationService.initialize();
   await CryptoUtils.init();
   await MigrationsService.runMigrations();
   // TODO: disable sentry until it can be made opt-in, also consider privacy implications
@@ -31,12 +31,12 @@ void main() async {
   if (PlatformService.isDesktop()) {
     await windowManager.ensureInitialized();
     WindowOptions windowOptions = const WindowOptions(
-      // size: Size(600, 600),
-      center: true,
-      backgroundColor: Colors.transparent,
-      skipTaskbar: false,
-      titleBarStyle: TitleBarStyle.normal,
-    );
+        size: Size(1200, 800),
+        center: true,
+        backgroundColor: Colors.transparent,
+        skipTaskbar: false,
+        titleBarStyle: TitleBarStyle.normal,
+        title: "Cards");
     windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.show();
       await windowManager.focus();

@@ -34,4 +34,8 @@ class PlatformService {
   static bool isWeb() {
     return kIsWeb;
   }
+
+  static bool isDarwin() {
+    return Platform.isIOS || Platform.isMacOS;
+  }
 }

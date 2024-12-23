@@ -1,4 +1,3 @@
-
 import 'package:cards/screens/backup_restore/backup_main.dart';
 import 'package:cards/components/home/bottom_sheet.dart';
 import 'package:cards/components/shared/button.dart';
@@ -122,11 +121,19 @@ class _HomeState extends State<Home> with TrayListener, WindowListener {
   }
 
   @override
-  void onTrayMenuItemClick(MenuItem menuItem) {
+  void onTrayIconRightMouseDown() {
+    trayManager.popUpContextMenu();
+  }
+
+  @override
+  void onTrayMenuItemClick(MenuItem menuItem) async {
     if (menuItem.key == 'show_window') {
-      windowManager.focus();
+      await windowManager.show();
+      await windowManager.focus();
     } else if (menuItem.key == 'exit') {
-      windowManager.destroy();
+      await windowManager.setClosable(true);
+      await windowManager.close();
+      await windowManager.destroy();
     }
   }
 

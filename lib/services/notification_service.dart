@@ -1,29 +1,25 @@
 import 'package:cards/config/colors.dart';
+import 'package:cards/services/platform_service.dart';
 import 'package:cards/services/toast_service.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:local_notifier/local_notifier.dart';
+import 'package:window_manager/window_manager.dart';
 
 class NotificationService {
-  static final NotificationService _notificationService =
-      NotificationService._internal();
-
-  FlutterLocalNotificationsPlugin? _notificationPlugin;
+  static FlutterLocalNotificationsPlugin? _notificationPlugin;
 
   static const String _channelId = 'cards_default';
   static const String _channelName = "Notifications for Cards";
   static const String _channelDesc = "Notifications for cards app";
-  int _notificationId = 1;
 
   // notification actions
   static const String _clearNotificationAction = "clear_notification";
 
-  factory NotificationService() {
-    return _notificationService;
-  }
-
-  NotificationService._internal();
-
-  Future<void> initialize() async {
+  static Future<void> initialize() async {
+    if (PlatformService.isWindows()) {
+      await localNotifier.setup(appName: "cards");
+    }
     _notificationPlugin = FlutterLocalNotificationsPlugin();
 
     // request permission for android 13+
@@ -38,7 +34,7 @@ class NotificationService {
 
     // iOS and MacOS specific settings
     DarwinInitializationSettings initializationSettingsDarwin =
-        DarwinInitializationSettings(
+        const DarwinInitializationSettings(
             onDidReceiveLocalNotification: _onDidReceiveLocalNotification);
 
     // linux specific settings
@@ -57,14 +53,14 @@ class NotificationService {
             _onDidReceiveBackgroundNotificationResponse);
   }
 
-  void _clearClipboardData() {
+  static void _clearClipboardData() {
     Clipboard.setData(const ClipboardData(text: ""));
     ToastService.show(
         message: "Card number cleared from clipboard",
         status: ToastStatus.unknown);
   }
 
-  void _onDidReceiveLocalNotification(
+  static void _onDidReceiveLocalNotification(
       int id, String? title, String? body, String? payload) {}
 
   static Future<void> _onDidReceiveBackgroundNotificationResponse(
@@ -72,7 +68,7 @@ class NotificationService {
     if (response.payload != null) {}
   }
 
-  Future<void> _onDidReceiveNotificationResponse(
+  static Future<void> _onDidReceiveNotificationResponse(
       NotificationResponse response) async {
     _notificationPlugin
         ?.resolvePlatformSpecificImplementation<
@@ -81,26 +77,33 @@ class NotificationService {
     _clearClipboardData();
   }
 
-  Future<void> showNotification(
+  static Future<void> showNotification(
       {required String title, String? body, String? payload}) async {
-    const AndroidNotificationDetails androidNotificationDetails =
-        AndroidNotificationDetails(_channelId, _channelName,
-            importance: Importance.max,
-            priority: Priority.high,
-            ongoing: true,
-            autoCancel: false,
-            color: ThemeColors.blue,
-            channelDescription: _channelDesc,
-            visibility: NotificationVisibility.private);
-    const NotificationDetails notificationDetails =
-        NotificationDetails(android: androidNotificationDetails);
-    await _notificationPlugin?.show(
-        _notificationId, title, body, notificationDetails,
-        payload: payload);
-    ++_notificationId;
+    if (PlatformService.isAndroid()) {
+      await showPersistentNotification(title: title, body: body ?? "");
+    } else if (PlatformService.isDarwin()) {
+      // TODO: handle notifications on macos and ios
+    } else if (PlatformService.isWindows()) {
+      LocalNotification notification = LocalNotification(
+          title: title,
+          body: body,
+          actions: [LocalNotificationAction(text: "Clear")]);
+      notification.onClickAction = (actionIndex) {
+        if (actionIndex == 0) {
+          _clearClipboardData();
+        }
+      };
+      notification.onClick = () async {
+        if (PlatformService.isDesktop()) {
+          await windowManager.show();
+          await windowManager.focus();
+        }
+      };
+      await notification.show();
+    }
   }
 
-  Future<void> showPersistentNotification(
+  static Future<void> showPersistentNotification(
       {required String title,
       String body = "",
       String? payload,
@@ -129,7 +132,7 @@ class NotificationService {
     await _notificationPlugin
         ?.resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>()
-        ?.startForegroundService(_notificationId, title, body,
+        ?.startForegroundService(1, title, body,
             notificationDetails: androidPlatformChannelSpecifics,
             payload: payload,
             foregroundServiceTypes: {
@@ -144,6 +147,5 @@ class NotificationService {
         _clearClipboardData();
       });
     }
-    _notificationId;
   }
 }
