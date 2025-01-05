@@ -7,8 +7,6 @@ import 'package:cards/services/platform_service.dart';
 import 'package:cards/services/toast_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:tray_manager/tray_manager.dart';
-import 'package:window_manager/window_manager.dart';
 
 class CardView extends StatefulWidget {
   final CardModel card;

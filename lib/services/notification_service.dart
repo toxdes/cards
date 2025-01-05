@@ -1,4 +1,3 @@
-import 'package:cards/config/colors.dart';
 import 'package:cards/services/platform_service.dart';
 import 'package:cards/services/toast_service.dart';
 import 'package:flutter/services.dart';

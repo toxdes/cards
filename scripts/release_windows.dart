@@ -7,26 +7,26 @@ void main() async {
 
   logger.cmd("Reading .env file");
   Map<String, String> env = await loadEnvFile('./.env');
-  String GH_TOKEN = env['GH_TOKEN'] ?? '';
-  if (GH_TOKEN == '') {
+  String ghToken = env['GH_TOKEN'] ?? '';
+  if (ghToken == '') {
     logger.error("GH Token is invalid");
     return;
   }
 
   logger.cmd("Getting app version from pubspec.yaml");
-  String APP_VERSION = await getVersionFromPubspec('./pubspec.yaml');
-  String cleanAppVersion = APP_VERSION.replaceAll(RegExp(r'\+'), '_');
-  String TAG_NAME = "internal-$cleanAppVersion";
+  String appVersion = await getVersionFromPubspec('./pubspec.yaml');
+  String cleanAppVersion = appVersion.replaceAll(RegExp(r'\+'), '_');
+  String tagName = "internal-$cleanAppVersion";
 
   logger.cmd("Getting latest release info");
   Map<String, String> customHeaders = {
     HttpHeaders.acceptHeader: 'application/vnd.github+json',
-    HttpHeaders.authorizationHeader: 'Bearer $GH_TOKEN',
+    HttpHeaders.authorizationHeader: 'Bearer $ghToken',
     HttpHeaders.userAgentHeader: 'cards-windows-release',
     'X-Github-Api-Version': '2022-11-28',
   };
   String releaseResJson = await sendGetRequest(
-      'https://api.github.com/repos/toxdes/cards/releases/tags/$TAG_NAME',
+      'https://api.github.com/repos/toxdes/cards/releases/tags/$tagName',
       customHeaders,
       logger);
   Map<String, dynamic> releaseRes = jsonDecode(releaseResJson);
@@ -59,7 +59,7 @@ void main() async {
 
   logger.cmd("Uploading exe to GH");
   String exeFilePath =
-      './dist/$APP_VERSION/cards-$APP_VERSION-windows-setup.exe';
+      './dist/$appVersion/cards-$appVersion-windows-setup.exe';
   String uploadUrl =
       'https://uploads.github.com/repos/toxdes/cards/releases/$releaseId/assets?name=cards-$cleanAppVersion-windows-setup.exe&label=cards-$cleanAppVersion-windows-setup.exe';
 
@@ -67,7 +67,7 @@ void main() async {
   Uint8List bytes = exeFile.readAsBytesSync();
   customHeaders = {
     HttpHeaders.acceptHeader: 'application/vnd.github+json',
-    HttpHeaders.authorizationHeader: 'Bearer $GH_TOKEN',
+    HttpHeaders.authorizationHeader: 'Bearer $ghToken',
     'X-Github-Api-Version': '2022-11-28',
     HttpHeaders.contentTypeHeader: "application/octet-stream",
     HttpHeaders.contentLengthHeader: "${bytes.length}"
