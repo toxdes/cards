@@ -200,18 +200,25 @@ void main() {
         storage: MockStorage(),
         storageKey: CardListModelStorageKeys.testStorage);
 
+    // add a random card to ours
     CardModel c1 = CardModelFactory.random();
     ours.add(c1);
+
+    // create a copy c2 of c1, with cvv changed, and add it to theirs
     CardModel c2 = CardModelFactory.fromJson(c1.toJson());
     c2.setCVV("200");
     theirs.add(c2);
 
-    c1 = CardModelFactory.random();
-    c2 = CardModelFactory.fromJson(c1.toJson());
-    ours.add(c2);
-    c1.setOwnerName("meow");
-    theirs.add(c1);
+    // add another random card c2 to theirs
+    c2 = CardModelFactory.random();
+    theirs.add(c2);
 
+    // create a copy c1 of c2, with ownerName changed, and add it to ours
+    c1 = CardModelFactory.fromJson(c2.toJson());
+    c1.setOwnerName("meow");
+    ours.add(c1);
+
+    // ours should have 2 cards, theirs should have 2 cards, and both are different in theirs, so diff-result should show changed cards as 2
     CardListModelDiffResult diffResult = ours.getDiff(theirs);
 
     expect(diffResult.added, 0);

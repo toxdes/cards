@@ -8,8 +8,13 @@ class AddTimeStampsMigration extends Migration<CardModel> {
 
   @override
   Future<CardModel> migrate(CardModel sourceModel) async {
-    return CardModelFactory.copyFrom(sourceModel, toSchemaId)
-      ..setCreatedAt(DateTime.now())
-      ..setUpdatedAt(DateTime.now());
+    CardModel next = CardModelFactory.copyFrom(sourceModel, toSchemaId);
+    if (next.createdAt == null) {
+      next.setCreatedAt(DateTime.now());
+    }
+    if (next.updatedAt == null) {
+      next.setUpdatedAt(DateTime.now());
+    }
+    return next;
   }
 }

@@ -4,7 +4,7 @@ import 'package:cards/utils/card_utils.dart';
 import 'package:cards/utils/string_utils.dart';
 
 class CardModel extends Model {
-  CardModel() : super(schemaVersion: 2);
+  CardModel() : super(schemaVersion: 3);
 
   CardModel.fromSchema(int schemaVersion) : super(schemaVersion: schemaVersion);
 
