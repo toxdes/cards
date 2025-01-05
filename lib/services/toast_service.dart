@@ -1,5 +1,7 @@
+import 'package:cards/components/shared/toast.dart';
 import 'package:cards/config/colors.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:cards/services/platform_service.dart';
+import 'package:fluttertoast/fluttertoast.dart' as ft;
 
 enum ToastStatus { success, info, error, warning, unknown }
 
@@ -17,7 +19,6 @@ class ToastService {
       case ToastStatus.info:
         return "";
       case ToastStatus.unknown:
-      default:
         return '';
     }
   }
@@ -26,14 +27,23 @@ class ToastService {
       {required String message,
       required ToastStatus status,
       ToastDuration duration = ToastDuration.long}) {
-    Fluttertoast.showToast(
-      msg: "${_getStatusIcon(status)} $message",
-      toastLength: duration == ToastDuration.short
-          ? Toast.LENGTH_SHORT
-          : Toast.LENGTH_LONG,
-      gravity: ToastGravity.BOTTOM,
-      backgroundColor: ThemeColors.white2,
-      textColor: ThemeColors.gray2,
-    );
+    if (PlatformService.isPhone() || PlatformService.isWeb()) {
+      ft.Fluttertoast.showToast(
+        msg: "${_getStatusIcon(status)} $message",
+        toastLength: duration == ToastDuration.short
+            ? ft.Toast.LENGTH_SHORT
+            : ft.Toast.LENGTH_LONG,
+        gravity: ft.ToastGravity.BOTTOM,
+        backgroundColor: ThemeColors.white2,
+        textColor: ThemeColors.gray2,
+      );
+    } else {
+      ToastManager().show(
+          message: "${_getStatusIcon(status)} $message",
+          duration: Duration(
+              milliseconds: duration == ToastDuration.long ? 2000 : 1000),
+          backgroundColor: ThemeColors.white1,
+          textColor: ThemeColors.gray2);
+    }
   }
 }

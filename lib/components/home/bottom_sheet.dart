@@ -33,8 +33,8 @@ class _AddNewFormModalState extends State<AddNewCardModal> {
           child: Stack(children: [
             Positioned.fill(
               child: Container(
-                decoration:
-                    BoxDecoration(color: ThemeColors.gray1.withOpacity(0.94)),
+                decoration: BoxDecoration(
+                    color: ThemeColors.gray1.withValues(alpha: 0.94)),
                 padding: const EdgeInsets.only(top: 60),
                 child: Container(
                     decoration: BoxDecoration(
@@ -42,7 +42,8 @@ class _AddNewFormModalState extends State<AddNewCardModal> {
                         border: Border(
                             top: BorderSide(
                                 width: 2,
-                                color: ThemeColors.blue.withOpacity(0.8))),
+                                color:
+                                    ThemeColors.blue.withValues(alpha: 0.8))),
                         borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(24),
                             topRight: Radius.circular(24))),

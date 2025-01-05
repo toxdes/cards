@@ -47,7 +47,7 @@ class StepHeader extends StatelessWidget {
         decoration: BoxDecoration(
             border: Border(
                 bottom: BorderSide(
-          color: ThemeColors.white3.withOpacity(!isActive ? 0.4 : 1),
+          color: ThemeColors.white3.withValues(alpha: !isActive ? 0.4 : 1),
           width: 2,
         ))),
         child: Row(
@@ -60,7 +60,8 @@ class StepHeader extends StatelessWidget {
                     fontFamily: Fonts.rubik,
                     fontSize: 36,
                     decoration: TextDecoration.none,
-                    color: ThemeColors.blue.withOpacity(!isActive ? 0.4 : 1),
+                    color:
+                        ThemeColors.blue.withValues(alpha: !isActive ? 0.4 : 1),
                     fontWeight: FontWeight.w600)),
             Container(
               margin: const EdgeInsets.only(left: 8, right: 8),
@@ -69,15 +70,16 @@ class StepHeader extends StatelessWidget {
                       fontFamily: Fonts.rubik,
                       fontSize: 16,
                       decoration: TextDecoration.none,
-                      color:
-                          ThemeColors.white1.withOpacity(!isActive ? 0.4 : 1),
+                      color: ThemeColors.white1
+                          .withValues(alpha: !isActive ? 0.4 : 1),
                       fontWeight: FontWeight.w400)),
             ),
             const Spacer(),
             Icon(
               _getIconForStatus(),
               size: 28,
-              color: _getIconColorForStatus().withOpacity(!isActive ? 0.4 : 1),
+              color: _getIconColorForStatus()
+                  .withValues(alpha: !isActive ? 0.4 : 1),
             )
           ],
         ),

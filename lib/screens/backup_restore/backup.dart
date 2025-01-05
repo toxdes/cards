@@ -9,6 +9,7 @@ import 'package:cards/config/fonts.dart';
 import 'package:cards/core/step/step.dart';
 import 'package:cards/models/cardlist/cardlist.dart';
 import 'package:cards/services/backup_service.dart';
+import 'package:cards/services/platform_service.dart';
 import 'package:cards/services/toast_service.dart';
 import 'package:cards/utils/file_utils.dart';
 import 'package:cards/utils/string_utils.dart';
@@ -158,7 +159,7 @@ class _BackupScreenState extends State<BackupScreen> {
   void saveBackupToDownloads(int stepId) async {
     try {
       Directory? downloadsDir;
-      if (Platform.isAndroid) {
+      if (PlatformService.isAndroid()) {
         String downloadsPath = "/storage/emulated/0/Download";
         bool dirExists = Directory(downloadsPath).existsSync();
         if (dirExists) {

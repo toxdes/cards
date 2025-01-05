@@ -1,0 +1,9 @@
+app_id: 1ed75faf-18ff-47f7-9141-7f6ebdf80d84
+publisher: Cards
+publisher_url: https://github.com/toxdes/cards
+display_name: Cards App
+create_desktop_icon: true
+launch_at_startup: false
+# install_dir_name: "D:\\HELLO-WORLD"
+locales:
+  - en

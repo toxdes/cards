@@ -10,7 +10,9 @@ class CardMigrationContext extends MigrationContext<CardModel> {
         CardModelFactory.copyFrom(sourceModel, sourceModel.schemaVersion);
     for (int i = 0; i < migrations.length; ++i) {
       if (nextModel.schemaVersion != migrations[i].fromSchemaId &&
-          nextModel.schemaVersion != 0) continue;
+          nextModel.schemaVersion != 0) {
+        continue;
+      }
       nextModel = await migrations[i].migrate(nextModel);
     }
     return nextModel;

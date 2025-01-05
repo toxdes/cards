@@ -8,12 +8,15 @@ import 'package:cards/config/fonts.dart';
 import 'package:cards/models/card/card.dart';
 import 'package:cards/models/cardlist/cardlist.dart';
 import 'package:cards/services/flavor_service.dart';
+import 'package:cards/services/platform_service.dart';
 import 'package:cards/services/sentry_service.dart';
 import 'package:cards/services/toast_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Text, IconButton;
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:tray_manager/tray_manager.dart';
+import 'package:window_manager/window_manager.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -21,9 +24,21 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeState extends State<Home> with TrayListener, WindowListener {
   CardListModel _cards = CardListModel.the();
   bool _addNewCardFormVisible = false;
+
+  Menu getContextMenuItems() {
+    return Menu(
+      items: [
+        MenuItem(
+          key: "show_window",
+          label: 'Show Cards',
+        ),
+        MenuItem(label: "Exit", key: 'exit')
+      ],
+    );
+  }
 
   void onCardListModelUpdate(CardListModel newModel) {
     setState(() {
@@ -73,9 +88,53 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     // _cards.clearStorage();
+    if (PlatformService.isDesktop()) {
+      trayManager.addListener(this);
+      windowManager.addListener(this);
+      windowManager.setPreventClose(true);
+      trayManager.setIcon(PlatformService.isWindows()
+          ? 'assets/icon48.ico'
+          : 'assets/icon48.png');
+      trayManager.setContextMenu(getContextMenuItems());
+    }
     _readFromStorage();
     _cards.setUpdateListener(onCardListModelUpdate);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    trayManager.removeListener(this);
+    windowManager.removeListener(this);
+    super.dispose();
+  }
+
+  @override
+  void onWindowClose() async {
+    await windowManager.setSkipTaskbar(true);
+    await windowManager.hide();
+  }
+
+  @override
+  void onTrayIconMouseDown() {
+    trayManager.popUpContextMenu();
+  }
+
+  @override
+  void onTrayIconRightMouseDown() {
+    trayManager.popUpContextMenu();
+  }
+
+  @override
+  void onTrayMenuItemClick(MenuItem menuItem) async {
+    if (menuItem.key == 'show_window') {
+      await windowManager.show();
+      await windowManager.focus();
+    } else if (menuItem.key == 'exit') {
+      await windowManager.setClosable(true);
+      await windowManager.close();
+      await windowManager.destroy();
+    }
   }
 
   Future<void> _readFromStorage() async {
