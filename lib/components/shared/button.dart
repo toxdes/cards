@@ -64,8 +64,8 @@ class _ButtonState extends State<Button> {
             height: widget.height,
             alignment: widget.alignment,
             decoration: BoxDecoration(
-                color: widget.color
-                    .withOpacity(widget.buttonType == ButtonType.ghost
+                color: widget.color.withValues(
+                    alpha: widget.buttonType == ButtonType.ghost
                         ? 0
                         : widget.disabled
                             ? 0.4
@@ -80,7 +80,7 @@ class _ButtonState extends State<Button> {
                     color: widget.buttonType == ButtonType.ghost
                         ? widget.color
                         : (widget.textColor ?? ThemeColors.white1)
-                            .withOpacity(widget.disabled ? 0.4 : 1),
+                            .withValues(alpha: widget.disabled ? 0.4 : 1),
                     fontSize: 14,
                     fontFamily: Fonts.rubik,
                     fontWeight: FontWeight.w600))));

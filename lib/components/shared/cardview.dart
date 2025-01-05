@@ -53,7 +53,7 @@ class _CardViewState extends State<CardView> {
       onLongPress: () {
         showAdaptiveDialog(
             context: context,
-            barrierColor: ThemeColors.gray1.withOpacity(0.9),
+            barrierColor: ThemeColors.gray1.withValues(alpha: 0.9),
             builder: (BuildContext context) {
               return Dialog(
                   // alignment: Alignment.center,
@@ -118,7 +118,7 @@ class _CardViewState extends State<CardView> {
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
                 color: _active
-                    ? ThemeColors.red.withOpacity(0.3)
+                    ? ThemeColors.red.withValues(alpha: 0.3)
                     : ThemeColors.gray2,
                 borderRadius: BorderRadius.circular(20)),
             child: Column(

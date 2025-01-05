@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import "dart:convert";
 import "dart:io";
 import "dart:typed_data";
@@ -58,8 +60,7 @@ void main() async {
   logger.info("exe generated");
 
   logger.cmd("Uploading exe to GH");
-  String exeFilePath =
-      './dist/$appVersion/cards-$appVersion-windows-setup.exe';
+  String exeFilePath = './dist/$appVersion/cards-$appVersion-windows-setup.exe';
   String uploadUrl =
       'https://uploads.github.com/repos/toxdes/cards/releases/$releaseId/assets?name=cards-$cleanAppVersion-windows-setup.exe&label=cards-$cleanAppVersion-windows-setup.exe';
 
