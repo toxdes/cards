@@ -24,9 +24,12 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
+enum CardFilter { all, credit, debit }
+
 class _HomeState extends State<Home> with TrayListener, WindowListener {
   CardListModel _cards = CardListModel.the();
   bool _addNewCardFormVisible = false;
+  CardFilter _activeCardFilter = CardFilter.all;
 
   Menu getContextMenuItems() {
     return Menu(
@@ -43,6 +46,12 @@ class _HomeState extends State<Home> with TrayListener, WindowListener {
   void onCardListModelUpdate(CardListModel newModel) {
     setState(() {
       _cards = newModel;
+    });
+  }
+
+  void setCardFilter(CardFilter newFilter) {
+    setState(() {
+      _activeCardFilter = newFilter;
     });
   }
 
@@ -141,6 +150,17 @@ class _HomeState extends State<Home> with TrayListener, WindowListener {
     await _cards.readFromStorage();
   }
 
+  bool isDebitCard(CardModel card) {
+    return card.getTitle().toLowerCase().contains("debit");
+  }
+
+  bool matchesFilterCriteria(CardModel card) {
+    if (isDebitCard(card)) {
+      return _activeCardFilter != CardFilter.credit;
+    }
+    return _activeCardFilter != CardFilter.debit;
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -185,6 +205,70 @@ class _HomeState extends State<Home> with TrayListener, WindowListener {
                                         iconData: Icons.share_rounded)
                               ]),
                           const SizedBox(height: 12),
+                          _cards.length > 0
+                              ? Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      margin: const EdgeInsets.only(left: 12),
+                                      child: Button(
+                                          buttonType: _activeCardFilter ==
+                                                  CardFilter.all
+                                              ? ButtonType.primary
+                                              : ButtonType.outline,
+                                          text: "All",
+                                          padding: const EdgeInsets.fromLTRB(
+                                              12, 4, 12, 4),
+                                          onTap: () {
+                                            setCardFilter(CardFilter.all);
+                                          },
+                                          textColor: _activeCardFilter ==
+                                                  CardFilter.all
+                                              ? ThemeColors.gray1
+                                              : ThemeColors.white1,
+                                          color: ThemeColors.white1),
+                                    ),
+                                    Container(
+                                      margin: const EdgeInsets.only(left: 12),
+                                      child: Button(
+                                          buttonType: _activeCardFilter ==
+                                                  CardFilter.debit
+                                              ? ButtonType.primary
+                                              : ButtonType.outline,
+                                          text: "Debit",
+                                          padding: const EdgeInsets.fromLTRB(
+                                              12, 4, 12, 4),
+                                          onTap: () {
+                                            setCardFilter(CardFilter.debit);
+                                          },
+                                          textColor: _activeCardFilter ==
+                                                  CardFilter.debit
+                                              ? ThemeColors.gray1
+                                              : ThemeColors.white1,
+                                          color: ThemeColors.white1),
+                                    ),
+                                    Container(
+                                      margin: const EdgeInsets.only(left: 12),
+                                      child: Button(
+                                          buttonType: _activeCardFilter ==
+                                                  CardFilter.credit
+                                              ? ButtonType.primary
+                                              : ButtonType.outline,
+                                          text: "Credit",
+                                          padding: const EdgeInsets.fromLTRB(
+                                              12, 4, 12, 4),
+                                          onTap: () {
+                                            setCardFilter(CardFilter.credit);
+                                          },
+                                          textColor: _activeCardFilter ==
+                                                  CardFilter.credit
+                                              ? ThemeColors.gray1
+                                              : ThemeColors.white1,
+                                          color: ThemeColors.white1),
+                                    ),
+                                  ],
+                                )
+                              : const SizedBox.shrink(),
                           Expanded(
                               child: ListView(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -195,20 +279,25 @@ class _HomeState extends State<Home> with TrayListener, WindowListener {
                                     Container(
                                         margin: const EdgeInsets.fromLTRB(
                                             16, 48, 16, 32),
-                                        child: const Text(
-                                            "You haven't added any cards yet.",
+                                        child: Text(
+                                            _cards.length == 0
+                                                ? "You haven't added any cards yet."
+                                                : "No cards to show",
                                             textAlign: TextAlign.center,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                                 fontFamily: Fonts.rubik,
                                                 fontWeight: FontWeight.w400,
                                                 color: ThemeColors.white2)))
                                   ]
                                 : _cards.getAll().map((CardModel card) {
-                                    return CardView(
-                                        card: card,
-                                        onLongPress: (CardModel c) {
-                                          removeCard(c);
-                                        });
+                                    if (matchesFilterCriteria(card)) {
+                                      return CardView(
+                                          card: card,
+                                          onLongPress: (CardModel c) {
+                                            removeCard(c);
+                                          });
+                                    }
+                                    return const SizedBox.shrink();
                                   }).toList(),
                           )),
                           Button(
