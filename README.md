@@ -1,21 +1,14 @@
-# cards
 
-A new Flutter project.
+![cover](https://github.com/user-attachments/assets/0421e278-3459-4641-94a3-3f253712d39a)
+
+# Supported platforms
+1. Android
+2. iOS
+3. MacOS
+4. Windows
+5. Linux (Ubuntu)
 
 # deps
 
 1. java - sdk 21
 2. android - api 34
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
