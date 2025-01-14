@@ -13,7 +13,8 @@ class Button extends StatefulWidget {
       this.disabled = false,
       this.width,
       this.height,
-      this.alignment});
+      this.alignment,
+      this.padding});
 
   final String text;
   final ButtonType buttonType;
@@ -25,6 +26,7 @@ class Button extends StatefulWidget {
   final double scaleFactor = 0.90;
   final Color color;
   final Color? textColor;
+  final EdgeInsets? padding;
 
   @override
   State<Button> createState() => _ButtonState();
@@ -40,6 +42,26 @@ class _ButtonState extends State<Button> {
 
   @override
   Widget build(BuildContext context) {
+    Color backgroundColor = widget.color.withValues(
+        alpha: widget.buttonType != ButtonType.primary
+            ? 0
+            : widget.disabled
+                ? 0.4
+                : 1);
+
+    Color textColor = widget.buttonType == ButtonType.ghost
+        ? widget.color
+        : (widget.textColor ?? ThemeColors.white1)
+            .withValues(alpha: widget.disabled ? 0.4 : 1);
+
+    Color borderColor = widget.buttonType == ButtonType.ghost
+        ? ThemeColors.transparent
+        : widget.buttonType == ButtonType.primary
+            ? ThemeColors.blue
+            : ThemeColors.white1;
+
+    EdgeInsets padding =
+        widget.padding ?? const EdgeInsets.fromLTRB(16, 8, 16, 8);
     return GestureDetector(
         onTap: widget.disabled ? () {} : widget.onTap,
         onTapDown: (TapDownDetails _) {
@@ -59,32 +81,26 @@ class _ButtonState extends State<Button> {
                 : (Matrix4.identity()),
             // props
             // width: 160,
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            padding: padding,
             width: widget.width,
             height: widget.height,
             alignment: widget.alignment,
             decoration: BoxDecoration(
-                color: widget.color.withValues(
-                    alpha: widget.buttonType == ButtonType.ghost
-                        ? 0
-                        : widget.disabled
-                            ? 0.4
-                            : 1),
-                borderRadius: BorderRadius.circular(8)),
+              color: backgroundColor,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: borderColor),
+            ),
             child: Text(widget.text,
                 textDirection: TextDirection.ltr,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     decoration: TextDecoration.none,
                     decorationColor: ThemeColors.white1,
-                    color: widget.buttonType == ButtonType.ghost
-                        ? widget.color
-                        : (widget.textColor ?? ThemeColors.white1)
-                            .withValues(alpha: widget.disabled ? 0.4 : 1),
+                    color: textColor,
                     fontSize: 14,
                     fontFamily: Fonts.rubik,
                     fontWeight: FontWeight.w600))));
   }
 }
 
-enum ButtonType { primary, ghost }
+enum ButtonType { primary, ghost, outline }
