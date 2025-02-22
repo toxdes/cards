@@ -2,9 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: "Rubik";
-}
 
 @layer utilities {
   .text-balance {
