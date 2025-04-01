@@ -11,12 +11,13 @@ class NotificationService {
   static const String _channelId = 'cards_default';
   static const String _channelName = "Notifications for Cards";
   static const String _channelDesc = "Notifications for cards app";
+  static int _notificationId = 0;
 
   // notification actions
   static const String _clearNotificationAction = "clear_notification";
 
   static Future<void> initialize() async {
-    if (PlatformService.isWindows()) {
+    if (PlatformService.isWindows() || PlatformService.isLinux()) {
       await localNotifier.setup(appName: "cards");
     }
     _notificationPlugin = FlutterLocalNotificationsPlugin();
@@ -33,8 +34,18 @@ class NotificationService {
 
     // iOS and MacOS specific settings
     DarwinInitializationSettings initializationSettingsDarwin =
-        const DarwinInitializationSettings(
-            onDidReceiveLocalNotification: _onDidReceiveLocalNotification);
+        DarwinInitializationSettings(
+            requestAlertPermission: false,
+            requestBadgePermission: false,
+            requestCriticalPermission: false,
+            notificationCategories: [
+          DarwinNotificationCategory("cards-notification", actions: [
+            DarwinNotificationAction.plain("clear", "Clear",
+                options: <DarwinNotificationActionOption>{
+                  DarwinNotificationActionOption.destructive
+                })
+          ])
+        ]);
 
     // linux specific settings
     const LinuxInitializationSettings initializationSettingsLinux =
@@ -59,12 +70,11 @@ class NotificationService {
         status: ToastStatus.unknown);
   }
 
-  static void _onDidReceiveLocalNotification(
-      int id, String? title, String? body, String? payload) {}
-
   static Future<void> _onDidReceiveBackgroundNotificationResponse(
       NotificationResponse response) async {
-    if (response.payload != null) {}
+    ToastService.show(
+        message: "_onDidReceiveBackgroundNotificationResponse was called",
+        status: ToastStatus.success);
   }
 
   static Future<void> _onDidReceiveNotificationResponse(
@@ -79,30 +89,85 @@ class NotificationService {
   static Future<void> showNotification(
       {required String title, String? body, String? payload}) async {
     if (PlatformService.isAndroid()) {
-      await showPersistentNotification(title: title, body: body ?? "");
-    } else if (PlatformService.isDarwin()) {
-      // TODO: handle notifications on macos and ios
-    } else if (PlatformService.isWindows()) {
-      LocalNotification notification = LocalNotification(
-          title: title,
-          body: body,
-          actions: [LocalNotificationAction(text: "Clear")]);
-      notification.onClickAction = (actionIndex) {
-        if (actionIndex == 0) {
-          _clearClipboardData();
-        }
-      };
-      notification.onClick = () async {
-        if (PlatformService.isDesktop()) {
-          await windowManager.show();
-          await windowManager.focus();
-        }
-      };
-      await notification.show();
+      return await _showNotificationAndroid(title: title, body: body ?? "");
+    }
+    if (PlatformService.isWindows() || PlatformService.isLinux()) {
+      _showNotificationWindowsOrLinux(title: title, body: body ?? "");
+    }
+    if (PlatformService.isDarwin()) {
+      _showNotificationDarwin(title: title, body: body ?? "");
     }
   }
 
-  static Future<void> showPersistentNotification(
+  static Future<void> _checkAndRequestNotificationPermsDarwin() async {
+    if (PlatformService.isMacOS()) {
+      NotificationsEnabledOptions? options = await _notificationPlugin
+          ?.resolvePlatformSpecificImplementation<
+              MacOSFlutterLocalNotificationsPlugin>()
+          ?.checkPermissions();
+      if (options != null && options.isAlertEnabled == true) return;
+      await _notificationPlugin
+          ?.resolvePlatformSpecificImplementation<
+              MacOSFlutterLocalNotificationsPlugin>()
+          ?.requestPermissions(alert: true);
+      return;
+    }
+    if (PlatformService.isIOS()) {
+      NotificationsEnabledOptions? options = await _notificationPlugin
+          ?.resolvePlatformSpecificImplementation<
+              IOSFlutterLocalNotificationsPlugin>()
+          ?.checkPermissions();
+      if (options != null && options.isAlertEnabled == true) return;
+      await _notificationPlugin
+          ?.resolvePlatformSpecificImplementation<
+              IOSFlutterLocalNotificationsPlugin>()
+          ?.requestPermissions(alert: true);
+      return;
+    }
+  }
+
+  static Future<void> _showNotificationDarwin(
+      {required title, required body}) async {
+    ++_notificationId;
+    await _checkAndRequestNotificationPermsDarwin();
+    if (PlatformService.isMacOS()) {
+      _notificationPlugin
+          ?.resolvePlatformSpecificImplementation<
+              MacOSFlutterLocalNotificationsPlugin>()
+          ?.show(_notificationId, title, body);
+    } else if (PlatformService.isIOS()) {
+      _notificationPlugin
+          ?.resolvePlatformSpecificImplementation<
+              IOSFlutterLocalNotificationsPlugin>()
+          ?.show(
+            _notificationId,
+            title,
+            body,
+          );
+    }
+  }
+
+  static Future<void> _showNotificationWindowsOrLinux(
+      {required String title, required String body}) async {
+    LocalNotification notification = LocalNotification(
+        title: title,
+        body: body,
+        actions: [LocalNotificationAction(text: "Clear")]);
+    notification.onClickAction = (actionIndex) {
+      if (actionIndex == 0) {
+        _clearClipboardData();
+      }
+    };
+    notification.onClick = () async {
+      if (PlatformService.isDesktop()) {
+        await windowManager.show();
+        await windowManager.focus();
+      }
+    };
+    await notification.show();
+  }
+
+  static Future<void> _showNotificationAndroid(
       {required String title,
       String body = "",
       String? payload,

@@ -79,7 +79,7 @@ class CardModelFactory {
       ..setNumber(other.getNumber())
       ..setCVV(other.getCVV())
       ..setExpiry(other.getExpiry())
-      ..setOwnerName(other.getCVV())
+      ..setOwnerName(other.getOwnerName())
       ..setCardType(other.getCardType())
       ..setProvider(other.getProvider())
       ..setBillingCycle(other.getBillingCycle())
