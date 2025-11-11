@@ -152,8 +152,9 @@ class _BackupScreenState extends State<BackupScreen> {
   }
 
   void shareBackup(int stepId) async {
-    var params = ShareParams(
-        text: "Share cards backup file...", files: [XFile(backupFile!.path)]);
+    var params = ShareParams(text: "Share cards backup file...", files: [
+      XFile(backupFile!.path),
+    ]);
     await SharePlus.instance.share(params);
   }
 
@@ -244,58 +245,78 @@ class _BackupScreenState extends State<BackupScreen> {
         child: Container(
             decoration: const BoxDecoration(color: ThemeColors.gray1),
             constraints: const BoxConstraints(maxWidth: 600),
-            padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.vertical,
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          "Backup",
-                          textAlign: TextAlign.left,
-                          style: TextStyle(
-                              decoration: TextDecoration.none,
-                              fontFamily: Fonts.rubik,
-                              fontWeight: FontWeight.w600,
-                              color: ThemeColors.white2,
-                              fontSize: 24),
-                        ),
-                        IconButton(
-                          size: 32,
-                          color: ThemeColors.white2,
-                          iconData: Icons.close_rounded,
+            padding: const EdgeInsets.fromLTRB(0, 0, 0, 12),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
+                  child: Stack(
+                    children: [
+                      Container(
+                        alignment: Alignment.centerLeft,
+                        child: IconButton(
+                          size: 28,
+                          color: ThemeColors.white1,
+                          iconData: Icons.arrow_back_rounded,
                           buttonType: ButtonType.ghost,
                           onTap: () {
                             Navigator.pop(context);
                           },
-                        )
-                      ],
-                    ),
-                    ..._steps.map((step) {
-                      return Column(
+                        ),
+                      ),
+                      Center(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: const Text("Backup",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  decoration: TextDecoration.none,
+                                  fontFamily: Fonts.rubik,
+                                  fontWeight: FontWeight.w600,
+                                  color: ThemeColors.white2,
+                                  fontSize: 18)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          StepHeader(
-                              status: step.status,
-                              stepId: step.id,
-                              title: step.title,
-                              actionCallback: stepActionCallback),
-                          const SizedBox(height: 24),
-                          BackupStepContent(
-                              step: step,
-                              actionCallback: act,
-                              encryptionKey: _key,
-                              encryptionSecret: _secret,
-                              backupFileName: backupFile == null
-                                  ? ''
-                                  : FileUtils.getFileName(backupFile!))
+                          ..._steps.map((step) {
+                            return Column(
+                              children: [
+                                StepHeader(
+                                    status: step.status,
+                                    stepId: step.id,
+                                    title: step.title,
+                                    actionCallback: stepActionCallback),
+                                const SizedBox(height: 24),
+                                BackupStepContent(
+                                    step: step,
+                                    actionCallback: act,
+                                    encryptionKey: _key,
+                                    encryptionSecret: _secret,
+                                    backupFileName: backupFile == null
+                                        ? ''
+                                        : FileUtils.getFileName(backupFile!))
+                              ],
+                            );
+                          }),
                         ],
-                      );
-                    }),
-                  ]),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             )));
   }
 }
