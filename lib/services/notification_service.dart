@@ -33,8 +33,7 @@ class NotificationService {
 
     // iOS and MacOS specific settings
     DarwinInitializationSettings initializationSettingsDarwin =
-        const DarwinInitializationSettings(
-            onDidReceiveLocalNotification: _onDidReceiveLocalNotification);
+        const DarwinInitializationSettings();
 
     // linux specific settings
     const LinuxInitializationSettings initializationSettingsLinux =
@@ -58,9 +57,6 @@ class NotificationService {
         message: "Card number cleared from clipboard",
         status: ToastStatus.unknown);
   }
-
-  static void _onDidReceiveLocalNotification(
-      int id, String? title, String? body, String? payload) {}
 
   static Future<void> _onDidReceiveBackgroundNotificationResponse(
       NotificationResponse response) async {

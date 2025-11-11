@@ -336,7 +336,7 @@ class _HomeState extends State<Home> with TrayListener, WindowListener {
               Positioned(
                 bottom: 4,
                 right: 4,
-                child: Text("${FlavorService.getFlavor().getLabel()}",
+                child: Text(FlavorService.getFlavor().getLabel(),
                     textAlign: TextAlign.left,
                     style: const TextStyle(
                         fontFamily: Fonts.rubik,
