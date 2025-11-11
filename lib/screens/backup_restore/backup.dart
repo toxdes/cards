@@ -152,8 +152,9 @@ class _BackupScreenState extends State<BackupScreen> {
   }
 
   void shareBackup(int stepId) async {
-    Share.shareXFiles([XFile(backupFile!.path)],
-        text: "Share cards backup file...");
+    var params = ShareParams(
+        text: "Share cards backup file...", files: [XFile(backupFile!.path)]);
+    await SharePlus.instance.share(params);
   }
 
   void saveBackupToDownloads(int stepId) async {

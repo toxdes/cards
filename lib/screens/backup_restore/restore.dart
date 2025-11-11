@@ -134,7 +134,7 @@ class _RestoreScreenState extends State<RestoreScreen> {
     });
   }
 
-  Future<void> restoreBackup(stepId) async {
+  Future<void> restoreBackup(int stepId) async {
     try {
       RestoreStrategy? restoreStrategy =
           restoreStrategyContext.getRestoreStrategy();
