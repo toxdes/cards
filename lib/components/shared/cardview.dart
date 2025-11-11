@@ -50,6 +50,9 @@ class _CardViewState extends State<CardView> {
       onTapUp: (TapUpDetails _) {
         setActive(false);
       },
+      onTapCancel: () {
+        setActive(false);
+      },
       onLongPress: () {
         showAdaptiveDialog(
             context: context,
