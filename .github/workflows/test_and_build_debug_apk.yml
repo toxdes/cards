@@ -1,4 +1,4 @@
-name: Test and build debug APK
+name: flutter: analyze and run unit tests
 
 on:
   push:
