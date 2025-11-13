@@ -41,7 +41,15 @@ endif()
 # of modifying this function.
 function(APPLY_STANDARD_SETTINGS TARGET)
   target_compile_features(${TARGET} PUBLIC cxx_std_14)
-  target_compile_options(${TARGET} PRIVATE -Wall -Werror)
+  # TODO: Remove following flags after respective libraries are updated/made available to ubuntu package manager 
+  # for flutter_secure_storage
+  # -Wno-error=deprecated-literal-operator 
+  # for tray_manager
+  # -Wno-error=deprecated-declarations
+  # more info: https://github.com/juliansteenbakker/flutter_secure_storage/issues/920
+  # and https://github.com/leanflutter/tray_manager/issues/67
+
+  target_compile_options(${TARGET} PRIVATE -Wall -Werror -Wno-error=deprecated-literal-operator -Wno-error=deprecated-declarations)
   target_compile_options(${TARGET} PRIVATE "$<$<NOT:$<CONFIG:Debug>>:-O3>")
   target_compile_definitions(${TARGET} PRIVATE "$<$<NOT:$<CONFIG:Debug>>:NDEBUG>")
 endfunction()

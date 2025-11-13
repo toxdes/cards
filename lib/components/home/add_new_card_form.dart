@@ -59,14 +59,12 @@ class _AddNewCardFormState extends State<AddNewCardForm> {
   Widget build(BuildContext context) {
     return Form(
         key: _formKey,
-        child: Expanded(
-          child: Container(
-            padding: const EdgeInsets.only(top: 24, bottom: 24),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.vertical,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
+        child: Container(
+          padding: const EdgeInsets.only(top: 24, bottom: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
                   TextInputField(
                     title: "Card number",
                     helper: "All good!",
@@ -153,8 +151,6 @@ class _AddNewCardFormState extends State<AddNewCardForm> {
                       text: "Save card")
                 ],
               ),
-            ),
-          ),
-        ));
+          ));
   }
 }

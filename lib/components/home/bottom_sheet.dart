@@ -48,35 +48,38 @@ class _AddNewFormModalState extends State<AddNewCardModal> {
                             topLeft: Radius.circular(24),
                             topRight: Radius.circular(24))),
                     margin: const EdgeInsets.only(top: 0),
-                    alignment: Alignment.center,
-                    child: Container(
-                      padding:
-                          const EdgeInsets.only(top: 24, left: 32, right: 32),
-                      child: Column(children: [
-                        Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: SingleChildScrollView(
+                      child: Container(
+                        padding:
+                            const EdgeInsets.only(top: 24, left: 32, right: 32),
+                        child: Column(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Text("Add new card",
-                                  textAlign: TextAlign.left,
-                                  style: TextStyle(
-                                      fontFamily: Fonts.rubik,
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.w600,
-                                      color: ThemeColors.white2)),
-                              Button(
-                                color: ThemeColors.red,
-                                text: "Close",
-                                onTap: widget.onClose,
-                                buttonType: ButtonType.ghost,
-                              )
+                              Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Text("Add new card",
+                                        textAlign: TextAlign.left,
+                                        style: TextStyle(
+                                            fontFamily: Fonts.rubik,
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.w600,
+                                            color: ThemeColors.white2)),
+                                    Button(
+                                      color: ThemeColors.red,
+                                      text: "Close",
+                                      onTap: widget.onClose,
+                                      buttonType: ButtonType.ghost,
+                                    )
+                                  ]),
+                              AddNewCardForm(
+                                onSubmit: (CardModel card) {
+                                  widget.onAddNewCard(card);
+                                  widget.onClose();
+                                },
+                              ),
                             ]),
-                        AddNewCardForm(
-                          onSubmit: (CardModel card) {
-                            widget.onAddNewCard(card);
-                            widget.onClose();
-                          },
-                        ),
-                      ]),
+                      ),
                     )),
               ),
             ),

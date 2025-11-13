@@ -163,6 +163,15 @@ class _HomeState extends State<Home> with TrayListener, WindowListener {
 
   @override
   Widget build(BuildContext context) {
+    List<Widget> visibleCards = _cards.getAll().where((CardModel card) {
+      return matchesFilterCriteria(card);
+    }).map((CardModel card) {
+      return CardView(
+          card: card,
+          onLongPress: (CardModel c) {
+            removeCard(c);
+          });
+    }).toList();
     return SafeArea(
       child: Center(
         child: Container(
@@ -170,44 +179,49 @@ class _HomeState extends State<Home> with TrayListener, WindowListener {
             constraints: const BoxConstraints(maxWidth: 600),
             child: Stack(textDirection: TextDirection.ltr, children: [
               Container(
-                  padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
                   child: Directionality(
                       textDirection: TextDirection.ltr,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Text("Saved cards (${_cards.length})",
-                                    textAlign: TextAlign.left,
+                          Container(
+                            // color: ThemeColors.red,
+                            padding: EdgeInsets.fromLTRB(0, 6, 0, 6),
+                            child: Stack(children: [
+                              Center(
+                                child: Text("Saved cards",
+                                    textAlign: TextAlign.center,
                                     style: const TextStyle(
                                         fontFamily: Fonts.rubik,
-                                        fontSize: 24,
+                                        fontSize: 18,
                                         fontWeight: FontWeight.w600,
                                         color: ThemeColors.white2)),
-                                kIsWeb
-                                    ? const SizedBox.shrink()
-                                    : IconButton(
-                                        onTap: () {
-                                          Navigator.push(
-                                              context,
-                                              CupertinoDialogRoute(
-                                                  context: context,
-                                                  builder: (context) =>
-                                                      const BackupMainScreen()));
-                                        },
-                                        size: 32,
-                                        color: ThemeColors.blue,
-                                        buttonType: ButtonType.primary,
-                                        iconData: Icons.share_rounded)
-                              ]),
-                          const SizedBox(height: 12),
+                              ),
+                              kIsWeb
+                                  ? const SizedBox.shrink()
+                                  : Container(
+                                      alignment: Alignment.centerRight,
+                                      child: IconButton(
+                                          onTap: () {
+                                            Navigator.push(
+                                                context,
+                                                CupertinoPageRoute(
+                                                    title: "Backup and Restore",
+                                                    builder: (context) =>
+                                                        const BackupMainScreen()));
+                                          },
+                                          size: 28,
+                                          color: ThemeColors.white1,
+                                          buttonType: ButtonType.primary,
+                                          iconData: Icons.backup_rounded))
+                            ]),
+                          ),
+                          const SizedBox(height: 6),
                           _cards.length > 0
                               ? Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Container(
                                       margin: const EdgeInsets.only(left: 12),
@@ -216,7 +230,10 @@ class _HomeState extends State<Home> with TrayListener, WindowListener {
                                                   CardFilter.all
                                               ? ButtonType.primary
                                               : ButtonType.outline,
-                                          text: "All",
+                                          text: _activeCardFilter ==
+                                                  CardFilter.all
+                                              ? "All (${visibleCards.length})"
+                                              : "All",
                                           padding: const EdgeInsets.fromLTRB(
                                               12, 4, 12, 4),
                                           onTap: () {
@@ -235,7 +252,10 @@ class _HomeState extends State<Home> with TrayListener, WindowListener {
                                                   CardFilter.debit
                                               ? ButtonType.primary
                                               : ButtonType.outline,
-                                          text: "Debit",
+                                          text: _activeCardFilter ==
+                                                  CardFilter.debit
+                                              ? "Debit (${visibleCards.length})"
+                                              : "Debit",
                                           padding: const EdgeInsets.fromLTRB(
                                               12, 4, 12, 4),
                                           onTap: () {
@@ -254,7 +274,10 @@ class _HomeState extends State<Home> with TrayListener, WindowListener {
                                                   CardFilter.credit
                                               ? ButtonType.primary
                                               : ButtonType.outline,
-                                          text: "Credit",
+                                          text: _activeCardFilter ==
+                                                  CardFilter.credit
+                                              ? "Credit (${visibleCards.length})"
+                                              : "Credit",
                                           padding: const EdgeInsets.fromLTRB(
                                               12, 4, 12, 4),
                                           onTap: () {
@@ -289,16 +312,7 @@ class _HomeState extends State<Home> with TrayListener, WindowListener {
                                                 fontWeight: FontWeight.w400,
                                                 color: ThemeColors.white2)))
                                   ]
-                                : _cards.getAll().map((CardModel card) {
-                                    if (matchesFilterCriteria(card)) {
-                                      return CardView(
-                                          card: card,
-                                          onLongPress: (CardModel c) {
-                                            removeCard(c);
-                                          });
-                                    }
-                                    return const SizedBox.shrink();
-                                  }).toList(),
+                                : visibleCards,
                           )),
                           Button(
                             text: "Add new card +",
@@ -336,7 +350,7 @@ class _HomeState extends State<Home> with TrayListener, WindowListener {
               Positioned(
                 bottom: 4,
                 right: 4,
-                child: Text("${FlavorService.getFlavor().getLabel()}",
+                child: Text(FlavorService.getFlavor().getLabel(),
                     textAlign: TextAlign.left,
                     style: const TextStyle(
                         fontFamily: Fonts.rubik,

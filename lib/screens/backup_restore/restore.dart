@@ -134,7 +134,7 @@ class _RestoreScreenState extends State<RestoreScreen> {
     });
   }
 
-  Future<void> restoreBackup(stepId) async {
+  Future<void> restoreBackup(int stepId) async {
     try {
       RestoreStrategy? restoreStrategy =
           restoreStrategyContext.getRestoreStrategy();
@@ -224,72 +224,93 @@ class _RestoreScreenState extends State<RestoreScreen> {
   Widget build(BuildContext context) {
     return Material(
       child: SafeArea(
-          child: AnimatedPadding(
-        padding: MediaQuery.of(context).viewInsets,
-        duration: const Duration(milliseconds: 100),
-        curve: Curves.decelerate,
         child: Container(
           decoration: const BoxDecoration(color: ThemeColors.gray1),
           constraints: const BoxConstraints(maxWidth: 600),
-          padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          padding: const EdgeInsets.fromLTRB(0, 0, 0, 12),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
+                child: Stack(
                   children: [
-                    const Text(
-                      "Restore",
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                          decoration: TextDecoration.none,
-                          fontFamily: Fonts.rubik,
-                          fontWeight: FontWeight.w600,
-                          color: ThemeColors.white2,
-                          fontSize: 24),
+                    Container(
+                      alignment: Alignment.centerLeft,
+                      child: IconButton(
+                        size: 28,
+                        color: ThemeColors.white1,
+                        iconData: Icons.arrow_back_rounded,
+                        buttonType: ButtonType.ghost,
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                      ),
                     ),
-                    IconButton(
-                      size: 32,
-                      color: ThemeColors.white2,
-                      iconData: Icons.close_rounded,
-                      buttonType: ButtonType.ghost,
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                    )
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: const Text("Restore",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                decoration: TextDecoration.none,
+                                fontFamily: Fonts.rubik,
+                                fontWeight: FontWeight.w600,
+                                color: ThemeColors.white2,
+                                fontSize: 18)),
+                      ),
+                    ),
                   ],
                 ),
-                ..._steps.map((step) {
-                  return Column(
-                    children: [
-                      StepHeader(
-                          status: step.status,
-                          stepId: step.id,
-                          title: step.title,
-                          actionCallback: stepActionCallback),
-                      const SizedBox(height: 24),
-                      RestoreStepContent(
-                        step: step,
-                        actionCallback: act,
-                        backupFile: _backupFile,
-                        validateCredsCallback: validateCredentials,
-                        diffResult: _diffResult,
-                        restoreStrategyOptions: _restoreStrategyOptions,
-                        selectedRestoreStrategy:
-                            restoreStrategyContext.getRestoreStrategy(),
-                        onSelectRestoreStrategy: onSelectRestoreStrategy,
-                      )
-                    ],
-                  );
-                }),
-              ],
-            ),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  child: Padding(
+                    padding: MediaQuery.of(context).viewInsets,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          ..._steps.map((step) {
+                            return Column(
+                              children: [
+                                StepHeader(
+                                    status: step.status,
+                                    stepId: step.id,
+                                    title: step.title,
+                                    actionCallback: stepActionCallback),
+                                const SizedBox(height: 24),
+                                RestoreStepContent(
+                                  step: step,
+                                  actionCallback: act,
+                                  backupFile: _backupFile,
+                                  validateCredsCallback: validateCredentials,
+                                  diffResult: _diffResult,
+                                  restoreStrategyOptions:
+                                      _restoreStrategyOptions,
+                                  selectedRestoreStrategy:
+                                      restoreStrategyContext
+                                          .getRestoreStrategy(),
+                                  onSelectRestoreStrategy:
+                                      onSelectRestoreStrategy,
+                                )
+                              ],
+                            );
+                          }),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-      )),
+      ),
     );
   }
 }

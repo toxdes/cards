@@ -77,7 +77,7 @@ class _ButtonState extends State<Button> {
             transformAlignment: Alignment.center,
             transform: _active
                 ? (Matrix4.identity()
-                  ..scale(widget.scaleFactor, widget.scaleFactor))
+                  ..scaleByDouble(widget.scaleFactor, widget.scaleFactor, 1, 1))
                 : (Matrix4.identity()),
             // props
             // width: 160,

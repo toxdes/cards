@@ -50,6 +50,9 @@ class _CardViewState extends State<CardView> {
       onTapUp: (TapUpDetails _) {
         setActive(false);
       },
+      onTapCancel: () {
+        setActive(false);
+      },
       onLongPress: () {
         showAdaptiveDialog(
             context: context,
@@ -110,7 +113,7 @@ class _CardViewState extends State<CardView> {
         curve: Curves.fastOutSlowIn,
         transformAlignment: Alignment.center,
         transform: _active
-            ? (Matrix4.identity()..scale(0.90, 0.90))
+            ? (Matrix4.identity()..scaleByDouble(0.90, 0.90, 1, 1))
             : (Matrix4.identity()),
         child: Container(
             margin: const EdgeInsets.fromLTRB(4, 16, 4, 16),

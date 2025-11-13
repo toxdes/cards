@@ -31,7 +31,7 @@ class ProdFlavor extends Flavor {
 }
 
 class FlavorService {
-  static getFlavor() {
+  static Flavor getFlavor() {
     String flavorString = const String.fromEnvironment('FLUTTER_APP_FLAVOR');
     return flavorString == 'dev' ? const DevFlavor() : const ProdFlavor();
   }

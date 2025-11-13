@@ -40,11 +40,11 @@ class KeyFormatter extends TextInputFormatter {
 }
 
 class RestoreFieldsFormatter {
-  static secretFormatter() {
+  static SecretFormatter secretFormatter() {
     return SecretFormatter();
   }
 
-  static keyFormatter() {
+  static KeyFormatter keyFormatter() {
     return KeyFormatter();
   }
 }

@@ -11,7 +11,7 @@ class StringUtils {
     return s.length == 1 && res != null && res >= 0 && res <= 9;
   }
 
-  static isAlphabetOrSpace(String s) {
+  static bool isAlphabetOrSpace(String s) {
     RegExp alphabetRegex = RegExp(r'^[a-zA-Z\ ]$');
     return alphabetRegex.hasMatch(s);
   }
@@ -47,7 +47,7 @@ class StringUtils {
     return buf.toString();
   }
 
-  static formatKey(String key, String separator) {
+  static String formatKey(String key, String separator) {
     StringBuffer buf = StringBuffer();
     for (int i = 0; i < key.length; ++i) {
       if (i != 0 && i != key.length && i % 4 == 0) {

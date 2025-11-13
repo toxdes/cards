@@ -15,7 +15,7 @@ class MigrationsService {
     await _runCardMigrations();
   }
 
-  static _runCardMigrations() async {
+  static Future<void> _runCardMigrations() async {
     CardMigrationContext context = CardMigrationContext();
     context.addMigration(AddTimeStampsMigration(id: 1));
     context.addMigration(AddBillingCycleMigration(id: 2));

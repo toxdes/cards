@@ -38,4 +38,8 @@ class PlatformService {
   static bool isDarwin() {
     return Platform.isIOS || Platform.isMacOS;
   }
+
+  static String getOS() {
+    return Platform.operatingSystem;
+  }
 }

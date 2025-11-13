@@ -48,7 +48,7 @@ class _IconButtonState extends State<IconButton> {
           transformAlignment: Alignment.center,
           transform: _active
               ? (Matrix4.identity()
-                ..scale(widget.scaleFactor, widget.scaleFactor))
+                ..scaleByDouble(widget.scaleFactor, widget.scaleFactor, 1, 1))
               : (Matrix4.identity()),
           child: Container(
               alignment: Alignment.center,

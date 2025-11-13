@@ -19,7 +19,7 @@ class SentryService {
     });
   }
 
-  static Future<void> error(throwable, StackTrace stackTrace) async {
+  static Future<void> error(dynamic throwable, StackTrace stackTrace) async {
     if (_initialized) {
       await Sentry.captureException(throwable, stackTrace: stackTrace);
     }
