@@ -21,10 +21,10 @@ Widget app = MaterialApp(
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await NotificationService.initialize();
+  await NotificationService.init();
   await CryptoUtils.init();
   await MigrationsService.runMigrations();
-  // TODO: disable sentry until it can be made opt-in, also consider privacy implications
+  // TODO: enable sentry after security hardening
   // await SentryService.init();
   await BackupService.init();
 

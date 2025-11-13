@@ -163,15 +163,14 @@ class _HomeState extends State<Home> with TrayListener, WindowListener {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> visibleCards = _cards.getAll().map((CardModel card) {
-      if (matchesFilterCriteria(card)) {
-        return CardView(
-            card: card,
-            onLongPress: (CardModel c) {
-              removeCard(c);
-            });
-      }
-      return const SizedBox.shrink();
+    List<Widget> visibleCards = _cards.getAll().where((CardModel card) {
+      return matchesFilterCriteria(card);
+    }).map((CardModel card) {
+      return CardView(
+          card: card,
+          onLongPress: (CardModel c) {
+            removeCard(c);
+          });
     }).toList();
     return SafeArea(
       child: Center(
