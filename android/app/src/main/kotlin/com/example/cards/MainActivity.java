@@ -7,7 +7,6 @@ import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.plugin.common.MethodChannel;
 
 public class MainActivity extends FlutterActivity {
-  private static final String CHANNEL = "com.toxdes.cards/notifications";
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -18,7 +17,9 @@ public class MainActivity extends FlutterActivity {
   public void configureFlutterEngine(io.flutter.embedding.engine.FlutterEngine flutterEngine) {
     super.configureFlutterEngine(flutterEngine);
     
-    new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), CHANNEL)
+    String packageName = getApplicationContext().getPackageName();
+    
+    new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), packageName)
         .setMethodCallHandler((call, result) -> {
           if (call.method.equals("showNotificationWithAction")) {
             String title = call.argument("title");
