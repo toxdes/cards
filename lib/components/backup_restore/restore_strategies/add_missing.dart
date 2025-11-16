@@ -2,7 +2,7 @@ import 'dart:collection';
 
 import 'package:cards/core/restore/restore_strategy.dart';
 import 'package:cards/models/card/card.dart';
-import 'package:cards/models/cardlist/cardlist.dart';
+import 'package:cards/repositories/card_repository.dart';
 
 class AddMissingRestoreStrategy extends RestoreStrategy {
   AddMissingRestoreStrategy()
@@ -13,7 +13,7 @@ class AddMissingRestoreStrategy extends RestoreStrategy {
                 "Import new cards from the file, ignore deletions, ignore conflicts");
 
   @override
-  Future<void> restore(CardListModel ours, CardListModel theirs) async {
+  Future<void> restore(CardRepository ours, CardRepository theirs) async {
     HashSet<String> existing = HashSet<String>();
     UnmodifiableListView<CardModel> ourCards = ours.getAll();
     UnmodifiableListView<CardModel> theirCards = theirs.getAll();

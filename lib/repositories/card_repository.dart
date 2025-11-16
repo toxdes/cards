@@ -1,42 +1,41 @@
 import 'dart:collection';
 
-import 'package:cards/core/db/model.dart';
 import 'package:cards/core/diff/diff_result.dart';
 import 'package:cards/core/encoder/encoder.dart';
-import 'package:cards/core/storage/storage.dart';
 import 'package:cards/models/card/card.dart';
-import 'package:cards/models/cardlist/cardlist_json_encoder.dart';
-import 'package:cards/utils/secure_storage.dart';
+import 'package:cards/repositories/card_repository_json_encoder.dart';
+import 'package:cards/core/storage/storage.dart';
 
-// CLM ✊ -> CardListModel
-class CLMErrorCodes {
+// Error codes for card repository operations
+class CardRepositoryErrorCodes {
   static const int notUnique = 0x100;
   static const int doesNotExist = 0x101;
 }
 
-class CardListModelException implements Exception {
+class CardRepositoryException implements Exception {
   final String message;
   final int errorCode;
-  CardListModelException(this.errorCode, this.message);
+
+  CardRepositoryException(this.errorCode, this.message);
+
   @override
   String toString() {
-    return '[CardListException] Error $errorCode: $message';
+    return '[CardRepositoryException] Error $errorCode: $message';
   }
 }
 
-class CardListModelStorageKeys {
+class CardRepositoryStorageKeys {
   static const mainStorage = "cards";
   static const testStorage = "cards-tests";
 }
 
 enum Recency { oursIsRecent, theirsIsRecent }
 
-class CardListModelDiffResult extends DiffResult {
+class CardRepositoryDiffResult extends DiffResult {
   final int changed;
-  // TODO: implement recency after createdAt is introduced to CardModel
   HashMap<String, Recency> recency = HashMap();
 
-  CardListModelDiffResult(
+  CardRepositoryDiffResult(
       {required super.added, required super.removed, required this.changed});
 
   @override
@@ -57,112 +56,81 @@ class CardListModelDiffResult extends DiffResult {
   }
 }
 
-class CardListModel extends Model {
-  CardListModel(
-      {required this.storageKey, required this.storage, this.onUpdate})
-      : super(schemaVersion: 1);
+/// Repository for managing card persistence and operations
+class CardRepository {
+  CardRepository({
+    required this.storageKey,
+    required this.storage,
+  });
 
   final List<CardModel> _cards = [];
   final Set<String> _cardNumbers = {};
   final String storageKey;
   final Storage storage;
-  Function? onUpdate;
-  // should encoder be private?
-  final Encoder encoder = CardListModelJsonEncoder();
-  int length = 0;
-  static CardListModel? _instance;
+  final Encoder encoder = CardRepositoryJsonEncoder();
 
-  static CardListModel the() {
-    _instance ??= CardListModel(
-        storageKey: CardListModelStorageKeys.mainStorage,
-        storage: const SecureStorage());
-    return _instance!;
-  }
-
-  static void setThe(CardListModel newModel) {
-    _instance = newModel;
-    if (_instance!.onUpdate != null) {
-      _instance!.onUpdate!();
-    }
-  }
-
-  void add(CardModel c) {
-    if (_cardNumbers.contains(c.getNumber())) {
-      throw CardListModelException(CLMErrorCodes.notUnique,
+  /// Add a card to the repository
+  void add(CardModel card) {
+    if (_cardNumbers.contains(card.getNumber())) {
+      throw CardRepositoryException(CardRepositoryErrorCodes.notUnique,
           "Cannot add card, card number is not unique.");
     }
-    _cards.add(c);
-    _cardNumbers.add(c.getNumber());
-    _updateLength();
-    if (onUpdate != null) {
-      onUpdate!(this);
-    }
+    _cards.add(card);
+    _cardNumbers.add(card.getNumber());
   }
 
-  void remove(CardModel c, {bool sync = false}) {
-    if (!_cardNumbers.contains(c.getNumber())) {
-      throw CardListModelException(
-          CLMErrorCodes.doesNotExist, "Cannot remove card, no such card.");
+  /// Remove a card from the repository
+  void remove(CardModel card) {
+    if (!_cardNumbers.contains(card.getNumber())) {
+      throw CardRepositoryException(CardRepositoryErrorCodes.doesNotExist,
+          "Cannot remove card, no such card.");
     }
-    _cardNumbers.remove(c.getNumber());
-    _cards.remove(c);
-    _updateLength();
-    if (onUpdate != null) {
-      onUpdate!(this);
-    }
+    _cardNumbers.remove(card.getNumber());
+    _cards.remove(card);
   }
 
-  void setUpdateListener(Function onUpdate) {
-    this.onUpdate = onUpdate;
+  void removeAll() {
+    _cardNumbers.clear();
+    _cards.clear();
   }
 
+  /// Get all cards as immutable list
   UnmodifiableListView<CardModel> getAll() {
     return UnmodifiableListView(_cards);
   }
 
-  void _updateLength() {
-    length = _cards.length;
-  }
+  /// Get number of cards
+  int get length => _cards.length;
 
-  Future<void> _writeToStorage() async {
+  /// Save all cards to storage
+  Future<void> save() async {
     await storage.write(key: storageKey, value: toJson());
   }
 
-  Future<void> save() async {
-    await _writeToStorage();
-  }
-
+  /// Clear all cards from storage
   void clearStorage() {
     storage.delete(key: storageKey);
   }
 
-  Future<CardListModel> readFromStorage() async {
+  /// Load all cards from storage
+  Future<void> readFromStorage() async {
     String? dataJson = await storage.read(key: storageKey);
-    CardListModel decodedCards = encoder.decode(dataJson ?? "[]");
+    CardRepository decoded = _decodeFromJson(dataJson ?? "[]");
     _cardNumbers.clear();
     _cards.clear();
-    decodedCards.getAll().forEach((card) {
+    decoded.getAll().forEach((card) {
       _cardNumbers.add(card.getNumber());
       _cards.add(card);
     });
-
-    _updateLength();
-    if (onUpdate != null) {
-      onUpdate!(this);
-    }
-    return this;
   }
 
-  @override
-  String toString() {
-    return toJson();
-  }
-
+  /// Export cards as JSON string
   String toJson() {
     return encoder.encode(this);
   }
 
-  bool equals(CardListModel other) {
+  /// Check equality with another repository
+  bool equals(CardRepository other) {
     if (other.length != length) {
       return false;
     }
@@ -175,7 +143,8 @@ class CardListModel extends Model {
     return true;
   }
 
-  CardListModelDiffResult getDiff(CardListModel other) {
+  /// Get diff between this repository and another
+  CardRepositoryDiffResult getDiff(CardRepository other) {
     int added = 0, changed = 0, removed = 0;
     UnmodifiableListView<CardModel> ours = getAll();
     UnmodifiableListView<CardModel> theirs = other.getAll();
@@ -218,8 +187,25 @@ class CardListModel extends Model {
       }
     }
 
-    CardListModelDiffResult res = CardListModelDiffResult(
+    return CardRepositoryDiffResult(
         added: added, changed: changed, removed: removed);
-    return res;
+  }
+
+  /// Decode JSON string into repository
+  CardRepository _decodeFromJson(String json) {
+    // Using the encoder which handles CardRepository format
+    // This maintains backward compatibility
+    final decoded = encoder.decode(json);
+    final repo = CardRepository(storageKey: storageKey, storage: storage);
+    decoded.getAll().forEach((card) {
+      repo._cards.add(card);
+      repo._cardNumbers.add(card.getNumber());
+    });
+    return repo;
+  }
+
+  @override
+  String toString() {
+    return toJson();
   }
 }

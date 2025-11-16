@@ -1,10 +1,10 @@
 import 'package:cards/config/colors.dart';
 import 'package:cards/config/fonts.dart';
-import 'package:cards/models/cardlist/cardlist.dart';
+import 'package:cards/repositories/card_repository.dart';
 import 'package:flutter/material.dart';
 
 class CardListDiffSummary extends StatelessWidget {
-  final CardListModelDiffResult result;
+  final CardRepositoryDiffResult result;
   const CardListDiffSummary({super.key, required this.result});
   @override
   Widget build(BuildContext context) {

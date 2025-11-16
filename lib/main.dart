@@ -1,5 +1,6 @@
 import 'package:cards/components/shared/toast.dart';
 import 'package:cards/config/colors.dart';
+import 'package:cards/providers/cards_notifier.dart';
 import 'package:cards/screens/home.dart';
 import 'package:cards/services/backup_service.dart';
 import 'package:cards/services/migrations_service.dart';
@@ -8,12 +9,16 @@ import 'package:cards/services/platform_service.dart';
 import 'package:cards/services/sentry_service.dart';
 import 'package:cards/utils/crypto/crypto_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
-Widget app = MaterialApp(
-  navigatorKey: ToastManager().navigatorKey,
-  home: const Scaffold(body: Home(), backgroundColor: ThemeColors.gray1),
-  navigatorObservers: [SentryService.getNavigatorObserver()],
+Widget app = ChangeNotifierProvider(
+  create: (_) => CardsNotifier(),
+  child: MaterialApp(
+    navigatorKey: ToastManager().navigatorKey,
+    home: const Scaffold(body: Home(), backgroundColor: ThemeColors.gray1),
+    navigatorObservers: [SentryService.getNavigatorObserver()],
+  ),
 );
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

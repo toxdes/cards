@@ -11,14 +11,16 @@ import 'package:cards/config/fonts.dart';
 import 'package:cards/core/restore/restore_strategy.dart';
 import 'package:cards/core/restore/restore_strategy_context.dart';
 import 'package:cards/core/step/step.dart';
-import 'package:cards/models/cardlist/cardlist.dart';
-import 'package:cards/models/cardlist/cardlist_json_encoder.dart';
+import 'package:cards/repositories/card_repository.dart';
+import 'package:cards/repositories/card_repository_json_encoder.dart';
+import 'package:cards/providers/cards_notifier.dart';
 import 'package:cards/services/backup_service.dart';
 import 'package:cards/services/file_service.dart';
 import 'package:cards/services/toast_service.dart';
 import 'package:cards/utils/string_utils.dart';
 import 'package:flutter/material.dart' hide IconButton, Step;
 import 'package:cards/components/shared/icon_button.dart';
+import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 enum RestoreStepDesc {
@@ -50,8 +52,8 @@ class RestoreScreen extends StatefulWidget {
 class _RestoreScreenState extends State<RestoreScreen> {
   final List<RestoreStep> _steps = <RestoreStep>[];
   XFile? _backupFile;
-  CardListModelDiffResult? _diffResult;
-  CardListModel? _decryptedCards;
+  CardRepositoryDiffResult? _diffResult;
+  CardRepository? _decryptedCards;
   final List<RestoreStrategy> _restoreStrategyOptions = [];
   RestoreStrategyContext restoreStrategyContext = RestoreStrategyContext();
 
@@ -139,10 +141,12 @@ class _RestoreScreenState extends State<RestoreScreen> {
       RestoreStrategy? restoreStrategy =
           restoreStrategyContext.getRestoreStrategy();
       if (restoreStrategy == null) return;
-      CardListModel ours = CardListModel.the();
       if (_decryptedCards == null) {
         throw Exception("Couldn't decrypt");
       }
+      // Get current cards from notifier
+      CardsNotifier cardsNotifier = context.read<CardsNotifier>();
+      CardRepository ours = cardsNotifier.cardList;
       await restoreStrategy.restore(ours, _decryptedCards!);
       await Future.delayed(const Duration(milliseconds: 1500));
       nextStep(stepId);
@@ -167,14 +171,11 @@ class _RestoreScreenState extends State<RestoreScreen> {
       Uint8List decryptedBytes = await BackupService.decrypt(
           key: key, data: fileContent, salt: secret);
       String decrypted = StringUtils.fromBytes(decryptedBytes);
-      CardListModelJsonEncoder encoder = CardListModelJsonEncoder();
-      CardListModel existingCards = CardListModel.the();
-      CardListModel decodedCards = encoder.decode(decrypted);
       ToastService.show(
           message: "Decrypted successfully", status: ToastStatus.success);
       setState(() {
-        _diffResult = existingCards.getDiff(decodedCards);
-        _decryptedCards = decodedCards;
+        _diffResult = context.read<CardsNotifier>().getDiff(decrypted);
+        _decryptedCards = CardRepositoryJsonEncoder().decode(decrypted);
       });
     } catch (e) {
       String message = "Failed to decrypt ${_backupFile!.name}";

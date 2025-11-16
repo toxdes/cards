@@ -7,7 +7,7 @@ import 'package:cards/components/shared/step_header.dart';
 import 'package:cards/config/colors.dart';
 import 'package:cards/config/fonts.dart';
 import 'package:cards/core/step/step.dart';
-import 'package:cards/models/cardlist/cardlist.dart';
+import 'package:cards/providers/cards_notifier.dart';
 import 'package:cards/services/backup_service.dart';
 import 'package:cards/services/platform_service.dart';
 import 'package:cards/services/toast_service.dart';
@@ -16,6 +16,7 @@ import 'package:cards/utils/string_utils.dart';
 import 'package:flutter/material.dart' hide Step, IconButton;
 import 'package:cards/components/shared/icon_button.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 class BackupScreen extends StatefulWidget {
@@ -120,11 +121,11 @@ class _BackupScreenState extends State<BackupScreen> {
   }
 
   void generateBackup(int stepId) async {
-    CardListModel cards = CardListModel.the();
+    CardsNotifier cardsNotifier = context.read<CardsNotifier>();
     await Future.delayed(const Duration(milliseconds: 2000));
     // generate backup
     Uint8List encrypted = await BackupService.encrypt(
-        key: _key, data: StringUtils.toBytes(cards.toJson()), salt: _secret);
+        key: _key, data: StringUtils.toBytes(cardsNotifier.toJsonString()), salt: _secret);
 
     // write to file
     final Directory documentsDir = await getApplicationDocumentsDirectory();

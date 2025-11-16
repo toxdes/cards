@@ -1,5 +1,5 @@
 import 'package:cards/core/restore/restore_strategy.dart';
-import 'package:cards/models/cardlist/cardlist.dart';
+import 'package:cards/repositories/card_repository.dart';
 
 class DoNothingRestoreStrategy extends RestoreStrategy {
   DoNothingRestoreStrategy()
@@ -9,5 +9,5 @@ class DoNothingRestoreStrategy extends RestoreStrategy {
             desc: "Don't do anything. Exit.");
 
   @override
-  Future<void> restore(CardListModel ours, CardListModel theirs) async {}
+  Future<void> restore(CardRepository ours, CardRepository theirs) async {}
 }

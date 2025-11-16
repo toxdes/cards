@@ -6,7 +6,7 @@ import 'package:cards/models/card/migrations/m_add_billing_cycle.dart';
 import 'package:cards/models/card/migrations/m_add_timestamps.dart';
 import 'package:cards/models/card/migrations/m_redo_card_type.dart';
 import 'package:cards/models/card/migrations/migration_context.dart';
-import 'package:cards/models/cardlist/cardlist.dart';
+import 'package:cards/repositories/card_repository.dart';
 import 'package:cards/services/toast_service.dart';
 import 'package:cards/utils/secure_storage.dart';
 
@@ -20,9 +20,13 @@ class MigrationsService {
     context.addMigration(AddTimeStampsMigration(id: 1));
     context.addMigration(AddBillingCycleMigration(id: 2));
     context.addMigration(RedoCardTypeMigration(id: 3));
-    CardListModel cardListModel = CardListModel.the();
-    await cardListModel.readFromStorage();
-    UnmodifiableListView<CardModel> cards = cardListModel.getAll();
+    
+    CardRepository cardRepository = CardRepository(
+        storage: const SecureStorage(),
+        storageKey: CardRepositoryStorageKeys.mainStorage);
+    await cardRepository.readFromStorage();
+    
+    UnmodifiableListView<CardModel> cards = cardRepository.getAll();
     if (cards.isEmpty) return;
     if (CardModelFactory.blank().schemaVersion != cards[0].schemaVersion) {
       ToastService.show(message: "Updating DB...", status: ToastStatus.info);
@@ -31,14 +35,13 @@ class MigrationsService {
         newCards.add(await context
             .runAllMigrations(CardModelFactory.fromJson(cards[i].toJson())));
       }
-      CardListModel newCardListModel = CardListModel(
+      CardRepository migratedRepository = CardRepository(
           storage: const SecureStorage(),
-          storageKey: CardListModelStorageKeys.mainStorage);
+          storageKey: CardRepositoryStorageKeys.mainStorage);
       for (int i = 0; i < newCards.length; ++i) {
-        newCardListModel.add(newCards[i]);
+        migratedRepository.add(newCards[i]);
       }
-      CardListModel.setThe(newCardListModel);
-      await CardListModel.the().save();
+      await migratedRepository.save();
       ToastService.show(message: "DB updated", status: ToastStatus.success);
     }
   }
