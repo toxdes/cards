@@ -6,6 +6,8 @@ import 'package:cards/utils/string_utils.dart';
 class CardModel extends Model {
   CardModel() : super(schemaVersion: 3);
 
+  /// Creates an empty CardModel with the specified schema version.
+  /// Used internally by migrations to instantiate models at specific schema versions.
   CardModel.fromSchema(int schemaVersion) : super(schemaVersion: schemaVersion);
 
   CardType type = CardType.unknown;

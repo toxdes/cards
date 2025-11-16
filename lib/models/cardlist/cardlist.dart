@@ -8,6 +8,7 @@ import 'package:cards/models/card/card.dart';
 import 'package:cards/models/cardlist/cardlist_json_encoder.dart';
 import 'package:cards/utils/secure_storage.dart';
 
+// CLM ✊ -> CardListModel
 class CLMErrorCodes {
   static const int notUnique = 0x100;
   static const int doesNotExist = 0x101;

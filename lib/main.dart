@@ -12,10 +12,7 @@ import 'package:window_manager/window_manager.dart';
 
 Widget app = MaterialApp(
   navigatorKey: ToastManager().navigatorKey,
-  home: const Scaffold(
-    body: Home(),
-    backgroundColor: ThemeColors.gray1,
-  ),
+  home: const Scaffold(body: Home(), backgroundColor: ThemeColors.gray1),
   navigatorObservers: [SentryService.getNavigatorObserver()],
 );
 void main() async {

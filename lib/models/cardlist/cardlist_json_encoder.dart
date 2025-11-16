@@ -23,15 +23,10 @@ class CardListModelJsonEncoder implements Encoder<CardListModel, String> {
 
   @override
   String encode(CardListModel input) {
-    StringBuffer buf = StringBuffer();
     List<CardModel> cards = input.getAll();
-    buf.write('[');
-    for (int i = 0; i < cards.length; ++i) {
-      buf.write(cards[i].toJson());
-      if (i != cards.length - 1) buf.write(',');
-    }
-    buf.write(']');
-    String items = buf.toString();
-    return items;
+    List<Map<String, dynamic>> cardsJson = cards
+        .map((card) => jsonDecode(card.toJson()) as Map<String, dynamic>)
+        .toList();
+    return jsonEncode(cardsJson);
   }
 }

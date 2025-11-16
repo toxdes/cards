@@ -10,23 +10,46 @@ class CardModelJsonEncoder implements Encoder<CardModel, String> {
   CardModel decode(String encodedInput) {
     Map<String, dynamic> record =
         jsonDecode(encodedInput) as Map<String, dynamic>;
-    int? createdAt = int.tryParse(record['createdAt'] ?? "bad");
-    int? updatedAt = int.tryParse(record['updatedAt'] ?? "bad");
-    int? schemaVersion = int.tryParse(record['schemaVersion'] ?? "bad");
-    String? billingCycle = record['billingCycle'];
+    
+    // Handle both old (string) and new (int) formats for backward compatibility
+    int? schemaVersion;
+    final schemaVersionValue = record['schemaVersion'];
+    if (schemaVersionValue is int) {
+      schemaVersion = schemaVersionValue;
+    } else if (schemaVersionValue is String) {
+      schemaVersion = int.tryParse(schemaVersionValue);
+    }
     schemaVersion ??= 0;
+
+    int? createdAt;
+    final createdAtValue = record['createdAt'];
+    if (createdAtValue is int) {
+      createdAt = createdAtValue;
+    } else if (createdAtValue is String) {
+      createdAt = int.tryParse(createdAtValue);
+    }
+
+    int? updatedAt;
+    final updatedAtValue = record['updatedAt'];
+    if (updatedAtValue is int) {
+      updatedAt = updatedAtValue;
+    } else if (updatedAtValue is String) {
+      updatedAt = int.tryParse(updatedAtValue);
+    }
+
+    String? billingCycle = record['billingCycle'];
 
     CardModel card = CardModelFactory.fromSchema(schemaVersion);
 
     card
-      ..setNumber(record['number'] as String)
+      ..setNumber((record['number'] ?? '') as String)
       ..setProvider(
-          CardUtils.getCardProviderFromString(record['provider'] as String))
-      ..setCVV(record['cvv'] as String)
-      ..setExpiry(record['expiry'] as String)
-      ..setCardType(CardUtils.getCardTypeFromString(record['type'] as String))
-      ..setTitle(record['title'] as String)
-      ..setOwnerName(record['ownerName'] as String);
+          CardUtils.getCardProviderFromString((record['provider'] ?? 'Unknown') as String))
+      ..setCVV((record['cvv'] ?? '') as String)
+      ..setExpiry((record['expiry'] ?? '') as String)
+      ..setCardType(CardUtils.getCardTypeFromString((record['type'] ?? 'Unknown') as String))
+      ..setTitle((record['title'] ?? '') as String)
+      ..setOwnerName((record['ownerName'] ?? '') as String);
     if (createdAt != null) {
       card.setCreatedAt(
           DateTime.fromMicrosecondsSinceEpoch(createdAt, isUtc: true));
@@ -43,20 +66,19 @@ class CardModelJsonEncoder implements Encoder<CardModel, String> {
 
   @override
   String encode(CardModel c) {
-    return """
-{
-  "schemaVersion":"${c.schemaVersion}",
-  "title": "${c.title}",
-  "number": "${c.number}",
-  "provider": "${c.getProviderView()}",
-  "cvv": "${c.cvv}",
-  "type": "${c.getCardTypeView()}",
-  "expiry": "${c.expiry}",
-  "ownerName": "${c.ownerName}",
-  "createdAt": ${c.createdAt == null ? 'null' : '"${c.createdAt!.toUtc().microsecondsSinceEpoch}"'},
-  "updatedAt": ${c.updatedAt == null ? 'null' : '"${c.updatedAt!.toUtc().microsecondsSinceEpoch}"'},
-  "billingCycle": "${c.getBillingCycle() == null ? 'null' : "${c.getBillingCycle()}"}"
-}
-    """;
+    final json = <String, dynamic>{
+      'schemaVersion': c.schemaVersion,
+      'title': c.title,
+      'number': c.number,
+      'provider': c.getProviderView(),
+      'cvv': c.cvv,
+      'type': c.getCardTypeView(),
+      'expiry': c.expiry,
+      'ownerName': c.ownerName,
+      'createdAt': c.createdAt?.toUtc().microsecondsSinceEpoch,
+      'updatedAt': c.updatedAt?.toUtc().microsecondsSinceEpoch,
+      'billingCycle': c.getBillingCycle(),
+    };
+    return jsonEncode(json);
   }
 }
