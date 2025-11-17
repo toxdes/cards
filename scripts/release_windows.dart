@@ -35,9 +35,9 @@ void main() async {
   int releaseId = releaseRes['id'];
   logger.info("Release ID: $releaseId");
 
-  logger.cmd("Activating flutter_distributor");
-  ProcessResult res = Process.runSync(
-      "dart", ['pub', 'global', 'activate', 'flutter_distributor']);
+  logger.cmd("Activating fastforge");
+  ProcessResult res =
+      Process.runSync("dart", ['pub', 'global', 'activate', 'fastforge']);
   logger.info("${res.stdout}");
   if (res.stderr?.length > 0) {
     logger.error("${res.stderr}");
@@ -51,7 +51,7 @@ void main() async {
 
   logger.cmd("Building windows exe");
   res = Process.runSync(
-      "$homeDir\\AppData\\Local\\Pub\\Cache\\bin\\flutter_distributor.bat",
+      "$homeDir\\AppData\\Local\\Pub\\Cache\\bin\\fastforge.bat",
       ['release', '--name=dev', '--jobs=release-windows-exe']);
 
   if (res.stderr?.length > 0) {

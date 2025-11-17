@@ -6,6 +6,10 @@ releases:
         package:
           platform: linux
           target: deb
+      - name: release-linux-appimage
+        package:
+          platform: linux
+          target: appimage
       - name: release-windows-exe
         package:
           platform: windows

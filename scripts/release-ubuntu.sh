@@ -12,8 +12,10 @@ RELEASE_RES=$(curl -L \
 )
 RELEASE_ID=$(echo $RELEASE_RES | jq -r '.id')
 LINUX_RELEASE_NAME=$(yq -r '.version' ./pubspec.yaml)
-dart pub global activate flutter_distributor
-~/.pub-cache/bin/flutter_distributor release --name=dev --jobs=release-linux-deb
+dart pub global activate fastforge
+~/.pub-cache/bin/fastforge release --name=dev --jobs=release-linux-deb,release-linux-appimage
+
+# Upload DEB
 UPLOAD_URL="https://uploads.github.com/repos/toxdes/cards/releases/$RELEASE_ID/assets?name=cards-$APP_VERSION.deb&label=cards-$APP_VERSION.deb"
 DEB_PATH="./dist/$LINUX_RELEASE_NAME/cards-$LINUX_RELEASE_NAME-linux.deb"
 curl -L \
@@ -24,3 +26,15 @@ curl -L \
   -H "Content-Type: application/octet-stream" \
   "$UPLOAD_URL" \
   --data-binary "@$DEB_PATH"
+
+# Upload AppImage
+UPLOAD_URL_APPIMAGE="https://uploads.github.com/repos/toxdes/cards/releases/$RELEASE_ID/assets?name=cards-$APP_VERSION-x86_64.AppImage&label=cards-$APP_VERSION-x86_64.AppImage"
+APPIMAGE_PATH="./dist/$LINUX_RELEASE_NAME/cards-$LINUX_RELEASE_NAME-linux.appimage"
+curl -L \
+  -X POST \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer $GH_TOKEN" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  -H "Content-Type: application/octet-stream" \
+  "$UPLOAD_URL_APPIMAGE" \
+  --data-binary "@$APPIMAGE_PATH"
