@@ -15,7 +15,6 @@ dependencies:
   - libappindicator3-1 | libaytana-appindicator3-1
   - libsecret-1-0
   - libnotify-bin
-  - libjsoncpp25
   - xdg-user-dirs
 
 essential: false
