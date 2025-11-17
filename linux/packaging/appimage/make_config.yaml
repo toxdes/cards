@@ -1,0 +1,17 @@
+display_name: Cards
+package_name: cards
+
+maintainer:
+  name: Vaibhav Mali
+  email: malivp3494@gmail.com
+
+icon: linux/icons/icon256.png
+
+keywords:
+  - secure wallet
+  - credit-cards wallet
+
+generic_name: Cards wallet app
+
+categories:
+  - Office
