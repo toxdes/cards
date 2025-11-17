@@ -1,7 +1,7 @@
 import 'package:cards/core/storage/storage.dart';
 import 'package:cards/models/card/card.dart';
 import 'package:cards/models/card/card_factory.dart';
-import 'package:cards/models/cardlist/cardlist.dart';
+import 'package:cards/repositories/card_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:test/test.dart';
 
@@ -11,12 +11,12 @@ void main() {
   setUp(() {});
   tearDown(() async {
     Storage storage = MockStorage();
-    await storage.delete(key: CardListModelStorageKeys.testStorage);
+    await storage.delete(key: CardRepositoryStorageKeys.testStorage);
   });
 
   test('raises exception when adding same card number twice', () {
-    CardListModel list = CardListModel(
-        storageKey: CardListModelStorageKeys.testStorage,
+    CardRepository list = CardRepository(
+        storageKey: CardRepositoryStorageKeys.testStorage,
         storage: MockStorage());
     CardModel c = CardModelFactory.random();
     expect(() {
@@ -25,15 +25,15 @@ void main() {
       return list.getAll().length == 1;
     },
         throwsA(predicate((e) =>
-            e is CardListModelException &&
-            e.errorCode == CLMErrorCodes.notUnique)));
+            e is CardRepositoryException &&
+            e.errorCode == CardRepositoryErrorCodes.notUnique)));
   });
 
   test('raises exception when removing a card that doesn\'t exist', () {
     WidgetsFlutterBinding.ensureInitialized();
 
-    CardListModel list = CardListModel(
-        storageKey: CardListModelStorageKeys.testStorage,
+    CardRepository list = CardRepository(
+        storageKey: CardRepositoryStorageKeys.testStorage,
         storage: MockStorage());
     CardModel c = CardModelFactory.random();
 
@@ -43,26 +43,26 @@ void main() {
       list.remove(c1);
     },
         throwsA(predicate((e) =>
-            e is CardListModelException &&
-            e.errorCode == CLMErrorCodes.doesNotExist)));
+            e is CardRepositoryException &&
+            e.errorCode == CardRepositoryErrorCodes.doesNotExist)));
   });
 
   test('raises exception when removing a card from empty list', () {
-    CardListModel list = CardListModel(
-        storageKey: CardListModelStorageKeys.testStorage,
+    CardRepository list = CardRepository(
+        storageKey: CardRepositoryStorageKeys.testStorage,
         storage: MockStorage());
     expect(() {
       CardModel c1 = CardModelFactory.random();
       list.remove(c1);
     },
         throwsA(predicate((e) =>
-            e is CardListModelException &&
-            e.errorCode == CLMErrorCodes.doesNotExist)));
+            e is CardRepositoryException &&
+            e.errorCode == CardRepositoryErrorCodes.doesNotExist)));
   });
 
   test('removes item correctly.', () {
-    CardListModel list = CardListModel(
-        storageKey: CardListModelStorageKeys.testStorage,
+    CardRepository list = CardRepository(
+        storageKey: CardRepositoryStorageKeys.testStorage,
         storage: MockStorage());
     expect(() {
       assert(list.getAll().isEmpty);
@@ -85,8 +85,8 @@ void main() {
   });
 
   test('cardlist_json_encoder works correctly', () async {
-    CardListModel cardsModel = CardListModel(
-        storageKey: CardListModelStorageKeys.testStorage,
+    CardRepository cardsModel = CardRepository(
+        storageKey: CardRepositoryStorageKeys.testStorage,
         storage: MockStorage());
     CardModel c1 = CardModelFactory.random();
     CardModel c2 = CardModelFactory.random();
@@ -95,13 +95,13 @@ void main() {
     cardsModel.add(c2);
     cardsModel.add(c3);
     await cardsModel.save();
-    CardListModel decodedCardsModel = CardListModel(
-        storageKey: CardListModelStorageKeys.testStorage,
+    CardRepository decodedCardsModel = CardRepository(
+        storageKey: CardRepositoryStorageKeys.testStorage,
         storage: MockStorage());
     await decodedCardsModel.readFromStorage();
     List<CardModel> cards = cardsModel.getAll();
-    List<CardModel> decodedCards =
-        (await cardsModel.readFromStorage()).getAll();
+    await cardsModel.readFromStorage();
+    List<CardModel> decodedCards = cardsModel.getAll();
     assert(cards.length == decodedCards.length);
     for (int i = 0; i < cards.length; ++i) {
       assert(cards[i].equals(decodedCards[i]));
@@ -109,15 +109,15 @@ void main() {
   });
 
   test('getDiff() with both empty', () {
-    CardListModel ours = CardListModel(
+    CardRepository ours = CardRepository(
         storage: MockStorage(),
-        storageKey: CardListModelStorageKeys.testStorage);
+        storageKey: CardRepositoryStorageKeys.testStorage);
 
-    CardListModel theirs = CardListModel(
+    CardRepository theirs = CardRepository(
         storage: MockStorage(),
-        storageKey: CardListModelStorageKeys.testStorage);
+        storageKey: CardRepositoryStorageKeys.testStorage);
 
-    CardListModelDiffResult diffResult = ours.getDiff(theirs);
+    CardRepositoryDiffResult diffResult = ours.getDiff(theirs);
 
     expect(diffResult.added, 0);
     expect(diffResult.removed, 0);
@@ -125,13 +125,13 @@ void main() {
   });
 
   test('getDiff() with both equal', () {
-    CardListModel ours = CardListModel(
+    CardRepository ours = CardRepository(
         storage: MockStorage(),
-        storageKey: CardListModelStorageKeys.testStorage);
+        storageKey: CardRepositoryStorageKeys.testStorage);
 
-    CardListModel theirs = CardListModel(
+    CardRepository theirs = CardRepository(
         storage: MockStorage(),
-        storageKey: CardListModelStorageKeys.testStorage);
+        storageKey: CardRepositoryStorageKeys.testStorage);
 
     CardModel c1 = CardModelFactory.random();
     CardModel c2 = CardModelFactory.random();
@@ -144,7 +144,7 @@ void main() {
     theirs.add(c1);
     theirs.add(c2);
     theirs.add(c3);
-    CardListModelDiffResult diffResult = ours.getDiff(theirs);
+    CardRepositoryDiffResult diffResult = ours.getDiff(theirs);
 
     expect(diffResult.added, 0);
     expect(diffResult.removed, 0);
@@ -152,19 +152,19 @@ void main() {
   });
 
   test('getDiff() with incoming-deletion', () {
-    CardListModel ours = CardListModel(
+    CardRepository ours = CardRepository(
         storage: MockStorage(),
-        storageKey: CardListModelStorageKeys.testStorage);
+        storageKey: CardRepositoryStorageKeys.testStorage);
 
-    CardListModel theirs = CardListModel(
+    CardRepository theirs = CardRepository(
         storage: MockStorage(),
-        storageKey: CardListModelStorageKeys.testStorage);
+        storageKey: CardRepositoryStorageKeys.testStorage);
 
     ours.add(CardModelFactory.random());
     ours.add(CardModelFactory.random());
     ours.add(CardModelFactory.random());
 
-    CardListModelDiffResult diffResult = ours.getDiff(theirs);
+    CardRepositoryDiffResult diffResult = ours.getDiff(theirs);
 
     expect(diffResult.added, 0);
     expect(diffResult.removed, 3);
@@ -172,19 +172,19 @@ void main() {
   });
 
   test('getDiff() with incoming-addition', () {
-    CardListModel ours = CardListModel(
+    CardRepository ours = CardRepository(
         storage: MockStorage(),
-        storageKey: CardListModelStorageKeys.testStorage);
+        storageKey: CardRepositoryStorageKeys.testStorage);
 
-    CardListModel theirs = CardListModel(
+    CardRepository theirs = CardRepository(
         storage: MockStorage(),
-        storageKey: CardListModelStorageKeys.testStorage);
+        storageKey: CardRepositoryStorageKeys.testStorage);
 
     theirs.add(CardModelFactory.random());
     theirs.add(CardModelFactory.random());
     theirs.add(CardModelFactory.random());
 
-    CardListModelDiffResult diffResult = ours.getDiff(theirs);
+    CardRepositoryDiffResult diffResult = ours.getDiff(theirs);
 
     expect(diffResult.added, 3);
     expect(diffResult.removed, 0);
@@ -192,13 +192,13 @@ void main() {
   });
 
   test('getDiff() with incoming-change', () {
-    CardListModel ours = CardListModel(
+    CardRepository ours = CardRepository(
         storage: MockStorage(),
-        storageKey: CardListModelStorageKeys.testStorage);
+        storageKey: CardRepositoryStorageKeys.testStorage);
 
-    CardListModel theirs = CardListModel(
+    CardRepository theirs = CardRepository(
         storage: MockStorage(),
-        storageKey: CardListModelStorageKeys.testStorage);
+        storageKey: CardRepositoryStorageKeys.testStorage);
 
     // add a random card to ours
     CardModel c1 = CardModelFactory.random();
@@ -219,7 +219,7 @@ void main() {
     ours.add(c1);
 
     // ours should have 2 cards, theirs should have 2 cards, and both are different in theirs, so diff-result should show changed cards as 2
-    CardListModelDiffResult diffResult = ours.getDiff(theirs);
+    CardRepositoryDiffResult diffResult = ours.getDiff(theirs);
 
     expect(diffResult.added, 0);
     expect(diffResult.removed, 0);

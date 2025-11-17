@@ -9,7 +9,7 @@ import 'package:cards/config/colors.dart';
 import 'package:cards/config/fonts.dart';
 import 'package:cards/core/restore/restore_strategy.dart';
 import 'package:cards/core/step/step.dart';
-import 'package:cards/models/cardlist/cardlist.dart';
+import 'package:cards/repositories/card_repository.dart';
 import 'package:cards/screens/backup_restore/restore.dart';
 import 'package:cards/services/backup_service.dart';
 import 'package:cards/utils/string_utils.dart';
@@ -23,7 +23,7 @@ class RestoreStepContent extends StatefulWidget {
   final Function(RestoreCallbackAction action, Step step)? actionCallback;
   final Function(String key, String secret)? validateCredsCallback;
   final XFile? backupFile;
-  final CardListModelDiffResult? diffResult;
+  final CardRepositoryDiffResult? diffResult;
   final List<RestoreStrategy> restoreStrategyOptions;
   final RestoreStrategy? selectedRestoreStrategy;
   final Function(RestoreStrategy selectedStrategy) onSelectRestoreStrategy;
