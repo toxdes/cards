@@ -29,7 +29,7 @@ curl -L \
 
 # Upload AppImage
 UPLOAD_URL_APPIMAGE="https://uploads.github.com/repos/toxdes/cards/releases/$RELEASE_ID/assets?name=cards-$APP_VERSION-x86_64.AppImage&label=cards-$APP_VERSION-x86_64.AppImage"
-APPIMAGE_PATH="./dist/$LINUX_RELEASE_NAME/cards-$LINUX_RELEASE_NAME-linux.appimage"
+APPIMAGE_PATH="./dist/$LINUX_RELEASE_NAME/cards-$LINUX_RELEASE_NAME-linux.AppImage"
 curl -L \
   -X POST \
   -H "Accept: application/vnd.github+json" \
