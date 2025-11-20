@@ -1,4 +1,4 @@
-class Model {
+abstract class Model {
   final int schemaVersion;
   const Model({required this.schemaVersion});
 

@@ -11,11 +11,13 @@ class BottomSheet extends StatefulWidget {
       required this.onClose,
       this.child,
       this.title,
-      this.closeLabel});
+      this.closeLabel,
+      this.heightFactor = 1.0});
   final bool isVisible;
   final VoidCallback onClose;
   final String? title;
   final String? closeLabel;
+  final double heightFactor;
 
   final Widget? child;
 
@@ -63,11 +65,14 @@ class _BottomSheetState extends State<BottomSheet>
             textDirection: TextDirection.ltr,
             child: Stack(children: [
               Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                      color: ThemeColors.gray1.withValues(alpha: 0.94)),
-                  padding: const EdgeInsets.only(top: 60),
                   child: Container(
+                decoration: BoxDecoration(
+                    color: ThemeColors.gray1.withValues(alpha: 0.94)),
+                padding: const EdgeInsets.only(top: 60),
+                child: FractionallySizedBox(
+                    heightFactor: widget.heightFactor,
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
                       decoration: BoxDecoration(
                           color: ThemeColors.gray1,
                           border: Border(
@@ -100,7 +105,7 @@ class _BottomSheetState extends State<BottomSheet>
                                       : const SizedBox.shrink(),
                                   Button(
                                     color: ThemeColors.red,
-                                    text: widget.closeLabel ?? "Close",
+                                    label: widget.closeLabel ?? "Close",
                                     onTap: widget.onClose,
                                     buttonType: ButtonType.ghost,
                                   )
@@ -108,9 +113,9 @@ class _BottomSheetState extends State<BottomSheet>
                             widget.child ?? SizedBox.shrink(),
                           ]),
                         ),
-                      )),
-                ),
-              ),
+                      ),
+                    )),
+              )),
             ])),
       ).animate(autoPlay: false, controller: _animationController).slideY(
           duration: 240.ms, curve: Curves.easeOutExpo, begin: 1, end: 0),

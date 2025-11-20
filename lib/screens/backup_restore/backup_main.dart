@@ -118,7 +118,7 @@ class _BackupScreenState extends State<BackupMainScreen> {
                       child: Button(
                         onTap: _proceedWithSelection,
                         color: ThemeColors.blue,
-                        text: "Continue",
+                        label: "Continue",
                         buttonType: ButtonType.primary,
                         disabled: _selectedOption == null,
                         width: 120,

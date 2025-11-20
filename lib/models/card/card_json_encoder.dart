@@ -39,6 +39,14 @@ class CardModelJsonEncoder implements Encoder<CardModel, String> {
 
     String? billingCycle = record['billingCycle'];
 
+    int usedCount = 0;
+    final usedCountValue = record['usedCount'];
+    if (usedCountValue is int) {
+      usedCount = usedCountValue;
+    } else if (usedCountValue is String) {
+      usedCount = int.tryParse(usedCountValue) ?? 0;
+    }
+
     CardModel card = CardModelFactory.fromSchema(schemaVersion);
 
     card
@@ -61,6 +69,7 @@ class CardModelJsonEncoder implements Encoder<CardModel, String> {
     if (billingCycle != null) {
       card.setBillingCycle(billingCycle);
     }
+    card.usedCount = usedCount;
     return card;
   }
 
@@ -78,6 +87,7 @@ class CardModelJsonEncoder implements Encoder<CardModel, String> {
       'createdAt': c.createdAt?.toUtc().microsecondsSinceEpoch,
       'updatedAt': c.updatedAt?.toUtc().microsecondsSinceEpoch,
       'billingCycle': c.getBillingCycle(),
+      'usedCount': c.usedCount,
     };
     return jsonEncode(json);
   }

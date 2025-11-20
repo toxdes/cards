@@ -1,17 +1,20 @@
 import 'package:cards/components/home/add_new_card_modal.dart';
-import 'package:cards/screens/backup_restore/backup_main.dart';
+import 'package:cards/components/home/cardlist_empty.dart';
+import 'package:cards/components/home/filter_controls.dart';
+import 'package:cards/components/home/filter_summary.dart';
+import 'package:cards/components/home/header.dart';
+import 'package:cards/components/home/sort_and_filter_modal.dart';
 import 'package:cards/components/shared/button.dart';
 import 'package:cards/components/shared/cardview.dart';
-import "package:cards/components/shared/icon_button.dart";
 import 'package:cards/config/colors.dart';
 import 'package:cards/config/fonts.dart';
+import 'package:cards/core/db/sort.dart';
 import 'package:cards/models/card/card.dart';
+import 'package:cards/providers/card_filters.dart';
 import 'package:cards/providers/cards_notifier.dart';
 import 'package:cards/services/flavor_service.dart';
 import 'package:cards/services/platform_service.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart' hide Text, IconButton;
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 import 'package:tray_manager/tray_manager.dart';
@@ -23,11 +26,9 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
-enum CardFilter { all, credit, debit }
-
 class _HomeState extends State<Home> with TrayListener, WindowListener {
   bool _addNewCardFormVisible = false;
-  CardFilter _activeCardFilter = CardFilter.all;
+  bool _sortAndFilterModalVisible = false;
 
   Menu getContextMenuItems() {
     return Menu(
@@ -39,12 +40,6 @@ class _HomeState extends State<Home> with TrayListener, WindowListener {
         MenuItem(label: "Exit", key: 'exit')
       ],
     );
-  }
-
-  void setCardFilter(CardFilter newFilter) {
-    setState(() {
-      _activeCardFilter = newFilter;
-    });
   }
 
   @override
@@ -96,29 +91,51 @@ class _HomeState extends State<Home> with TrayListener, WindowListener {
     }
   }
 
-  bool isDebitCard(CardModel card) {
-    return card.getTitle().toLowerCase().contains("debit");
-  }
+  void _onApplyFilter(
+      Set<String> cardTypes, Set<String> providers, Sort<CardModel>? sort) {
+    final cardsNotifier = context.read<CardsNotifier>();
 
-  bool matchesFilterCriteria(CardModel card) {
-    if (isDebitCard(card)) {
-      return _activeCardFilter != CardFilter.credit;
+    cardsNotifier.getAllFilters().toList().forEach((filter) {
+      cardsNotifier.removeFilter(filter);
+    });
+
+    if (cardTypes.contains("Credit")) {
+      cardsNotifier.addFilter(CreditCardFilter());
     }
-    return _activeCardFilter != CardFilter.debit;
+    if (cardTypes.contains("Debit")) {
+      cardsNotifier.addFilter(DebitCardFilter());
+    }
+
+    if (providers.contains("RuPay")) {
+      cardsNotifier.addFilter(RupayFilter());
+    }
+    if (providers.contains("Visa")) {
+      cardsNotifier.addFilter(VisaFilter());
+    }
+    if (providers.contains("MasterCard")) {
+      cardsNotifier.addFilter(MasterCardFilter());
+    }
+
+    if (sort != null) {
+      cardsNotifier.addSort(sort);
+    } else {
+      cardsNotifier.resetSort();
+    }
+    setState(() {
+      _sortAndFilterModalVisible = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<CardsNotifier>(
       builder: (context, cardsNotifier, _) {
-        final cards = cardsNotifier.getAllCards();
-        List<Widget> visibleCards = cards.where((CardModel card) {
-          return matchesFilterCriteria(card);
-        }).map((CardModel card) {
+        List<Widget> cards =
+            cardsNotifier.getFilteredCards().map((CardModel c) {
           return CardView(
-              card: card,
-              onLongPress: (CardModel c) async {
-                await cardsNotifier.removeCard(c);
+              card: c,
+              onLongPress: (CardModel sc) async {
+                cardsNotifier.removeCard(sc);
               });
         }).toList();
         return SafeArea(
@@ -128,153 +145,36 @@ class _HomeState extends State<Home> with TrayListener, WindowListener {
                 constraints: const BoxConstraints(maxWidth: 600),
                 child: Stack(textDirection: TextDirection.ltr, children: [
                   Container(
-                      padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+                      padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
                       child: Directionality(
                           textDirection: TextDirection.ltr,
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.end,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Container(
-                                // color: ThemeColors.red,
-                                padding: EdgeInsets.fromLTRB(0, 6, 0, 6),
-                                child: Stack(children: [
-                                  Center(
-                                    child: Text("Saved cards",
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(
-                                            fontFamily: Fonts.rubik,
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w600,
-                                            color: ThemeColors.white2)),
-                                  ),
-                                  kIsWeb
-                                      ? const SizedBox.shrink()
-                                      : Container(
-                                          alignment: Alignment.centerRight,
-                                          child: IconButton(
-                                              onTap: () {
-                                                Navigator.push(
-                                                    context,
-                                                    CupertinoPageRoute(
-                                                        title:
-                                                            "Backup and Restore",
-                                                        builder: (context) =>
-                                                            const BackupMainScreen()));
-                                              },
-                                              size: 28,
-                                              color: ThemeColors.white1,
-                                              buttonType: ButtonType.primary,
-                                              iconData: Icons.backup_rounded))
-                                ]),
-                              ),
+                              const Header(),
                               const SizedBox(height: 6),
-                              cards.isNotEmpty
-                                  ? Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Container(
-                                          margin:
-                                              const EdgeInsets.only(left: 12),
-                                          child: Button(
-                                              buttonType: _activeCardFilter ==
-                                                      CardFilter.all
-                                                  ? ButtonType.primary
-                                                  : ButtonType.outline,
-                                              text: _activeCardFilter ==
-                                                      CardFilter.all
-                                                  ? "All (${visibleCards.length})"
-                                                  : "All",
-                                              padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                      12, 4, 12, 4),
-                                              onTap: () {
-                                                setCardFilter(CardFilter.all);
-                                              },
-                                              textColor: _activeCardFilter ==
-                                                      CardFilter.all
-                                                  ? ThemeColors.gray1
-                                                  : ThemeColors.white1,
-                                              color: ThemeColors.white1),
-                                        ),
-                                        Container(
-                                          margin:
-                                              const EdgeInsets.only(left: 12),
-                                          child: Button(
-                                              buttonType: _activeCardFilter ==
-                                                      CardFilter.debit
-                                                  ? ButtonType.primary
-                                                  : ButtonType.outline,
-                                              text: _activeCardFilter ==
-                                                      CardFilter.debit
-                                                  ? "Debit (${visibleCards.length})"
-                                                  : "Debit",
-                                              padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                      12, 4, 12, 4),
-                                              onTap: () {
-                                                setCardFilter(CardFilter.debit);
-                                              },
-                                              textColor: _activeCardFilter ==
-                                                      CardFilter.debit
-                                                  ? ThemeColors.gray1
-                                                  : ThemeColors.white1,
-                                              color: ThemeColors.white1),
-                                        ),
-                                        Container(
-                                          margin:
-                                              const EdgeInsets.only(left: 12),
-                                          child: Button(
-                                              buttonType: _activeCardFilter ==
-                                                      CardFilter.credit
-                                                  ? ButtonType.primary
-                                                  : ButtonType.outline,
-                                              text: _activeCardFilter ==
-                                                      CardFilter.credit
-                                                  ? "Credit (${visibleCards.length})"
-                                                  : "Credit",
-                                              padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                      12, 4, 12, 4),
-                                              onTap: () {
-                                                setCardFilter(
-                                                    CardFilter.credit);
-                                              },
-                                              textColor: _activeCardFilter ==
-                                                      CardFilter.credit
-                                                  ? ThemeColors.gray1
-                                                  : ThemeColors.white1,
-                                              color: ThemeColors.white1),
-                                        ),
-                                      ],
+                              cardsNotifier.getCardsCount() > 0
+                                  ? FilterControls(
+                                      onTuneIconTap: () {
+                                        setState(() {
+                                          _sortAndFilterModalVisible = true;
+                                        });
+                                      },
                                     )
                                   : const SizedBox.shrink(),
+                              const FilterSummary(),
                               Expanded(
                                   child: ListView(
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 8.0),
                                 scrollDirection: Axis.vertical,
                                 shrinkWrap: true,
-                                children: cards.isEmpty
-                                    ? [
-                                        Container(
-                                            margin: const EdgeInsets.fromLTRB(
-                                                16, 48, 16, 32),
-                                            child: Text(
-                                                cards.isEmpty
-                                                    ? "You haven't added any cards yet."
-                                                    : "No cards to show",
-                                                textAlign: TextAlign.center,
-                                                style: const TextStyle(
-                                                    fontFamily: Fonts.rubik,
-                                                    fontWeight: FontWeight.w400,
-                                                    color: ThemeColors.white2)))
-                                      ]
-                                    : visibleCards,
+                                children:
+                                    cards.isEmpty ? [CardListEmpty()] : cards,
                               )),
                               Button(
-                                text: "Add new card +",
+                                label: "Add new card +",
                                 color: ThemeColors.blue,
                                 buttonType: ButtonType.primary,
                                 alignment: Alignment.center,
@@ -295,6 +195,7 @@ class _HomeState extends State<Home> with TrayListener, WindowListener {
                                     duration: 600.ms,
                                     rotation: 0.02,
                                   ),
+                              SizedBox(height: 12),
                             ],
                           ))),
                   AddNewCardModal(
@@ -312,6 +213,15 @@ class _HomeState extends State<Home> with TrayListener, WindowListener {
                         });
                       }
                     },
+                  ),
+                  SortAndFilterModal(
+                    isVisible: _sortAndFilterModalVisible,
+                    onClose: () {
+                      setState(() {
+                        _sortAndFilterModalVisible = false;
+                      });
+                    },
+                    onApplyFilter: _onApplyFilter,
                   ),
                   Positioned(
                     bottom: 4,

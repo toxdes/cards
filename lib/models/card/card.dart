@@ -4,7 +4,7 @@ import 'package:cards/utils/card_utils.dart';
 import 'package:cards/utils/string_utils.dart';
 
 class CardModel extends Model {
-  CardModel() : super(schemaVersion: 3);
+  CardModel() : super(schemaVersion: 4);
 
   /// Creates an empty CardModel with the specified schema version.
   /// Used internally by migrations to instantiate models at specific schema versions.
@@ -21,6 +21,7 @@ class CardModel extends Model {
   String _numberView = "";
   String _expiryView = "";
   String? billingCycle;
+  int usedCount = 0;
 
   DateTime? createdAt;
   DateTime? updatedAt;
@@ -152,6 +153,14 @@ class CardModel extends Model {
 
   String getOwnerName() {
     return ownerName ?? "";
+  }
+
+  int getUsedCount() {
+    return usedCount;
+  }
+
+  void incrementUsedCount() {
+    usedCount++;
   }
 
   void _updateProvider() {

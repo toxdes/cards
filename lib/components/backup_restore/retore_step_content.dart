@@ -107,9 +107,9 @@ class _RestoreStepContentState extends State<RestoreStepContent> {
                             RestoreCallbackAction.chooseBackupFile, step);
                       }
                     },
-                    text: backupFile != null ? "Change" : "Choose file",
+                    label: backupFile != null ? "Change" : "Choose file",
                     color: ThemeColors.white2,
-                    textColor: ThemeColors.gray1,
+                    labelColor: ThemeColors.gray1,
                   ),
                   SizedBox(
                     width: backupFile != null ? 12 : 0,
@@ -122,7 +122,7 @@ class _RestoreStepContentState extends State<RestoreStepContent> {
                                   RestoreCallbackAction.nextStep, step);
                             }
                           },
-                          text: "Continue",
+                          label: "Continue",
                           color: ThemeColors.blue,
                         )
                       : const SizedBox.shrink()
@@ -176,7 +176,7 @@ class _RestoreStepContentState extends State<RestoreStepContent> {
                         actionCallback(RestoreCallbackAction.nextStep, step);
                       }
                     },
-                    text: "Continue",
+                    label: "Continue",
                     disabled: !_isFormValid,
                     color: ThemeColors.blue,
                   ),
@@ -244,7 +244,7 @@ class _RestoreStepContentState extends State<RestoreStepContent> {
                   alignment: Alignment.centerRight,
                   child: Button(
                       color: ThemeColors.blue,
-                      text: "Continue",
+                      label: "Continue",
                       onTap: () {
                         if (actionCallback != null) {
                           actionCallback(RestoreCallbackAction.restore, step);

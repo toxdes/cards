@@ -78,7 +78,7 @@ class BackupStepContent extends StatelessWidget {
                               BackupCallbackAction.generateCreds, step);
                         }
                       },
-                      text: "I understand, continue",
+                      label: "I understand, continue",
                       color: ThemeColors.blue),
                 )
               ],
@@ -209,7 +209,7 @@ class BackupStepContent extends StatelessWidget {
                           actionCallback!(BackupCallbackAction.saveCreds, step);
                         }
                       },
-                      text: "I saved the key, continue",
+                      label: "I saved the key, continue",
                       color: ThemeColors.blue),
                 )
               ],
@@ -287,7 +287,7 @@ class BackupStepContent extends StatelessWidget {
                                 step);
                           }
                         },
-                        text: "Save to downloads",
+                        label: "Save to downloads",
                         color: ThemeColors.blue),
                     Container(
                         margin: const EdgeInsets.only(left: 12),
@@ -298,8 +298,8 @@ class BackupStepContent extends StatelessWidget {
                                     BackupCallbackAction.shareBackup, step);
                               }
                             },
-                            text: "Share",
-                            textColor: ThemeColors.gray1,
+                            label: "Share",
+                            labelColor: ThemeColors.gray1,
                             color: ThemeColors.white2)),
                   ])
                 ]));
