@@ -22,7 +22,7 @@ class SortAndFilterModal extends StatelessWidget {
         closeLabel: "Close",
         onClose: onClose,
         isVisible: isVisible,
-        heightFactor: 0.65,
+        maxHeightFactor: 0.65,
         child: SortAndFilterForm(onApplyFilter: onApplyFilter));
   }
 }
