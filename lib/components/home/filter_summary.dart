@@ -61,7 +61,7 @@ class FilterSummary extends StatelessWidget {
                       _buildSummaryText(cardsNotifier),
                       style: TextStyle(
                         color:
-                            cardCount > 0 ? ThemeColors.green : ThemeColors.red,
+                            cardCount > 0 ? ThemeColors.teal : ThemeColors.red,
                         fontFamily: Fonts.rubik,
                         fontSize: 12,
                         fontWeight: FontWeight.w400,
