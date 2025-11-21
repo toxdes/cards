@@ -1,12 +1,12 @@
 import 'package:cards/components/shared/button.dart';
 import 'package:cards/config/colors.dart';
-import 'package:cards/components/shared/icon_button.dart' as ui;
+import 'package:cards/components/shared/icon_button.dart';
 import 'package:cards/components/shared/select_from_options.dart';
 import 'package:cards/config/fonts.dart';
 import 'package:cards/screens/backup_restore/backup.dart';
 import 'package:cards/screens/backup_restore/restore.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide IconButton;
 
 class BackupMainScreen extends StatefulWidget {
   const BackupMainScreen({super.key});
@@ -50,7 +50,7 @@ class _BackupScreenState extends State<BackupMainScreen> {
               children: [
                 Container(
                   alignment: Alignment.centerLeft,
-                  child: ui.IconButton(
+                  child: IconButton(
                     size: 28,
                     color: ThemeColors.white1,
                     iconData: Icons.arrow_back_rounded,

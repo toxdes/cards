@@ -1,8 +1,8 @@
 import 'package:cards/components/shared/button.dart';
 import 'package:cards/config/colors.dart';
 import 'package:cards/config/fonts.dart';
-import 'package:flutter/material.dart';
-import 'package:cards/components/shared/icon_button.dart' as ui;
+import 'package:flutter/material.dart' hide IconButton;
+import 'package:cards/components/shared/icon_button.dart';
 
 class HelpScreen extends StatefulWidget {
   const HelpScreen({super.key});
@@ -35,7 +35,7 @@ class _HelpScreenState extends State<HelpScreen> {
                     color: ThemeColors.white2,
                     fontSize: 24),
               ),
-              ui.IconButton(
+              IconButton(
                 size: 32,
                 color: ThemeColors.white2,
                 iconData: Icons.close_rounded,
