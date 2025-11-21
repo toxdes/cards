@@ -2,11 +2,13 @@ import 'package:cards/components/shared/button.dart';
 import 'package:cards/config/colors.dart';
 import 'package:cards/config/fonts.dart';
 import 'package:cards/models/card/card.dart';
+import 'package:cards/providers/cards_notifier.dart';
 import 'package:cards/services/notification_service.dart';
 import 'package:cards/services/platform_service.dart';
 import 'package:cards/services/toast_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 class CardView extends StatefulWidget {
   final CardModel card;
@@ -27,10 +29,22 @@ class _CardViewState extends State<CardView> {
     });
   }
 
+  Future<void> _incrementUsedCount() async {
+    widget.card.incrementUsedCount();
+    final cardsNotifier = context.read<CardsNotifier>();
+    try {
+      await cardsNotifier.cardList.save();
+    } catch (e) {
+      ToastService.show(
+          message: 'Failed to update card usage', status: ToastStatus.error);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
+        await _incrementUsedCount();
         Clipboard.setData(ClipboardData(text: widget.card.getNumber()));
         String notificationTitle = "Card details: ${widget.card.getTitle()}";
         String notificationBody =
@@ -84,7 +98,7 @@ class _CardViewState extends State<CardView> {
                       Button(
                           color: ThemeColors.blue,
                           buttonType: ButtonType.ghost,
-                          text: "No",
+                          label: "No",
                           height: 36,
                           onTap: () {
                             Navigator.of(context).pop();
@@ -94,7 +108,7 @@ class _CardViewState extends State<CardView> {
                       Button(
                           color: ThemeColors.red2,
                           buttonType: ButtonType.ghost,
-                          text: "Yes",
+                          label: "Yes",
                           height: 36,
                           onTap: () {
                             widget.onLongPress(widget.card);
@@ -174,6 +188,18 @@ class _CardViewState extends State<CardView> {
                             fontSize: 16),
                       )
                     ]),
+                SizedBox(height: 6),
+                widget.card.getUsedCount() > 0
+                    ? Text(
+                        "Used ${widget.card.getUsedCount()} time${widget.card.getUsedCount() == 1 ? "" : "s"}",
+                        textDirection: TextDirection.ltr,
+                        textAlign: TextAlign.left,
+                        style: const TextStyle(
+                            color: ThemeColors.white3,
+                            fontFamily: Fonts.rubik,
+                            fontWeight: FontWeight.w400,
+                            fontSize: 12))
+                    : SizedBox.shrink(),
                 Expanded(
                     child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,

@@ -20,6 +20,7 @@ class AddNewCardModal extends StatelessWidget {
         closeLabel: "Cancel",
         onClose: onClose,
         isVisible: isVisible,
-        child: AddNewCardForm(onSubmit: onAddNewCard));
+        maxHeightFactor: 0.9,
+        child: isVisible ? AddNewCardForm(onSubmit: onAddNewCard) : null);
   }
 }

@@ -135,7 +135,7 @@ class _AddNewCardFormState extends State<AddNewCardForm> {
                 color: ThemeColors.blue,
                 onTap: () {
                   if (_isFormValid) {
-                    CardModel card = CardModelFactory.random()
+                    CardModel card = CardModelFactory.blank()
                       ..setTitle(_titleController.text)
                       ..setNumber(
                           StringUtils.removeAll(_numberController.text, ' '))
@@ -148,7 +148,7 @@ class _AddNewCardFormState extends State<AddNewCardForm> {
                 disabled: !_isFormValid,
                 alignment: Alignment.center,
                 height: 48,
-                text: "Save card")
+                label: "Save card")
           ],
         ),
       ),

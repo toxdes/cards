@@ -1,6 +1,10 @@
 import 'dart:collection';
+import 'package:cards/core/db/filter.dart';
+import 'package:cards/core/db/sort.dart';
+import 'package:cards/providers/card_filters.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cards/models/card/card.dart';
+import 'package:cards/providers/card_sort_strategies.dart';
 import 'package:cards/repositories/card_repository.dart';
 import 'package:cards/services/toast_service.dart';
 import 'package:cards/services/sentry_service.dart';
@@ -9,6 +13,8 @@ import 'package:cards/utils/secure_storage.dart';
 /// Notifier for managing cards list state
 class CardsNotifier extends ChangeNotifier {
   final CardRepository _cardRepo;
+  final Set<Filter<CardModel>> _cardFilters;
+  late Sort<CardModel> _cardSort;
   bool _loaded = false;
 
   CardsNotifier({CardRepository? repository})
@@ -16,7 +22,9 @@ class CardsNotifier extends ChangeNotifier {
             CardRepository(
               storageKey: CardRepositoryStorageKeys.mainStorage,
               storage: const SecureStorage(),
-            ) {
+            ),
+        _cardFilters = <Filter<CardModel>>{} {
+    _cardSort = SortByDateAdded();
     _initializeCards();
   }
 
@@ -39,6 +47,72 @@ class CardsNotifier extends ChangeNotifier {
 
   UnmodifiableListView<CardModel> getAllCards() {
     return _cardRepo.getAll();
+  }
+
+  void addFilter(Filter<CardModel> f) {
+    // card types can only be a single value at a time
+    if (f is CreditCardFilter) {
+      _cardFilters.removeWhere((Filter<CardModel> c) {
+        return c is DebitCardFilter;
+      });
+    } else if (f is DebitCardFilter) {
+      _cardFilters.removeWhere((Filter<CardModel> c) {
+        return c is CreditCardFilter;
+      });
+    }
+    _cardFilters.add(f);
+    notifyListeners();
+  }
+
+  void removeFilter(Filter<CardModel> f) {
+    _cardFilters.remove(f);
+    notifyListeners();
+  }
+
+  void addSort(Sort<CardModel> s) {
+    _cardSort = s;
+    notifyListeners();
+  }
+
+  void resetSort() {
+    _cardSort = SortByDateAdded();
+    notifyListeners();
+  }
+
+  UnmodifiableListView<CardModel> getFilteredCards() {
+    List<CardModel> filtered = _cardRepo.getAll().where((CardModel c) {
+      return _cardFilters.every((Filter<CardModel> f) {
+        return f.ok(c);
+      });
+    }).toList();
+
+    filtered.sort((a, b) => _cardSort.compare(a, b));
+
+    return UnmodifiableListView(filtered);
+  }
+
+  int getCardsCount() {
+    return _cardRepo.length;
+  }
+
+  UnmodifiableListView<Filter<CardModel>> getAllFilters() {
+    return UnmodifiableListView(_cardFilters);
+  }
+
+  Sort<CardModel> getActiveSort() {
+    return _cardSort;
+  }
+
+  bool isSortActive(Sort<CardModel> s) {
+    return _cardSort == s;
+  }
+
+  bool isFilterActive(Filter<CardModel> f) {
+    return _cardFilters.contains(f);
+  }
+
+  bool isUsingDefaultSortAndFilters() {
+    return _cardFilters.isEmpty && _cardSort == SortByDateAdded();
   }
 
   /// Add a new card with error handling and persistence

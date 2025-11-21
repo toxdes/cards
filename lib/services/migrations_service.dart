@@ -4,6 +4,7 @@ import 'package:cards/models/card/card.dart';
 import 'package:cards/models/card/card_factory.dart';
 import 'package:cards/models/card/migrations/m_add_billing_cycle.dart';
 import 'package:cards/models/card/migrations/m_add_timestamps.dart';
+import 'package:cards/models/card/migrations/m_add_used_count.dart';
 import 'package:cards/models/card/migrations/m_redo_card_type.dart';
 import 'package:cards/models/card/migrations/migration_context.dart';
 import 'package:cards/repositories/card_repository.dart';
@@ -20,6 +21,7 @@ class MigrationsService {
     context.addMigration(AddTimeStampsMigration(id: 1));
     context.addMigration(AddBillingCycleMigration(id: 2));
     context.addMigration(RedoCardTypeMigration(id: 3));
+    context.addMigration(AddUsedCountMigration(id: 4));
     
     CardRepository cardRepository = CardRepository(
         storage: const SecureStorage(),
@@ -35,13 +37,11 @@ class MigrationsService {
         newCards.add(await context
             .runAllMigrations(CardModelFactory.fromJson(cards[i].toJson())));
       }
-      CardRepository migratedRepository = CardRepository(
-          storage: const SecureStorage(),
-          storageKey: CardRepositoryStorageKeys.mainStorage);
+      cardRepository.removeAll();
       for (int i = 0; i < newCards.length; ++i) {
-        migratedRepository.add(newCards[i]);
+        cardRepository.add(newCards[i]);
       }
-      await migratedRepository.save();
+      await cardRepository.save();
       ToastService.show(message: "DB updated", status: ToastStatus.success);
     }
   }

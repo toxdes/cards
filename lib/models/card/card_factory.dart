@@ -84,6 +84,7 @@ class CardModelFactory {
       ..setProvider(other.getProvider())
       ..setBillingCycle(other.getBillingCycle())
       ..setCreatedAt(other.getCreatedAt())
-      ..setUpdatedAt(other.getUpdatedAt());
+      ..setUpdatedAt(other.getUpdatedAt())
+      ..usedCount = other.usedCount;
   }
 }

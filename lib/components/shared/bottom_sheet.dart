@@ -11,11 +11,13 @@ class BottomSheet extends StatefulWidget {
       required this.onClose,
       this.child,
       this.title,
-      this.closeLabel});
+      this.closeLabel,
+      this.maxHeightFactor = 1.0});
   final bool isVisible;
   final VoidCallback onClose;
   final String? title;
   final String? closeLabel;
+  final double maxHeightFactor;
 
   final Widget? child;
 
@@ -56,64 +58,86 @@ class _BottomSheetState extends State<BottomSheet>
       maintainState: true,
       maintainAnimation: true,
       child: AnimatedPadding(
-        padding: MediaQuery.of(context).viewInsets,
-        duration: const Duration(milliseconds: 100),
-        curve: Curves.decelerate,
-        child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Stack(children: [
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                      color: ThemeColors.gray1.withValues(alpha: 0.94)),
-                  padding: const EdgeInsets.only(top: 60),
-                  child: Container(
-                      decoration: BoxDecoration(
-                          color: ThemeColors.gray1,
-                          border: Border(
-                              top: BorderSide(
-                                  width: 2,
-                                  color:
-                                      ThemeColors.blue.withValues(alpha: 0.8))),
-                          borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(24),
-                              topRight: Radius.circular(24))),
-                      margin: const EdgeInsets.only(top: 0),
-                      child: SingleChildScrollView(
-                        child: Container(
-                          padding: const EdgeInsets.only(
-                              top: 24, left: 32, right: 32),
-                          child:
-                              Column(mainAxisSize: MainAxisSize.min, children: [
-                            Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  widget.title != null
-                                      ? Text(widget.title!,
-                                          textAlign: TextAlign.left,
-                                          style: TextStyle(
-                                              fontFamily: Fonts.rubik,
-                                              fontSize: 24,
-                                              fontWeight: FontWeight.w600,
-                                              color: ThemeColors.white2))
-                                      : const SizedBox.shrink(),
-                                  Button(
-                                    color: ThemeColors.red,
-                                    text: widget.closeLabel ?? "Close",
-                                    onTap: widget.onClose,
-                                    buttonType: ButtonType.ghost,
-                                  )
-                                ]),
-                            widget.child ?? SizedBox.shrink(),
-                          ]),
+              padding: MediaQuery.of(context).viewInsets,
+              duration: const Duration(milliseconds: 100),
+              curve: Curves.decelerate,
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            color: ThemeColors.gray1.withValues(alpha: 0.94)),
+                        padding: const EdgeInsets.only(top: 60),
+                        alignment: Alignment.bottomCenter,
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            return DecoratedBox(
+                              decoration: BoxDecoration(
+                                  color: ThemeColors.gray1,
+                                  border: Border(
+                                      top: BorderSide(
+                                          width: 2,
+                                          color: ThemeColors.blue
+                                              .withValues(alpha: 0.8))),
+                                  borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(24),
+                                      topRight: Radius.circular(24))),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 24, horizontal: 32),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          widget.title != null
+                                              ? Text(widget.title!,
+                                                  textAlign: TextAlign.left,
+                                                  style: TextStyle(
+                                                      fontFamily: Fonts.rubik,
+                                                      fontSize: 24,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color:
+                                                          ThemeColors.white2))
+                                              : const SizedBox.shrink(),
+                                          Button(
+                                            color: ThemeColors.red,
+                                            label: widget.closeLabel ?? "Close",
+                                            onTap: widget.onClose,
+                                            buttonType: ButtonType.ghost,
+                                          )
+                                        ]),
+                                    ConstrainedBox(
+                                      constraints: BoxConstraints(
+                                          maxHeight: (constraints.maxHeight *
+                                                      widget.maxHeightFactor -
+                                                  100)
+                                              .clamp(0, double.infinity)),
+                                      child: SingleChildScrollView(
+                                        child:
+                                            widget.child ?? SizedBox.shrink(),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
                         ),
-                      )),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ])),
-      ).animate(autoPlay: false, controller: _animationController).slideY(
-          duration: 240.ms, curve: Curves.easeOutExpo, begin: 1, end: 0),
+              ))
+          .animate(autoPlay: false, controller: _animationController)
+          .slideY(
+              duration: 240.ms, curve: Curves.easeOutExpo, begin: 1, end: 0),
     );
   }
 }

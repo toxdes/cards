@@ -1,0 +1,51 @@
+import 'package:cards/components/shared/button.dart';
+import 'package:cards/components/shared/icon_button.dart';
+import 'package:cards/config/colors.dart';
+import 'package:cards/config/fonts.dart';
+import 'package:cards/screens/backup_restore/backup_main.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart' hide IconButton;
+
+class Header extends StatelessWidget {
+  const Header({super.key});
+  void navigateToBackupRestore(BuildContext context) {
+    Navigator.push(
+        context,
+        CupertinoPageRoute(
+            title: "Backup and Restore",
+            builder: (context) => const BackupMainScreen()));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      // color: ThemeColors.red,
+      padding: EdgeInsets.fromLTRB(0, 12, 0, 0),
+      child: Stack(children: [
+        Container(
+          alignment: Alignment.centerLeft,
+          child: Text("Saved cards",
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                  fontFamily: Fonts.rubik,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                  color: ThemeColors.white2)),
+        ),
+        kIsWeb
+            ? const SizedBox.shrink()
+            : Container(
+                alignment: Alignment.centerRight,
+                child: IconButton(
+                    onTap: () {
+                      navigateToBackupRestore(context);
+                    },
+                    size: 28,
+                    color: ThemeColors.white1,
+                    buttonType: ButtonType.primary,
+                    iconData: Icons.backup_rounded))
+      ]),
+    );
+  }
+}

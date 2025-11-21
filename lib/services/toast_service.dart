@@ -46,4 +46,11 @@ class ToastService {
           textColor: ThemeColors.gray2);
     }
   }
+
+  static void todo() {
+    show(
+      message: "Not implemented yet",
+      status: ToastStatus.error,
+    );
+  }
 }

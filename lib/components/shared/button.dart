@@ -6,9 +6,10 @@ class Button extends StatefulWidget {
   const Button(
       {super.key,
       required this.onTap,
-      required this.text,
+      this.label,
       required this.color,
-      this.textColor,
+      this.icon,
+      this.labelColor,
       this.buttonType = ButtonType.primary,
       this.disabled = false,
       this.width,
@@ -16,7 +17,8 @@ class Button extends StatefulWidget {
       this.alignment,
       this.padding});
 
-  final String text;
+  final String? label;
+  final IconData? icon;
   final ButtonType buttonType;
   final VoidCallback onTap;
   final bool disabled;
@@ -25,7 +27,7 @@ class Button extends StatefulWidget {
   final Alignment? alignment;
   final double scaleFactor = 0.90;
   final Color color;
-  final Color? textColor;
+  final Color? labelColor;
   final EdgeInsets? padding;
 
   @override
@@ -49,9 +51,9 @@ class _ButtonState extends State<Button> {
                 ? 0.4
                 : 1);
 
-    Color textColor = widget.buttonType == ButtonType.ghost
+    Color labelColor = widget.buttonType == ButtonType.ghost
         ? widget.color
-        : (widget.textColor ?? ThemeColors.white1)
+        : (widget.labelColor ?? ThemeColors.white1)
             .withValues(alpha: widget.disabled ? 0.4 : 1);
 
     Color borderColor = widget.buttonType == ButtonType.ghost
@@ -90,16 +92,29 @@ class _ButtonState extends State<Button> {
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: borderColor),
             ),
-            child: Text(widget.text,
-                textDirection: TextDirection.ltr,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    decoration: TextDecoration.none,
-                    decorationColor: ThemeColors.white1,
-                    color: textColor,
-                    fontSize: 14,
-                    fontFamily: Fonts.rubik,
-                    fontWeight: FontWeight.w600))));
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                widget.icon != null
+                    ? Icon(
+                        widget.icon,
+                        size: 16,
+                        color: widget.labelColor,
+                      )
+                    : SizedBox.shrink(),
+                widget.label != null ? SizedBox(width: 4) : SizedBox.shrink(),
+                Text(widget.label ?? "",
+                    textDirection: TextDirection.ltr,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        decoration: TextDecoration.none,
+                        decorationColor: ThemeColors.white1,
+                        color: labelColor,
+                        fontSize: 14,
+                        fontFamily: Fonts.rubik,
+                        fontWeight: FontWeight.w600)),
+              ],
+            )));
   }
 }
 
