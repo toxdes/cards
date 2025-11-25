@@ -165,9 +165,9 @@ class CardModel extends Model {
     StringBuffer sb = StringBuffer();
     int haveTo = 3;
     String maskChar = '*';
-    String _cvv = cvv ?? "";
-    for (int i = 0; i < _cvv.length; ++i) {
-      final String c = _cvv[i];
+    String cvvValue = cvv ?? "";
+    for (int i = 0; i < cvvValue.length; ++i) {
+      final String c = cvvValue[i];
       if (c.codeUnitAt(0) >= '0'.codeUnitAt(0) &&
           c.codeUnitAt(0) <= '9'.codeUnitAt(0) &&
           haveTo > 0) {

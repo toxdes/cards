@@ -102,8 +102,8 @@ void main() {
     PreferencesEncoder encoder = PreferencesEncoder();
     
     PreferencesModel decodedPrefs = encoder.decode(oldFormatJson);
-    assert(decodedPrefs.createdAt != null);
-    assert(decodedPrefs.updatedAt != null);
+    expect(decodedPrefs.createdAt, isNotNull);
+    expect(decodedPrefs.updatedAt, isNotNull);
     assert(
       decodedPrefs.createdAt.toUtc().microsecondsSinceEpoch == 1577836800000000,
     );

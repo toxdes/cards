@@ -18,8 +18,8 @@ void main() {
     assert(prefs.enableNotifications == true);
     assert(prefs.useDeviceAuth == true);
     assert(prefs.schemaVersion == 1);
-    assert(prefs.createdAt != null);
-    assert(prefs.updatedAt != null);
+    expect(prefs.createdAt, isNotNull);
+    expect(prefs.updatedAt, isNotNull);
   });
 
   test('setMaskCardNumber updates the value', () {
