@@ -41,10 +41,12 @@ class PreferencesRepository {
   }
 
   Future<void> readFromStorage() async {
-    // TODO: implement
     String? dataJson = await storage.read(key: storageKey);
-    dataJson ??= "";
-    _prefs = encoder.decode(dataJson);
+    if (dataJson == null || dataJson.isEmpty) {
+      _prefs = PreferencesFactory.defaultPrefs();
+    } else {
+      _prefs = encoder.decode(dataJson);
+    }
   }
 
   void setMaskCVV(bool maskCVV) {
