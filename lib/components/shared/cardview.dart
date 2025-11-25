@@ -3,6 +3,7 @@ import 'package:cards/config/colors.dart';
 import 'package:cards/config/fonts.dart';
 import 'package:cards/models/card/card.dart';
 import 'package:cards/providers/cards_notifier.dart';
+import 'package:cards/providers/preferences_notifier.dart';
 import 'package:cards/services/notification_service.dart';
 import 'package:cards/services/platform_service.dart';
 import 'package:cards/services/toast_service.dart';
@@ -138,103 +139,113 @@ class _CardViewState extends State<CardView> {
                     ? ThemeColors.red.withValues(alpha: 0.3)
                     : ThemeColors.gray2,
                 borderRadius: BorderRadius.circular(20)),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.card.getTitle(),
-                  textDirection: TextDirection.ltr,
-                  style: const TextStyle(
-                      color: ThemeColors.teal,
-                      fontFamily: Fonts.rubik,
-                      fontWeight: FontWeight.w400,
-                      fontSize: 12),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  widget.card.getNumberView(),
-                  textDirection: TextDirection.ltr,
-                  style: const TextStyle(
-                      color: ThemeColors.white2,
-                      fontFamily: Fonts.rubik,
-                      fontWeight: FontWeight.w400,
-                      fontSize: 24),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.card.getExpiryView(),
-                        textDirection: TextDirection.ltr,
-                        textAlign: TextAlign.left,
-                        style: const TextStyle(
-                            color: ThemeColors.white2,
-                            fontFamily: Fonts.rubik,
-                            fontWeight: FontWeight.w400,
-                            fontSize: 16),
-                      ),
-                      const SizedBox(width: 24),
-                      Text(
-                        widget.card.getCVV(),
-                        textDirection: TextDirection.ltr,
-                        textAlign: TextAlign.right,
-                        style: const TextStyle(
-                            color: ThemeColors.white2,
-                            fontFamily: Fonts.rubik,
-                            fontWeight: FontWeight.w400,
-                            fontSize: 16),
-                      )
-                    ]),
-                SizedBox(height: 6),
-                widget.card.getUsedCount() > 0
-                    ? Text(
-                        "Used ${widget.card.getUsedCount()} time${widget.card.getUsedCount() == 1 ? "" : "s"}",
-                        textDirection: TextDirection.ltr,
-                        textAlign: TextAlign.left,
-                        style: const TextStyle(
-                            color: ThemeColors.white3,
-                            fontFamily: Fonts.rubik,
-                            fontWeight: FontWeight.w400,
-                            fontSize: 12))
-                    : SizedBox.shrink(),
-                Expanded(
-                    child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        crossAxisAlignment: CrossAxisAlignment.end,
+            child: Consumer<PreferencesNotifier>(
+              builder: (context, prefsNotifier, _) {
+                String numberView = prefsNotifier.prefs.maskCardNumber
+                    ? widget.card.getMaskedNumberView()
+                    : widget.card.getNumberView();
+                String cvvView = prefsNotifier.prefs.maskCVV
+                    ? widget.card.getMaskedCVV()
+                    : widget.card.getCVV();
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.card.getTitle(),
+                      textDirection: TextDirection.ltr,
+                      style: const TextStyle(
+                          color: ThemeColors.teal,
+                          fontFamily: Fonts.rubik,
+                          fontWeight: FontWeight.w400,
+                          fontSize: 12),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      numberView,
+                      textDirection: TextDirection.ltr,
+                      style: const TextStyle(
+                          color: ThemeColors.white2,
+                          fontFamily: Fonts.rubik,
+                          fontWeight: FontWeight.w400,
+                          fontSize: 24),
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                      Expanded(
-                          child: Text(
-                        widget.card.getOwnerName().toUpperCase(),
-                        textDirection: TextDirection.ltr,
-                        textAlign: TextAlign.left,
-                        style: const TextStyle(
-                            color: ThemeColors.white3,
-                            fontFamily: Fonts.rubik,
-                            fontWeight: FontWeight.w400,
-                            letterSpacing: 2,
-                            fontSize: 14),
-                      )),
-                      Text(
-                        widget.card.getProviderView(),
-                        textDirection: TextDirection.ltr,
-                        textAlign: TextAlign.right,
-                        style: TextStyle(
-                            color:
-                                widget.card.getProvider() == CardProvider.visa
+                          Text(
+                            widget.card.getExpiryView(),
+                            textDirection: TextDirection.ltr,
+                            textAlign: TextAlign.left,
+                            style: const TextStyle(
+                                color: ThemeColors.white2,
+                                fontFamily: Fonts.rubik,
+                                fontWeight: FontWeight.w400,
+                                fontSize: 16),
+                          ),
+                          const SizedBox(width: 24),
+                          Text(
+                            cvvView,
+                            textDirection: TextDirection.ltr,
+                            textAlign: TextAlign.right,
+                            style: const TextStyle(
+                                color: ThemeColors.white2,
+                                fontFamily: Fonts.rubik,
+                                fontWeight: FontWeight.w400,
+                                fontSize: 16),
+                          )
+                        ]),
+                    SizedBox(height: 6),
+                    widget.card.getUsedCount() > 0
+                        ? Text(
+                            "Used ${widget.card.getUsedCount()} time${widget.card.getUsedCount() == 1 ? "" : "s"}",
+                            textDirection: TextDirection.ltr,
+                            textAlign: TextAlign.left,
+                            style: const TextStyle(
+                                color: ThemeColors.white3,
+                                fontFamily: Fonts.rubik,
+                                fontWeight: FontWeight.w400,
+                                fontSize: 12))
+                        : SizedBox.shrink(),
+                    Expanded(
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                          Expanded(
+                              child: Text(
+                            widget.card.getOwnerName().toUpperCase(),
+                            textDirection: TextDirection.ltr,
+                            textAlign: TextAlign.left,
+                            style: const TextStyle(
+                                color: ThemeColors.white3,
+                                fontFamily: Fonts.rubik,
+                                fontWeight: FontWeight.w400,
+                                letterSpacing: 2,
+                                fontSize: 14),
+                          )),
+                          Text(
+                            widget.card.getProviderView(),
+                            textDirection: TextDirection.ltr,
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                                color: widget.card.getProvider() ==
+                                        CardProvider.visa
                                     ? ThemeColors.yellow
                                     : widget.card.getProvider() ==
                                             CardProvider.rupay
                                         ? ThemeColors.green
                                         : ThemeColors.red,
-                            fontFamily: Fonts.rubik,
-                            fontWeight: FontWeight.w400,
-                            fontSize: 14),
-                      )
-                    ]))
-              ],
+                                fontFamily: Fonts.rubik,
+                                fontWeight: FontWeight.w400,
+                                fontSize: 14),
+                          )
+                        ]))
+                  ],
+                );
+              },
             )),
       ),
     );
