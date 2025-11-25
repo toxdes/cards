@@ -2,16 +2,22 @@ import 'package:cards/core/db/model.dart';
 
 class PreferencesModel extends Model {
   PreferencesModel() : super(schemaVersion: 1) {
-    _maskCardNumber = true;
-    _maskCVV = true;
-    _enableNotifications = true;
-    _useDeviceAuth = true;
-    _createdAt = DateTime.now();
-    _updatedAt = DateTime.now();
+    _initDefaults();
   }
 
   PreferencesModel.fromSchema(int schemaVersion)
       : super(schemaVersion: schemaVersion) {
+    _initDefaults();
+  }
+
+  bool _maskCardNumber = false;
+  bool _maskCVV = false;
+  bool _enableNotifications = false;
+  bool _useDeviceAuth = false;
+  DateTime _createdAt = DateTime.now();
+  DateTime _updatedAt = DateTime.now();
+
+  void _initDefaults() {
     _maskCardNumber = true;
     _maskCVV = true;
     _enableNotifications = true;
@@ -19,13 +25,6 @@ class PreferencesModel extends Model {
     _createdAt = DateTime.now();
     _updatedAt = DateTime.now();
   }
-
-  late bool _maskCardNumber;
-  late bool _maskCVV;
-  late bool _enableNotifications;
-  late bool _useDeviceAuth;
-  late DateTime _createdAt;
-  late DateTime _updatedAt;
 
   void _updateTs() {
     _updatedAt = DateTime.now();
@@ -53,7 +52,6 @@ class PreferencesModel extends Model {
 
   void setCreatedAt(DateTime createdAt) {
     _createdAt = createdAt;
-    _updateTs();
   }
 
   void setUpdatedAt(DateTime updatedAt) {

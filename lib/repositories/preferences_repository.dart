@@ -3,21 +3,6 @@ import 'package:cards/models/preferences/preferences.dart';
 import 'package:cards/models/preferences/preferences_factory.dart';
 import 'package:cards/models/preferences/preferences_json_encoder.dart';
 
-class CardRepositoryErrorCodes {
-  //...
-}
-
-class PreferencesRepositoryException implements Exception {
-  final String message;
-  final int errorCode;
-  PreferencesRepositoryException(this.errorCode, this.message);
-
-  @override
-  String toString() {
-    return '[PreferencesRepositoryException] Error $errorCode: $message';
-  }
-}
-
 class PreferencesStorageKeys {
   static const mainStorage = "prefs";
   static const testStorage = "prefs-tests";
