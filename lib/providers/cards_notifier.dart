@@ -25,11 +25,11 @@ class CardsNotifier extends ChangeNotifier {
             ),
         _cardFilters = <Filter<CardModel>>{} {
     _cardSort = SortByDateAdded();
-    _initializeCards();
+    _initCards();
   }
 
   /// Load cards from storage on initialization
-  void _initializeCards() {
+  void _initCards() {
     _cardRepo.readFromStorage().then((_) {
       _loaded = true;
       notifyListeners();
