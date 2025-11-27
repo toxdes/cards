@@ -139,8 +139,44 @@ class CardModel extends Model {
     return _numberView;
   }
 
+  String getMaskedNumberView() {
+    StringBuffer sb = StringBuffer();
+    int haveTo = 12;
+    String maskChar = "X";
+    for (int i = 0; i < _numberView.length; ++i) {
+      final String c = _numberView[i];
+      if (c.codeUnitAt(0) >= '0'.codeUnitAt(0) &&
+          c.codeUnitAt(0) <= '9'.codeUnitAt(0) &&
+          haveTo > 0) {
+        sb.write(maskChar);
+        --haveTo;
+      } else {
+        sb.write(c);
+      }
+    }
+    return sb.toString();
+  }
+
   String getCVV() {
     return cvv ?? "";
+  }
+
+  String getMaskedCVV() {
+    StringBuffer sb = StringBuffer();
+    int haveTo = 3;
+    String maskChar = '*';
+    String cvvValue = cvv ?? "";
+    for (int i = 0; i < cvvValue.length; ++i) {
+      final String c = cvvValue[i];
+      if (c.codeUnitAt(0) >= '0'.codeUnitAt(0) &&
+          c.codeUnitAt(0) <= '9'.codeUnitAt(0) &&
+          haveTo > 0) {
+        sb.write(maskChar);
+      } else {
+        sb.write(c);
+      }
+    }
+    return sb.toString();
   }
 
   String getExpiry() {

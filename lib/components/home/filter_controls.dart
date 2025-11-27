@@ -44,7 +44,7 @@ class FilterControls extends StatelessWidget {
               ...specialFilterChips,
               Chip(
                   checked: false,
-                  icon: Icons.tune_rounded,
+                  icon: Icons.filter_list_outlined,
                   padding: chipPadding,
                   onTap: onTuneIconTap)
             ],

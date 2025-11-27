@@ -3,6 +3,7 @@ import 'package:cards/config/colors.dart';
 import 'package:cards/config/fonts.dart';
 import 'package:cards/models/card/card.dart';
 import 'package:cards/providers/cards_notifier.dart';
+import 'package:cards/providers/preferences_notifier.dart';
 import 'package:cards/services/notification_service.dart';
 import 'package:cards/services/platform_service.dart';
 import 'package:cards/services/toast_service.dart';
@@ -42,94 +43,104 @@ class _CardViewState extends State<CardView> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () async {
-        await _incrementUsedCount();
-        Clipboard.setData(ClipboardData(text: widget.card.getNumber()));
-        String notificationTitle = "Card details: ${widget.card.getTitle()}";
-        String notificationBody =
-            "Expiry: ${widget.card.getExpiryView()} | CVV: ${widget.card.getCVV()}\nCard number is copied to clipboard.";
-        if (PlatformService.isAndroid()) {
-          notificationBody =
-              "Expiry: <strong>${widget.card.getExpiryView()}</strong> | CVV: <strong>${widget.card.getCVV()}</strong><br/><i>Card number is copied to clipboard.</i>";
-        }
-        ToastService.show(
-            message: "Number copied to clipboard", status: ToastStatus.success);
-        NotificationService.showNotification(
-            title: notificationTitle, body: notificationBody);
-      },
-      onTapDown: (TapDownDetails _) {
-        setActive(true);
-      },
-      onTapUp: (TapUpDetails _) {
-        setActive(false);
-      },
-      onTapCancel: () {
-        setActive(false);
-      },
-      onLongPress: () {
-        showAdaptiveDialog(
-            context: context,
-            barrierColor: ThemeColors.gray1.withValues(alpha: 0.9),
-            builder: (BuildContext context) {
-              return Dialog(
-                  // alignment: Alignment.center,
-                  child: Container(
-                height: 140,
-                width: 320,
-                constraints: const BoxConstraints(maxWidth: 400),
-                decoration: BoxDecoration(
-                    color: ThemeColors.gray3,
-                    border: Border.all(color: ThemeColors.white3),
-                    borderRadius: BorderRadius.circular(16)),
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Do you want to delete this card?",
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                          fontFamily: Fonts.rubik, color: ThemeColors.white2),
-                    ),
-                    const SizedBox(height: 24),
-                    Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                      Button(
-                          color: ThemeColors.blue,
-                          buttonType: ButtonType.ghost,
-                          label: "No",
-                          height: 36,
-                          onTap: () {
-                            Navigator.of(context).pop();
-                            setActive(false);
-                          }),
-                      const SizedBox(width: 12),
-                      Button(
-                          color: ThemeColors.red2,
-                          buttonType: ButtonType.ghost,
-                          label: "Yes",
-                          height: 36,
-                          onTap: () {
-                            widget.onLongPress(widget.card);
-                            Navigator.of(context).pop();
-                            setActive(false);
-                          })
-                    ])
-                  ],
-                ),
-              ));
-            });
-      },
-      child: AnimatedContainer(
-        // animated props
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.fastOutSlowIn,
-        transformAlignment: Alignment.center,
-        transform: _active
-            ? (Matrix4.identity()..scaleByDouble(0.90, 0.90, 1, 1))
-            : (Matrix4.identity()),
-        child: Container(
+    return Consumer<PreferencesNotifier>(builder: (context, prefsNotifier, _) {
+      String numberView = prefsNotifier.prefs.maskCardNumber
+          ? widget.card.getMaskedNumberView()
+          : widget.card.getNumberView();
+      String cvvView = prefsNotifier.prefs.maskCVV
+          ? widget.card.getMaskedCVV()
+          : widget.card.getCVV();
+      return GestureDetector(
+        onTap: () async {
+          await _incrementUsedCount();
+          Clipboard.setData(ClipboardData(text: widget.card.getNumber()));
+          String notificationTitle = "Card details: ${widget.card.getTitle()}";
+          String notificationBody =
+              "Expiry: ${widget.card.getExpiryView()} | CVV: ${widget.card.getCVV()}\nCard number is copied to clipboard.";
+          if (PlatformService.isAndroid()) {
+            notificationBody =
+                "Expiry: <strong>${widget.card.getExpiryView()}</strong> | CVV: <strong>${widget.card.getCVV()}</strong><br/><i>Card number is copied to clipboard.</i>";
+          }
+          ToastService.show(
+              message: "Number copied to clipboard",
+              status: ToastStatus.success);
+          if (prefsNotifier.prefs.enableNotifications) {
+            NotificationService.showNotification(
+                title: notificationTitle, body: notificationBody);
+          }
+        },
+        onTapDown: (TapDownDetails _) {
+          setActive(true);
+        },
+        onTapUp: (TapUpDetails _) {
+          setActive(false);
+        },
+        onTapCancel: () {
+          setActive(false);
+        },
+        onLongPress: () {
+          showAdaptiveDialog(
+              context: context,
+              barrierColor: ThemeColors.gray1.withValues(alpha: 0.9),
+              builder: (BuildContext context) {
+                return Dialog(
+                    // alignment: Alignment.center,
+                    child: Container(
+                  height: 140,
+                  width: 320,
+                  constraints: const BoxConstraints(maxWidth: 400),
+                  decoration: BoxDecoration(
+                      color: ThemeColors.gray3,
+                      border: Border.all(color: ThemeColors.white3),
+                      borderRadius: BorderRadius.circular(16)),
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Do you want to delete this card?",
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                            fontFamily: Fonts.rubik, color: ThemeColors.white2),
+                      ),
+                      const SizedBox(height: 24),
+                      Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                        Button(
+                            color: ThemeColors.blue,
+                            buttonType: ButtonType.ghost,
+                            label: "No",
+                            height: 36,
+                            onTap: () {
+                              Navigator.of(context).pop();
+                              setActive(false);
+                            }),
+                        const SizedBox(width: 12),
+                        Button(
+                            color: ThemeColors.red2,
+                            buttonType: ButtonType.ghost,
+                            label: "Yes",
+                            height: 36,
+                            onTap: () {
+                              widget.onLongPress(widget.card);
+                              Navigator.of(context).pop();
+                              setActive(false);
+                            })
+                      ])
+                    ],
+                  ),
+                ));
+              });
+        },
+        child: AnimatedContainer(
+          // animated props
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.fastOutSlowIn,
+          transformAlignment: Alignment.center,
+          transform: _active
+              ? (Matrix4.identity()..scaleByDouble(0.90, 0.90, 1, 1))
+              : (Matrix4.identity()),
+          child: Container(
             margin: const EdgeInsets.fromLTRB(4, 16, 4, 16),
             height: 220,
             padding: const EdgeInsets.all(24),
@@ -153,7 +164,7 @@ class _CardViewState extends State<CardView> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  widget.card.getNumberView(),
+                  numberView,
                   textDirection: TextDirection.ltr,
                   style: const TextStyle(
                       color: ThemeColors.white2,
@@ -178,7 +189,7 @@ class _CardViewState extends State<CardView> {
                       ),
                       const SizedBox(width: 24),
                       Text(
-                        widget.card.getCVV(),
+                        cvvView,
                         textDirection: TextDirection.ltr,
                         textAlign: TextAlign.right,
                         style: const TextStyle(
@@ -235,8 +246,10 @@ class _CardViewState extends State<CardView> {
                       )
                     ]))
               ],
-            )),
-      ),
-    );
+            ),
+          ),
+        ),
+      );
+    });
   }
 }

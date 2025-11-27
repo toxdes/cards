@@ -44,23 +44,27 @@ class _ButtonState extends State<Button> {
 
   @override
   Widget build(BuildContext context) {
+    // TODO: is using opacity widget better than doing this?
+    final disabledOpacity = 0.4;
     Color backgroundColor = widget.color.withValues(
         alpha: widget.buttonType != ButtonType.primary
             ? 0
             : widget.disabled
-                ? 0.4
+                ? disabledOpacity
                 : 1);
 
     Color labelColor = widget.buttonType == ButtonType.ghost
         ? widget.color
         : (widget.labelColor ?? ThemeColors.white1)
-            .withValues(alpha: widget.disabled ? 0.4 : 1);
+            .withValues(alpha: widget.disabled ? disabledOpacity : 1.0);
 
     Color borderColor = widget.buttonType == ButtonType.ghost
         ? ThemeColors.transparent
         : widget.buttonType == ButtonType.primary
             ? ThemeColors.blue
-            : ThemeColors.white1;
+                .withValues(alpha: widget.disabled ? disabledOpacity : 1.0)
+            : ThemeColors.white1
+                .withValues(alpha: widget.disabled ? disabledOpacity : 1.0);
 
     EdgeInsets padding =
         widget.padding ?? const EdgeInsets.fromLTRB(16, 8, 16, 8);
