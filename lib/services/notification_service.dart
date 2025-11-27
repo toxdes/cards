@@ -21,7 +21,7 @@ class NotificationService {
     if (PlatformService.isAndroid()) {
       _methodChannel = MethodChannel(packageName);
     }
-    if (PlatformService.isWindows()) {
+    if (PlatformService.isWindows() || PlatformService.isLinux()) {
       await localNotifier.setup(appName: "cards");
     }
     _notificationPlugin = FlutterLocalNotificationsPlugin();
@@ -90,7 +90,7 @@ class NotificationService {
       await showPersistentNotification(title: title, body: body ?? "");
     } else if (PlatformService.isDarwin()) {
       // TODO: handle notifications on macos and ios
-    } else if (PlatformService.isWindows()) {
+    } else if (PlatformService.isWindows() || PlatformService.isLinux()) {
       LocalNotification notification = LocalNotification(
           title: title,
           body: body,
