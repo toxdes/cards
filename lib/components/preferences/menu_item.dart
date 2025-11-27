@@ -14,13 +14,15 @@ class MenuItemWithSwitch extends StatelessWidget {
       this.iconColor = ThemeColors.white2,
       this.fgColor = ThemeColors.white2,
       this.bgColor = ThemeColors.gray1,
-      this.borderColor = ThemeColors.gray3});
+      this.borderColor = ThemeColors.gray3,
+      this.disabled = false});
 
   final ValueSetter<bool> onChange;
   final bool checked;
   final String title;
   final String? desc;
   final IconData? icon;
+  final bool disabled;
   final Color fgColor, bgColor, borderColor, iconColor;
 
   @override
@@ -28,6 +30,7 @@ class MenuItemWithSwitch extends StatelessWidget {
     return MenuItemBase(
       bgColor: bgColor,
       borderColor: borderColor,
+      disabled: disabled,
       onTap: () {
         onChange(!checked);
       },
@@ -60,9 +63,7 @@ class MenuItemWithSwitch extends StatelessWidget {
               value: checked,
               activeTrackColor: ThemeColors.blue,
               inactiveTrackColor: ThemeColors.gray3,
-              onChanged: (bool newValue) {
-                onChange(newValue);
-              }),
+              onChanged: (_) {}),
         ],
       ),
     );
@@ -80,17 +81,20 @@ class MenuItem extends StatelessWidget {
     this.fgColor = ThemeColors.white2,
     this.bgColor = ThemeColors.gray1,
     this.borderColor = ThemeColors.gray3,
+    this.disabled = false,
   });
   final VoidCallback onTap;
   final String title;
   final String? desc;
   final IconData? icon;
+  final bool disabled;
   final Color fgColor, bgColor, iconColor, borderColor;
   @override
   Widget build(BuildContext context) {
     return MenuItemBase(
       onTap: onTap,
       borderColor: borderColor,
+      disabled: disabled,
       bgColor: bgColor,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -131,24 +135,30 @@ class MenuItemBase extends StatelessWidget {
       required this.child,
       this.onTap,
       required this.bgColor,
-      required this.borderColor});
+      required this.borderColor,
+      required this.disabled});
   final Widget child;
   final VoidCallback? onTap;
   final Color bgColor, borderColor;
+  final bool disabled;
+  static const disabledOpacity = 0.4;
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 24),
-          height: 64,
-          decoration: BoxDecoration(
-              color: bgColor,
-              border: BoxBorder.fromLTRB(
-                  bottom: BorderSide(color: ThemeColors.gray3, width: 1),
-                  top: BorderSide(color: ThemeColors.gray3, width: 1))),
-          width: double.infinity,
-          child: child,
+        onTap: disabled ? () {} : onTap,
+        child: Opacity(
+          opacity: disabled ? disabledOpacity : 1,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 24),
+            height: 64,
+            decoration: BoxDecoration(
+                color: bgColor,
+                border: BoxBorder.fromLTRB(
+                    bottom: BorderSide(color: ThemeColors.gray3, width: 1),
+                    top: BorderSide(color: ThemeColors.gray3, width: 1))),
+            width: double.infinity,
+            child: child,
+          ),
         ));
   }
 }

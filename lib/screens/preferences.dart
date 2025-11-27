@@ -77,6 +77,7 @@ class PreferencesScreen extends StatelessWidget {
                           MenuItemWithSwitch(
                             checked: prefsNotifier.prefs.enableNotifications,
                             title: "Notifications",
+                            disabled: true,
                             icon: Icons.notifications_outlined,
                             onChange: (bool newValue) {
                               prefsNotifier.setEnableNotifications(newValue);
@@ -86,12 +87,14 @@ class PreferencesScreen extends StatelessWidget {
                               checked: prefsNotifier.prefs.useDeviceAuth,
                               icon: Icons.lock_outlined,
                               title: "Use screen lock",
+                              disabled: true,
                               onChange: (bool newValue) {
                                 prefsNotifier.setUseDeviceAuth(newValue);
                               }),
                           MenuItem(
                             title: "Set theme",
                             icon: Icons.color_lens_outlined,
+                            disabled: true,
                             onTap: () {
                               ToastService.todo();
                             },
