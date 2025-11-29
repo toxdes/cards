@@ -7,7 +7,7 @@ from pathlib import Path
 from lib import Config, GitHub, Shell, Version, log_error, log_info
 
 
-def build_apks() -> tuple:
+def build_apks() -> tuple[Path, Path]:
     """Build APKs and return (dev_dir, prod_dir)."""
     log_info("Building APKs")
     Shell.run("flutter clean")

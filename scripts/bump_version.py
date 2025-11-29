@@ -13,7 +13,7 @@ def main() -> None:
     try:
         old, new = Version.bump(bump_type)
         Git.commit(
-            f"chore: bump {bump_type if bump_type == 'patch' else ''} version",
+            f"chore: bump {bump_type + ' ' if bump_type == 'patch' else ''}version",
             ["pubspec.yaml"],
         )
         log_info(f"{bump_type} version bumped: {old} -> {new}")

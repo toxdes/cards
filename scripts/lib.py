@@ -202,7 +202,12 @@ class GitHub:
         self.token = token
 
     def create_release(
-        self, tag: str, name: str, body: str = "", draft: bool = True
+        self,
+        tag: str,
+        name: str,
+        body: str = "",
+        draft: bool = True,
+        prerelease: bool = False,
     ) -> int:
         """Create release and return ID."""
         data = {
@@ -211,11 +216,11 @@ class GitHub:
             "name": name,
             "body": body,
             "draft": draft,
-            "prerelease": draft,
+            "prerelease": prerelease,
             "generate_release_notes": False,
         }
 
-        cmd = (
+        redacted_cmd = (
             f"curl -L -X POST "
             f'-H "Accept: application/vnd.github+json" '
             f'-H "Authorization: Bearer ***" '
@@ -224,10 +229,10 @@ class GitHub:
             f"-d '{json.dumps(data)}'"
         )
 
-        log_cmd(cmd)
+        log_cmd(redacted_cmd)
 
-        # Run with actual token
-        actual_cmd = (
+        # Actual token
+        cmd = (
             f"curl -L -X POST "
             f'-H "Accept: application/vnd.github+json" '
             f'-H "Authorization: Bearer {self.token}" '
@@ -237,7 +242,7 @@ class GitHub:
         )
 
         result = subprocess.run(
-            actual_cmd, shell=True, capture_output=True, text=True, check=False
+            cmd, shell=True, capture_output=True, text=True, check=False
         )
 
         if result.returncode != 0:
@@ -248,6 +253,18 @@ class GitHub:
 
     def get_release(self, tag: str) -> Dict[str, Any]:
         """Get release by tag."""
+
+        redacted_cmd = (
+            f"curl -L -X GET"
+            f'-H "Accept: application/vnd.github+json" '
+            f'-H "Authorization: Bearer ***" '
+            f'-H "X-GitHub-Api-Version: 2022-11-28" '
+            f"{self.API}/releases/tags/{tag}"
+        )
+
+        log_cmd(redacted_cmd)
+
+        # Actual token
         cmd = (
             f"curl -L -X GET "
             f'-H "Accept: application/vnd.github+json" '
@@ -255,8 +272,6 @@ class GitHub:
             f'-H "X-GitHub-Api-Version: 2022-11-28" '
             f"{self.API}/releases/tags/{tag}"
         )
-
-        log_cmd(f"curl -L -X GET ... {self.API}/releases/tags/{tag}")
 
         result = subprocess.run(
             cmd, shell=True, capture_output=True, text=True, check=False
@@ -287,6 +302,20 @@ class GitHub:
         query = f"name={encoded_name}&label={encoded_label}"
         url = f"{base_url}?{query}"
 
+        redacted_cmd = (
+            f"curl -L -X POST "
+            f'-H "Accept: application/vnd.github+json" '
+            f'-H "Authorization: Bearer ***" '
+            f'-H "X-GitHub-Api-Version: 2022-11-28" '
+            f'-H "Content-Type: application/octet-stream" '
+            f"-o /dev/null "
+            f'"{url}" '
+            f'--data-binary "@{filepath}"'
+        )
+
+        log_cmd(redacted_cmd)
+
+        # Actual token
         cmd = (
             f"curl -L -X POST "
             f'-H "Accept: application/vnd.github+json" '
@@ -297,8 +326,6 @@ class GitHub:
             f'"{url}" '
             f'--data-binary "@{filepath}"'
         )
-
-        log_cmd(f'curl -L -X POST ...  --data-binary "@{filepath}"')
 
         result = subprocess.run(
             cmd, shell=True, capture_output=False, text=True, check=False
@@ -311,7 +338,7 @@ class GitHub:
 
 
 def log_info(msg: str) -> None:
-    """Log info message with color."""
+    """Log info message with color***."""
     print(f"{ANSI.BLUE}{ANSI.BOLD}[INFO]{ANSI.RESET} {msg}")
 
 
