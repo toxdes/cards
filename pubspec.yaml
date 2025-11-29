@@ -3,7 +3,7 @@ description: A new Flutter project.
 publish_to: none
 version: 0.5.7+40
 environment:
-  sdk: '>=3.2.6 <4.0.0'
+  sdk: ">=3.2.6 <4.0.0"
 dependencies:
   flutter:
     sdk: flutter
@@ -22,6 +22,7 @@ dependencies:
   window_manager: ^0.5.1
   local_notifier: ^0.1.6
   provider: ^6.0.0
+  local_auth: ^3.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
