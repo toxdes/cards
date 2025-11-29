@@ -9,16 +9,14 @@ RELEASE_NAME="cards-${APP_VERSION}"
 TAG_NAME="internal-$APP_VERSION"
 echo "[INFO] Tagging most recent commit with tag: $TAG_NAME"
 git tag -a $TAG_NAME HEAD -m "release $APP_VERSION"
-echo "[INFO] Generating source tar.gz"
-git archive --format=tar.gz -o /tmp/cards.tar.gz --prefix=cards/ main
 echo "[INFO] Building $RELEASE_NAME.apk"
 flutter clean
 flutter pub get
 dart fix --apply
-flutter build apk --flavor dev
-flutter build apk --flavor prod
-PROD_APK_PATH="./build/app/outputs/flutter-apk/app-prod-release.apk"
-DEV_APK_PATH="./build/app/outputs/flutter-apk/app-dev-release.apk"
+flutter build apk --release --flavor dev --split-per-abi
+flutter build apk --release --flavor prod --split-per-abi
+DEV_APK_DIR="./build/app/outputs/apk/dev/release"
+PROD_APK_DIR="./build/app/outputs/apk/prod/release"
 
 # create a new github release
 echo "[INFO] Creating a new github release $RELEASE_NAME"
@@ -32,37 +30,45 @@ CREATE_RELEASE_RES=$(curl -L \
 RELEASE_ID=$(echo $CREATE_RELEASE_RES | jq -r '.id')
 echo "RELEASE ID: $RELEASE_ID"
 
-# upload assets
-echo "[INFO] Uploading Prod APK"
-UPLOAD_URL="https://uploads.github.com/repos/toxdes/cards/releases/$RELEASE_ID/assets?name=$RELEASE_NAME.apk&label=$RELEASE_NAME.apk"
-curl -L \
-  -X POST \
-  -H "Accept: application/vnd.github+json" \
-  -H "Authorization: Bearer $GH_TOKEN" \
-  -H "X-GitHub-Api-Version: 2022-11-28" \
-  -H "Content-Type: application/octet-stream" \
-  "$UPLOAD_URL" \
-  --data-binary "@$PROD_APK_PATH"
+# Upload file to GitHub release with progress bar
+upload_asset() {
+  local file_path=$1
+  local asset_name=$2
+  local asset_label=$3
+  
+  echo "[INFO] Uploading $asset_label"
+  curl -L \
+    -X POST \
+    -H "Accept: application/vnd.github+json" \
+    -H "Authorization: Bearer $GH_TOKEN" \
+    -H "X-GitHub-Api-Version: 2022-11-28" \
+    -H "Content-Type: application/octet-stream" \
+    --progress-bar \
+    "https://uploads.github.com/repos/toxdes/cards/releases/$RELEASE_ID/assets?name=$asset_name&label=$asset_label" \
+    --data-binary "@$file_path"
+  echo ""
+}
 
+# Upload prod APKs (arch-specific)
+for apk in $PROD_APK_DIR/app-prod-*-release.apk; do
+  [[ "$apk" =~ universal ]] && continue
+  arch=$(basename "$apk" | sed -E 's/app-prod-(.+?)-release\.apk/\1/')
+  upload_asset "$apk" "cards-${arch}-${APP_VERSION}.apk" "Prod - $arch"
+done
 
-echo "[INFO] Uploading Dev APK"
-UPLOAD_URL="https://uploads.github.com/repos/toxdes/cards/releases/$RELEASE_ID/assets?name=$RELEASE_NAME-dev.apk&label=$RELEASE_NAME-dev.apk"
-curl -L \
-  -X POST \
-  -H "Accept: application/vnd.github+json" \
-  -H "Authorization: Bearer $GH_TOKEN" \
-  -H "X-GitHub-Api-Version: 2022-11-28" \
-  -H "Content-Type: application/octet-stream" \
-  "$UPLOAD_URL" \
-  --data-binary "@$DEV_APK_PATH"
+# Upload prod universal APK
+[[ -f "$PROD_APK_DIR/app-prod-universal-release.apk" ]] && \
+  upload_asset "$PROD_APK_DIR/app-prod-universal-release.apk" "cards-universal-${APP_VERSION}.apk" "Prod - Universal"
 
-echo "[INFO] Uploading source tarball"
-UPLOAD_URL="https://uploads.github.com/repos/toxdes/cards/releases/$RELEASE_ID/assets?name=cards.tar.gz&label=Source%20code%20(tarball)"
-curl -L \
-  -X POST \
-  -H "Accept: application/vnd.github+json" \
-  -H "Authorization: Bearer $GH_TOKEN" \
-  -H "X-GitHub-Api-Version: 2022-11-28" \
-  -H "Content-Type: application/octet-stream" \
-  "$UPLOAD_URL" \
-  --data-binary "@/tmp/cards.tar.gz"
+# Upload dev APKs (arch-specific)
+for apk in $DEV_APK_DIR/app-dev-*-release.apk; do
+  [[ "$apk" =~ universal ]] && continue
+  arch=$(basename "$apk" | sed -E 's/app-dev-(.+?)-release\.apk/\1/')
+  upload_asset "$apk" "cards-dev-${arch}-${APP_VERSION}.apk" "Dev - $arch"
+done
+
+# Upload dev universal APK
+[[ -f "$DEV_APK_DIR/app-dev-universal-release.apk" ]] && \
+  upload_asset "$DEV_APK_DIR/app-dev-universal-release.apk" "cards-dev-universal-${APP_VERSION}.apk" "Dev - Universal"
+
+echo "[INFO] Release complete!"
