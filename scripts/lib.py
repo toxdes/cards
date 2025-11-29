@@ -338,7 +338,7 @@ class GitHub:
 
 
 def log_info(msg: str) -> None:
-    """Log info message with color***."""
+    """Log info message with color."""
     print(f"{ANSI.BLUE}{ANSI.BOLD}[INFO]{ANSI.RESET} {msg}")
 
 
