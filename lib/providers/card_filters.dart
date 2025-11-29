@@ -4,8 +4,8 @@ import 'package:cards/models/card/card.dart';
 class DebitCardFilter extends Filter<CardModel> {
   @override
   bool ok(CardModel t) {
-    return t.getCardType() == CardType.debit ||
-        t.getTitle().toLowerCase().contains("debit");
+    // TODO: get rid of name based filters once edit-card functionality is added
+    return t.getTitle().toLowerCase().contains("debit");
   }
 
   @override
@@ -15,7 +15,8 @@ class DebitCardFilter extends Filter<CardModel> {
 class CreditCardFilter extends Filter<CardModel> {
   @override
   bool ok(CardModel t) {
-    return t.type == CardType.credit;
+    // TODO: get rid of name based filters once edit-card functionality is added
+    return !t.getTitle().toLowerCase().contains("debit");
   }
 
   @override
