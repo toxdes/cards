@@ -5,6 +5,8 @@ import 'package:cards/config/colors.dart';
 import 'package:cards/config/fonts.dart';
 import 'package:cards/providers/preferences_notifier.dart';
 import 'package:cards/screens/backup_restore/backup_main.dart';
+import 'package:cards/services/auth_service.dart';
+import 'package:cards/services/platform_service.dart';
 import 'package:cards/services/toast_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Icons;
@@ -63,21 +65,21 @@ class PreferencesScreen extends StatelessWidget {
                           MenuItemWithSwitch(
                               checked: prefsNotifier.prefs.maskCardNumber,
                               icon: Icons.numbers_outlined,
-                              title: "Mask Card Number",
+                              title: "Hide card number",
                               onChange: (bool newValue) {
                                 prefsNotifier.setMaskCardNumber(newValue);
                               }),
                           MenuItemWithSwitch(
                               checked: prefsNotifier.prefs.maskCVV,
                               icon: Icons.credit_card_outlined,
-                              title: "Mask CVV",
+                              title: "Hide CVV",
                               onChange: (bool newValue) {
                                 prefsNotifier.setMaskCVV(newValue);
                               }),
                           MenuItemWithSwitch(
                             checked: prefsNotifier.prefs.enableNotifications,
                             title: "Notifications",
-                            disabled: true,
+                            disabled: false,
                             icon: Icons.notifications_outlined,
                             onChange: (bool newValue) {
                               prefsNotifier.setEnableNotifications(newValue);
@@ -87,7 +89,14 @@ class PreferencesScreen extends StatelessWidget {
                               checked: prefsNotifier.prefs.useDeviceAuth,
                               icon: Icons.lock_outlined,
                               title: "Use screen lock",
-                              disabled: true,
+                              desc: PlatformService.isAndroid() &&
+                                      !AuthService.isAuthSupported()
+                                  // TODO: navigate to settings on press
+                                  // TODO: update AuthNotifier on app-state changes
+                                  ? "Please set up a device PIN or biometrics in your phone settings."
+                                  : null,
+                              descColor: ThemeColors.red,
+                              disabled: !AuthService.isAuthSupported(),
                               onChange: (bool newValue) {
                                 prefsNotifier.setUseDeviceAuth(newValue);
                               }),

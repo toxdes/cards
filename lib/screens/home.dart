@@ -12,6 +12,8 @@ import 'package:cards/core/db/sort.dart';
 import 'package:cards/models/card/card.dart';
 import 'package:cards/providers/card_filters.dart';
 import 'package:cards/providers/cards_notifier.dart';
+import 'package:cards/providers/preferences_notifier.dart';
+import 'package:cards/services/auth_service.dart';
 import 'package:cards/services/flavor_service.dart';
 import 'package:cards/services/platform_service.dart';
 import 'package:flutter/cupertino.dart';
@@ -128,116 +130,119 @@ class _HomeState extends State<Home> with TrayListener, WindowListener {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<CardsNotifier>(
-      builder: (context, cardsNotifier, _) {
-        List<Widget> cards =
-            cardsNotifier.getFilteredCards().map((CardModel c) {
-          return CardView(
-              card: c,
-              onLongPress: (CardModel sc) async {
-                cardsNotifier.removeCard(sc);
-              });
-        }).toList();
-        return SafeArea(
-          child: Center(
-            child: Container(
-                decoration: const BoxDecoration(color: ThemeColors.gray1),
-                constraints: const BoxConstraints(maxWidth: 600),
-                child: Stack(textDirection: TextDirection.ltr, children: [
-                  Container(
-                      padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
-                      child: Directionality(
-                          textDirection: TextDirection.ltr,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Header(),
-                              const SizedBox(height: 6),
-                              cardsNotifier.getCardsCount() > 0
-                                  ? FilterControls(
-                                      onTuneIconTap: () {
-                                        setState(() {
-                                          _sortAndFilterModalVisible = true;
-                                        });
-                                      },
-                                    )
-                                  : const SizedBox.shrink(),
-                              const FilterSummary(),
-                              Expanded(
-                                  child: ListView(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 8.0),
-                                scrollDirection: Axis.vertical,
-                                shrinkWrap: true,
-                                children:
-                                    cards.isEmpty ? [CardListEmpty()] : cards,
-                              )),
-                              Button(
-                                label: "Add new card +",
-                                color: ThemeColors.blue,
-                                buttonType: ButtonType.primary,
-                                alignment: Alignment.center,
-                                height: 48,
-                                onTap: () {
-                                  setState(() {
-                                    _addNewCardFormVisible = true;
-                                  });
-                                },
-                              )
-                                  .animate(
-                                      autoPlay: true,
-                                      onComplete: (controller) {
-                                        controller.loop(count: 3);
-                                      })
-                                  .then(delay: 10.seconds)
-                                  .shake(
-                                    duration: 600.ms,
-                                    rotation: 0.02,
-                                  ),
-                              SizedBox(height: 12),
-                            ],
-                          ))),
-                  AddNewCardModal(
-                    isVisible: _addNewCardFormVisible,
-                    onClose: () {
-                      setState(() {
-                        _addNewCardFormVisible = false;
-                      });
-                    },
-                    onAddNewCard: (CardModel card) async {
-                      await cardsNotifier.addCard(card);
-                      if (mounted) {
+    return Consumer<PreferencesNotifier>(builder: (context, prefsNotifier, _) {
+      if (prefsNotifier.prefs.useDeviceAuth && AuthService.isAuthSupported()) {}
+      return Consumer<CardsNotifier>(
+        builder: (context, cardsNotifier, _) {
+          List<Widget> cards =
+              cardsNotifier.getFilteredCards().map((CardModel c) {
+            return CardView(
+                card: c,
+                onLongPress: (CardModel sc) async {
+                  cardsNotifier.removeCard(sc);
+                });
+          }).toList();
+          return SafeArea(
+            child: Center(
+              child: Container(
+                  decoration: const BoxDecoration(color: ThemeColors.gray1),
+                  constraints: const BoxConstraints(maxWidth: 600),
+                  child: Stack(textDirection: TextDirection.ltr, children: [
+                    Container(
+                        padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
+                        child: Directionality(
+                            textDirection: TextDirection.ltr,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Header(),
+                                const SizedBox(height: 6),
+                                cardsNotifier.getCardsCount() > 0
+                                    ? FilterControls(
+                                        onTuneIconTap: () {
+                                          setState(() {
+                                            _sortAndFilterModalVisible = true;
+                                          });
+                                        },
+                                      )
+                                    : const SizedBox.shrink(),
+                                const FilterSummary(),
+                                Expanded(
+                                    child: ListView(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  scrollDirection: Axis.vertical,
+                                  shrinkWrap: true,
+                                  children:
+                                      cards.isEmpty ? [CardListEmpty()] : cards,
+                                )),
+                                Button(
+                                  label: "Add new card +",
+                                  color: ThemeColors.blue,
+                                  buttonType: ButtonType.primary,
+                                  alignment: Alignment.center,
+                                  height: 48,
+                                  onTap: () {
+                                    setState(() {
+                                      _addNewCardFormVisible = true;
+                                    });
+                                  },
+                                )
+                                    .animate(
+                                        autoPlay: true,
+                                        onComplete: (controller) {
+                                          controller.loop(count: 3);
+                                        })
+                                    .then(delay: 10.seconds)
+                                    .shake(
+                                      duration: 600.ms,
+                                      rotation: 0.02,
+                                    ),
+                                SizedBox(height: 12),
+                              ],
+                            ))),
+                    AddNewCardModal(
+                      isVisible: _addNewCardFormVisible,
+                      onClose: () {
                         setState(() {
                           _addNewCardFormVisible = false;
                         });
-                      }
-                    },
-                  ),
-                  SortAndFilterModal(
-                    isVisible: _sortAndFilterModalVisible,
-                    onClose: () {
-                      setState(() {
-                        _sortAndFilterModalVisible = false;
-                      });
-                    },
-                    onApplyFilter: _onApplyFilter,
-                  ),
-                  Positioned(
-                    bottom: 4,
-                    right: 4,
-                    child: Text(FlavorService.getFlavor().getLabel(),
-                        textAlign: TextAlign.left,
-                        style: const TextStyle(
-                            fontFamily: Fonts.rubik,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: ThemeColors.yellow)),
-                  ),
-                ])),
-          ),
-        );
-      },
-    );
+                      },
+                      onAddNewCard: (CardModel card) async {
+                        await cardsNotifier.addCard(card);
+                        if (mounted) {
+                          setState(() {
+                            _addNewCardFormVisible = false;
+                          });
+                        }
+                      },
+                    ),
+                    SortAndFilterModal(
+                      isVisible: _sortAndFilterModalVisible,
+                      onClose: () {
+                        setState(() {
+                          _sortAndFilterModalVisible = false;
+                        });
+                      },
+                      onApplyFilter: _onApplyFilter,
+                    ),
+                    Positioned(
+                      bottom: 4,
+                      right: 4,
+                      child: Text(FlavorService.getFlavor().getLabel(),
+                          textAlign: TextAlign.left,
+                          style: const TextStyle(
+                              fontFamily: Fonts.rubik,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: ThemeColors.yellow)),
+                    ),
+                  ])),
+            ),
+          );
+        },
+      );
+    });
   }
 }

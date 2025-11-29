@@ -15,6 +15,7 @@ class MenuItemWithSwitch extends StatelessWidget {
       this.fgColor = ThemeColors.white2,
       this.bgColor = ThemeColors.gray1,
       this.borderColor = ThemeColors.gray3,
+      this.descColor = ThemeColors.white3,
       this.disabled = false});
 
   final ValueSetter<bool> onChange;
@@ -23,7 +24,12 @@ class MenuItemWithSwitch extends StatelessWidget {
   final String? desc;
   final IconData? icon;
   final bool disabled;
-  final Color fgColor, bgColor, borderColor, iconColor;
+  final Color fgColor, bgColor, borderColor, iconColor, descColor;
+
+  void onTap() {
+    if (disabled) return;
+    onChange(!checked);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,39 +37,69 @@ class MenuItemWithSwitch extends StatelessWidget {
       bgColor: bgColor,
       borderColor: borderColor,
       disabled: disabled,
-      onTap: () {
-        onChange(!checked);
-      },
+      onTap: onTap,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              icon != null
-                  ? Icon(
-                      icon,
-                      color: iconColor,
-                    )
-                  : SizedBox.shrink(),
-              SizedBox(width: 8),
-              Text(
-                title,
-                style: TextStyle(
-                  fontFamily: Fonts.rubik,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w400,
-                  color: fgColor,
-                  decoration: TextDecoration.none,
+          Expanded(
+            child: Row(
+              children: [
+                icon != null
+                    ? Icon(
+                        icon,
+                        color: iconColor,
+                      )
+                    : SizedBox.shrink(),
+                SizedBox(width: 12),
+                Flexible(
+                  fit: FlexFit.tight,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontFamily: Fonts.rubik,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          color: fgColor,
+                          decoration: TextDecoration.none,
+                        ),
+                        textAlign: TextAlign.left,
+                      ),
+                      desc != null
+                          ? const SizedBox(height: 4)
+                          : SizedBox.shrink(),
+                      desc != null
+                          ? Text(
+                              desc!,
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontFamily: Fonts.rubik,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                                color: descColor,
+                                decoration: TextDecoration.none,
+                              ),
+                              softWrap: true,
+                              textAlign: TextAlign.left,
+                            )
+                          : SizedBox.shrink(),
+                    ],
+                  ),
                 ),
-                textAlign: TextAlign.left,
-              ),
-            ],
+              ],
+            ),
           ),
           CupertinoSwitch(
               value: checked,
               activeTrackColor: ThemeColors.blue,
               inactiveTrackColor: ThemeColors.gray3,
-              onChanged: (_) {}),
+              onChanged: (_) {
+                onTap();
+              }),
         ],
       ),
     );
@@ -81,6 +117,7 @@ class MenuItem extends StatelessWidget {
     this.fgColor = ThemeColors.white2,
     this.bgColor = ThemeColors.gray1,
     this.borderColor = ThemeColors.gray3,
+    this.descColor = ThemeColors.white3,
     this.disabled = false,
   });
   final VoidCallback onTap;
@@ -88,7 +125,7 @@ class MenuItem extends StatelessWidget {
   final String? desc;
   final IconData? icon;
   final bool disabled;
-  final Color fgColor, bgColor, iconColor, borderColor;
+  final Color fgColor, bgColor, iconColor, borderColor, descColor;
   @override
   Widget build(BuildContext context) {
     return MenuItemBase(
@@ -96,35 +133,55 @@ class MenuItem extends StatelessWidget {
       borderColor: borderColor,
       disabled: disabled,
       bgColor: bgColor,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              icon != null
-                  ? Icon(icon, color: ThemeColors.white2)
-                  : SizedBox.shrink(),
-              SizedBox(width: 8),
-              Text(
-                title,
-                style: TextStyle(
-                  fontFamily: Fonts.rubik,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w400,
-                  color: ThemeColors.white2,
-                  decoration: TextDecoration.none,
-                ),
-                textAlign: TextAlign.left,
-              ),
-            ],
-          ),
-          Icon(
-            Icons.chevron_right_outlined,
-            color: ThemeColors.white2,
-            size: 18,
-          )
-        ],
-      ),
+      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        Row(
+          children: [
+            icon != null
+                ? Icon(icon, color: ThemeColors.white2)
+                : SizedBox.shrink(),
+            SizedBox(width: 12),
+            Column(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontFamily: Fonts.rubik,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                      color: fgColor,
+                      decoration: TextDecoration.none,
+                    ),
+                    textAlign: TextAlign.left,
+                  ),
+                  desc != null ? const SizedBox(height: 4) : SizedBox.shrink(),
+                  desc != null
+                      ? Text(
+                          desc!,
+                          style: TextStyle(
+                            fontFamily: Fonts.rubik,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                            color: descColor,
+                            decoration: TextDecoration.none,
+                          ),
+                          softWrap: true,
+                          textAlign: TextAlign.left,
+                        )
+                      : SizedBox.shrink()
+                ]),
+            Icon(
+              Icons.chevron_right_outlined,
+              color: ThemeColors.white2,
+              size: 18,
+            ),
+          ],
+        )
+      ]),
     );
   }
 }
