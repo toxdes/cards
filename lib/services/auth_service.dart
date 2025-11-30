@@ -48,6 +48,7 @@ class AuthService {
       return await _auth!.authenticate(localizedReason: "Unlock");
     } catch (e, stackTrace) {
       SentryService.error(e, stackTrace);
+      // TODO: show toast here based on what error we get?
     }
     return false;
   }

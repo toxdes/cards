@@ -26,9 +26,9 @@ class MenuItemWithSwitch extends StatelessWidget {
   final bool disabled;
   final Color fgColor, bgColor, borderColor, iconColor, descColor;
 
-  void onTap() {
+  void onTap(bool newValue) {
     if (disabled) return;
-    onChange(!checked);
+    onChange(newValue);
   }
 
   @override
@@ -37,7 +37,9 @@ class MenuItemWithSwitch extends StatelessWidget {
       bgColor: bgColor,
       borderColor: borderColor,
       disabled: disabled,
-      onTap: onTap,
+      onTap: () {
+        onTap(!checked);
+      },
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -49,7 +51,7 @@ class MenuItemWithSwitch extends StatelessWidget {
                         icon,
                         color: iconColor,
                       )
-                    : SizedBox.shrink(),
+                    : const SizedBox.shrink(),
                 SizedBox(width: 12),
                 Flexible(
                   fit: FlexFit.tight,
@@ -70,7 +72,7 @@ class MenuItemWithSwitch extends StatelessWidget {
                       ),
                       desc != null
                           ? const SizedBox(height: 4)
-                          : SizedBox.shrink(),
+                          : const SizedBox.shrink(),
                       desc != null
                           ? Text(
                               desc!,
@@ -86,7 +88,7 @@ class MenuItemWithSwitch extends StatelessWidget {
                               softWrap: true,
                               textAlign: TextAlign.left,
                             )
-                          : SizedBox.shrink(),
+                          : const SizedBox.shrink(),
                     ],
                   ),
                 ),
@@ -97,9 +99,11 @@ class MenuItemWithSwitch extends StatelessWidget {
               value: checked,
               activeTrackColor: ThemeColors.blue,
               inactiveTrackColor: ThemeColors.gray3,
-              onChanged: (_) {
-                onTap();
-              }),
+              onChanged: disabled
+                  ? null
+                  : (bool newValue) {
+                      onTap(newValue);
+                    }),
         ],
       ),
     );
@@ -172,7 +176,7 @@ class MenuItem extends StatelessWidget {
                           softWrap: true,
                           textAlign: TextAlign.left,
                         )
-                      : SizedBox.shrink()
+                      : const SizedBox.shrink()
                 ]),
           ],
         ),

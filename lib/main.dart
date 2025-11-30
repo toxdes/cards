@@ -45,7 +45,7 @@ Widget app = MultiProvider(
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // TODO: refactor this so there is no "implicit" order betweeen services, if possible
+  // TODO: refactor this so there is no "implicit" order between services, if possible
   await AuthService.init();
   await NotificationService.init();
   await CryptoUtils.init();

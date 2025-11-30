@@ -36,13 +36,13 @@ class _LockedScreenState extends State<LockedScreen> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const SizedBox(height: 48),
-          Icon(
+          const Icon(
             Icons.lock_outlined,
             color: ThemeColors.white1,
             size: 48,
           ),
           const SizedBox(height: 16),
-          Text(
+          const Text(
             "App is locked",
             style: TextStyle(
                 fontFamily: Fonts.rubik,
@@ -53,8 +53,8 @@ class _LockedScreenState extends State<LockedScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
-          Text(
-            "App is locked, unlock it.",
+          const Text(
+            "Authenticate to access your cards",
             style: TextStyle(
                 fontFamily: Fonts.rubik,
                 color: ThemeColors.white2,
