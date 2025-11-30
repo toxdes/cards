@@ -242,7 +242,7 @@ class _SortAndFilterFormState extends State<SortAndFilterForm> {
                 labelColor: ThemeColors.red,
                 buttonType: ButtonType.ghost,
                 onTap: _resetForm,
-                padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                 alignment: Alignment.center,
                 height: 42,
                 label: "Reset filters",
