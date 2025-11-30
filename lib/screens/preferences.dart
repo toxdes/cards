@@ -27,7 +27,7 @@ class PreferencesScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
-                    padding: EdgeInsets.fromLTRB(24, 12, 24, 12),
+                    padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
                     child: Stack(
                       children: [
                         Container(
@@ -43,7 +43,7 @@ class PreferencesScreen extends StatelessWidget {
                         ),
                         Center(
                             child: Padding(
-                          padding: EdgeInsets.only(top: 2),
+                          padding: const EdgeInsets.only(top: 2),
                           child: const Text(
                             "Preferences",
                             textAlign: TextAlign.center,

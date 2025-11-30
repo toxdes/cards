@@ -174,13 +174,13 @@ class MenuItem extends StatelessWidget {
                         )
                       : SizedBox.shrink()
                 ]),
-            Icon(
-              Icons.chevron_right_outlined,
-              color: ThemeColors.white2,
-              size: 18,
-            ),
           ],
-        )
+        ),
+        Icon(
+          Icons.chevron_right_outlined,
+          color: ThemeColors.white2,
+          size: 18,
+        ),
       ]),
     );
   }
@@ -206,7 +206,7 @@ class MenuItemBase extends StatelessWidget {
         child: Opacity(
           opacity: disabled ? disabledOpacity : 1,
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 24),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             height: 64,
             decoration: BoxDecoration(
                 color: bgColor,

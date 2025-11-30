@@ -6,6 +6,8 @@ import android.os.Bundle;
 import io.flutter.embedding.android.FlutterFragmentActivity;
 import io.flutter.plugin.common.MethodChannel;
 
+// We use FlutterFragmentActivity here because local_auth needs a FragmentActivity
+// to be able to show system level device-auth popup
 public class MainActivity extends FlutterFragmentActivity{
 
   @Override

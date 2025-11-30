@@ -62,12 +62,12 @@ class _LockedScreenState extends State<LockedScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
-          Consumer<AuthNotifier>(builder: (conext, authNotifier, _) {
+          Consumer<AuthNotifier>(builder: (context, authNotifier, _) {
             return Button(
               icon: Icons.fingerprint_outlined,
               label: "Unlock",
               buttonType: ButtonType.primary,
-              padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
               color: ThemeColors.blue,
               disabled: authNotifier.isAuthInProgress(),
               labelColor: ThemeColors.white1,

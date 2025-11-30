@@ -45,7 +45,7 @@ class _BackupScreenState extends State<BackupMainScreen> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            padding: EdgeInsets.fromLTRB(24, 12, 24, 12),
+            padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
             child: Stack(
               children: [
                 Container(

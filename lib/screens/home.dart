@@ -131,7 +131,6 @@ class _HomeState extends State<Home> with TrayListener, WindowListener {
   @override
   Widget build(BuildContext context) {
     return Consumer<PreferencesNotifier>(builder: (context, prefsNotifier, _) {
-      if (prefsNotifier.prefs.useDeviceAuth && AuthService.isAuthSupported()) {}
       return Consumer<CardsNotifier>(
         builder: (context, cardsNotifier, _) {
           List<Widget> cards =
