@@ -1,9 +1,9 @@
 name: cards
 description: A new Flutter project.
 publish_to: none
-version: 0.5.7+40
+version: 0.5.8+41
 environment:
-  sdk: ">=3.2.6 <4.0.0"
+  sdk: '>=3.2.6 <4.0.0'
 dependencies:
   flutter:
     sdk: flutter
