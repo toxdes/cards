@@ -197,6 +197,7 @@ class GitHub:
 
     API = "https://api.github.com/repos/toxdes/cards"
     UPLOAD = "https://uploads.github.com/repos/toxdes/cards"
+    RELEASE_INFO_FILE = "/tmp/rel-info"
 
     def __init__(self, token: str):
         self.token = token
@@ -249,42 +250,21 @@ class GitHub:
             raise ProcessError(f"Failed to create release: {result.stderr}")
 
         resp_data = json.loads(result.stdout)
-        return int(resp_data["id"])
-
-    def get_release(self, tag: str) -> Dict[str, Any]:
-        """Get release by tag."""
-
-        redacted_cmd = (
-            f"curl -L -X GET"
-            f'-H "Accept: application/vnd.github+json" '
-            f'-H "Authorization: Bearer ***" '
-            f'-H "X-GitHub-Api-Version: 2022-11-28" '
-            f"{self.API}/releases/tags/{tag}"
-        )
-
-        log_cmd(redacted_cmd)
-
-        # Actual token
-        cmd = (
-            f"curl -L -X GET "
-            f'-H "Accept: application/vnd.github+json" '
-            f'-H "Authorization: Bearer {self.token}" '
-            f'-H "X-GitHub-Api-Version: 2022-11-28" '
-            f"{self.API}/releases/tags/{tag}"
-        )
-
-        result = subprocess.run(
-            cmd, shell=True, capture_output=True, text=True, check=False
-        )
-        return json.loads(result.stdout)
+        release_id = int(resp_data["id"])
+        with open(self.RELEASE_INFO_FILE, "w") as f:
+            f.writelines(f"{tag};{release_id}")
+        return release_id
 
     def get_release_id(self, tag: str) -> int:
-        """Get release ID by tag or raise if not found."""
-        data = self.get_release(tag)
-        release_id = data.get("id")
-        if not release_id:
+        """Check if release exists for given tag"""
+        try:
+            with open(self.RELEASE_INFO_FILE, "r") as f:
+                saved_tag_id, release_id = f.readline().split(";")
+                if not release_id or saved_tag_id != tag:
+                    raise ValueError(f"Release not found for tag: {tag}")
+                return int(release_id)
+        except:
             raise ValueError(f"Release not found for tag: {tag}")
-        return int(release_id)
 
     def upload(self, release_id: int, filepath: str, name: str, label: str) -> None:
         """Upload asset to release."""
