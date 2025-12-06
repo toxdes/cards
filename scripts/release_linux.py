@@ -25,8 +25,8 @@ def main() -> None:
         log_info("Building Linux releases")
         Shell.run("dart pub global activate fastforge")
         Shell.run(
-            "~/.pub-cache/bin/fastforge release "
-            "--name=dev --jobs=release-linux-deb,release-linux-appimage"
+            "FLAVOR=prod ~/.pub-cache/bin/fastforge release "
+            "--name=prod --jobs=release-linux-deb,release-linux-appimage"
         )
 
         # Upload DEB

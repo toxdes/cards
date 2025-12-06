@@ -7,7 +7,21 @@ project(runner LANGUAGES CXX)
 set(BINARY_NAME "cards")
 # The unique GTK application identifier for this application. See:
 # https://wiki.gnome.org/HowDoI/ChooseApplicationID
-set(APPLICATION_ID "com.toxdes.cards")
+
+# Since flavors are not supported on linux yet, we use FLAVOR env variable to
+# simulate "dev" and "prod" instances to get isolated local storage for each
+# instance.
+# accepted values for FLAVOR: dev, prod
+
+# by default append ".dev" for debug/dev builds
+set(APPLICATION_ID "com.toxdes.cards.dev")
+
+# use correct app id for prod
+if(DEFINED ENV{FLAVOR})
+  if($ENV{FLAVOR} STREQUAL "prod")
+    set(APPLICATION_ID "com.toxdes.cards")
+  endif()
+endif()
 
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.
@@ -41,9 +55,9 @@ endif()
 # of modifying this function.
 function(APPLY_STANDARD_SETTINGS TARGET)
   target_compile_features(${TARGET} PUBLIC cxx_std_14)
-  # TODO: Remove following flags after respective libraries are updated/made available to ubuntu package manager 
+  # TODO: Remove following flags after respective libraries are updated/made available to ubuntu package manager
   # for flutter_secure_storage
-  # -Wno-error=deprecated-literal-operator 
+  # -Wno-error=deprecated-literal-operator
   # for tray_manager
   # -Wno-error=deprecated-declarations
   # more info: https://github.com/juliansteenbakker/flutter_secure_storage/issues/920

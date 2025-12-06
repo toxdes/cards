@@ -1,6 +1,6 @@
 output: dist/
 releases:
-  - name: dev
+  - name: prod
     jobs:
       - name: release-linux-deb
         package:
