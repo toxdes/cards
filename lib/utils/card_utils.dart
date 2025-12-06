@@ -44,6 +44,16 @@ class CardUtils {
     return CardProvider.unknown;
   }
 
+  static CardNumberType getCardNumberTypeFromString(String type) {
+    switch (type) {
+      case "Last4":
+        return CardNumberType.last4;
+      case "Complete":
+      default:
+        return CardNumberType.complete;
+    }
+  }
+
   static CardType getCardTypeFromString(String type) {
     switch (type) {
       case "Debit":

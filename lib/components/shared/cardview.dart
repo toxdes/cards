@@ -52,6 +52,13 @@ class _CardViewState extends State<CardView> {
           : widget.card.getCVV();
       return GestureDetector(
         onTap: () async {
+          if (widget.card.cardNumberType == CardNumberType.last4) {
+            ToastService.show(
+                message:
+                    "could not copy to clipboard, you have added only last 4 digits for this card.",
+                status: ToastStatus.error);
+            return;
+          }
           await _incrementUsedCount();
           Clipboard.setData(ClipboardData(text: widget.card.getNumber()));
           String notificationTitle = "Card details: ${widget.card.getTitle()}";

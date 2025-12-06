@@ -4,6 +4,7 @@ import 'package:cards/utils/string_utils.dart';
 import 'package:flutter/services.dart';
 
 class CardNumberFormatter extends TextInputFormatter {
+  bool _isCompleteCardNumber = true;
   @override
   TextEditingValue formatEditUpdate(
       TextEditingValue oldValue, TextEditingValue newValue) {
@@ -11,7 +12,8 @@ class CardNumberFormatter extends TextInputFormatter {
         StringUtils.removeAll(newValue.text.toString(), ' ');
 
     StringBuffer buf = StringBuffer();
-    for (int i = 1; i <= min<int>(textWithoutWhitespace.length, 16); ++i) {
+    int maxLen = _isCompleteCardNumber ? 16 : 4;
+    for (int i = 1; i <= min<int>(textWithoutWhitespace.length, maxLen); ++i) {
       if (StringUtils.isDigit(textWithoutWhitespace[i - 1])) {
         buf.write(textWithoutWhitespace[i - 1]);
       }
@@ -20,6 +22,10 @@ class CardNumberFormatter extends TextInputFormatter {
     return newValue.copyWith(
         text: modifiedText,
         selection: TextSelection.collapsed(offset: modifiedText.length));
+  }
+
+  void setIsCompleteCardNumber(bool newValue) {
+    _isCompleteCardNumber = newValue;
   }
 }
 
