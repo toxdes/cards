@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:cards/models/card/card.dart';
 import 'package:cards/models/card/card_factory.dart';
 import 'package:cards/models/card/migrations/m_add_billing_cycle.dart';
+import 'package:cards/models/card/migrations/m_add_card_number_type.dart';
 import 'package:cards/models/card/migrations/m_add_timestamps.dart';
 import 'package:cards/models/card/migrations/m_add_used_count.dart';
 import 'package:cards/models/card/migrations/m_redo_card_type.dart';
@@ -22,12 +23,13 @@ class MigrationsService {
     context.addMigration(AddBillingCycleMigration(id: 2));
     context.addMigration(RedoCardTypeMigration(id: 3));
     context.addMigration(AddUsedCountMigration(id: 4));
-    
+    context.addMigration(AddCardNumberTypeMigration(id: 5));
+
     CardRepository cardRepository = CardRepository(
         storage: const SecureStorage(),
         storageKey: CardRepositoryStorageKeys.mainStorage);
     await cardRepository.readFromStorage();
-    
+
     UnmodifiableListView<CardModel> cards = cardRepository.getAll();
     if (cards.isEmpty) return;
     if (CardModelFactory.blank().schemaVersion != cards[0].schemaVersion) {

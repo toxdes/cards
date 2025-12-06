@@ -1,10 +1,10 @@
 import 'package:cards/core/db/model.dart';
 import 'package:cards/models/card/card_json_encoder.dart';
-import 'package:cards/utils/card_utils.dart';
+
 import 'package:cards/utils/string_utils.dart';
 
 class CardModel extends Model {
-  CardModel() : super(schemaVersion: 4);
+  CardModel() : super(schemaVersion: 5);
 
   /// Creates an empty CardModel with the specified schema version.
   /// Used internally by migrations to instantiate models at specific schema versions.
@@ -21,6 +21,7 @@ class CardModel extends Model {
   String _numberView = "";
   String _expiryView = "";
   String? billingCycle;
+  CardNumberType cardNumberType = CardNumberType.complete;
   int usedCount = 0;
 
   DateTime? createdAt;
@@ -49,6 +50,19 @@ class CardModel extends Model {
     this.type = type;
   }
 
+  void setCardNumberType(CardNumberType cardNumberType) {
+    this.cardNumberType = cardNumberType;
+  }
+
+  String getCardNumberTypeView() {
+    switch (cardNumberType) {
+      case CardNumberType.complete:
+        return "Complete";
+      case CardNumberType.last4:
+        return "Last4";
+    }
+  }
+
   void setProvider(CardProvider provider) {
     this.provider = provider;
   }
@@ -58,17 +72,24 @@ class CardModel extends Model {
   }
 
   void setNumber(String number) {
-    this.number = StringUtils.removeAll(number, ' ');
+    number = StringUtils.removeAll(number, ' ');
 
     StringBuffer buf = StringBuffer();
+    if (cardNumberType == CardNumberType.last4) {
+      for (int i = 0; i < 12; ++i) {
+        buf.write('X');
+      }
+      // take only last 4 digits
+      number = number.substring(number.length - 4, number.length);
+    }
     for (int i = 1; i <= number.length; ++i) {
       buf.write(number[i - 1]);
       if (i % 4 == 0 && i != 16) {
         buf.write(' ');
       }
     }
+    this.number = number;
     _numberView = buf.toString();
-    _updateProvider();
   }
 
   void setCVV(String cvv) {
@@ -136,10 +157,23 @@ class CardModel extends Model {
   }
 
   String getNumberView() {
-    return _numberView;
+    StringBuffer sb = StringBuffer();
+    if (cardNumberType == CardNumberType.last4) {
+      for (int i = 1; i <= 12; ++i) {
+        sb.write('X');
+        if (i % 4 == 0) {
+          sb.write(' ');
+        }
+      }
+    }
+    sb.write(_numberView);
+    return sb.toString();
   }
 
   String getMaskedNumberView() {
+    if (cardNumberType == CardNumberType.last4) {
+      return getNumberView();
+    }
     StringBuffer sb = StringBuffer();
     int haveTo = 12;
     String maskChar = "X";
@@ -199,10 +233,6 @@ class CardModel extends Model {
     usedCount++;
   }
 
-  void _updateProvider() {
-    provider = CardUtils.getProviderFromNumber(number ?? "");
-  }
-
   @override
   String toString() {
     return toJson();
@@ -217,6 +247,7 @@ class CardModel extends Model {
     return type == other.type &&
         provider == other.provider &&
         title == other.title &&
+        cardNumberType == other.cardNumberType &&
         number == other.number &&
         cvv == other.cvv &&
         expiry == other.expiry &&
@@ -225,5 +256,7 @@ class CardModel extends Model {
 }
 
 enum CardType { debit, credit, unknown }
+
+enum CardNumberType { complete, last4 }
 
 enum CardProvider { visa, mastercard, amex, discover, rupay, unknown }
