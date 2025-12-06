@@ -17,7 +17,13 @@ G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
 // Implements GApplication::activate.
 static void my_application_activate(GApplication* application) {
     MyApplication* self = MY_APPLICATION(application);
-    GtkWindow* window =
+    GtkWindow* window = GTK_WINDOW(gtk_application_get_active_window(GTK_APPLICATION(application)));
+    if(window != nullptr){
+      gtk_window_present(window);
+      return;
+    }
+
+    window =
         GTK_WINDOW(gtk_application_window_new(GTK_APPLICATION(application)));
     // Set the window icon
     // Set the window icon using the embedded XPM
@@ -106,5 +112,5 @@ static void my_application_init(MyApplication* self) {}
 MyApplication* my_application_new() {
     return MY_APPLICATION(g_object_new(
         my_application_get_type(), "application-id", APPLICATION_ID, "flags",
-        G_APPLICATION_NON_UNIQUE, nullptr));
+        G_APPLICATION_FLAGS_NONE, nullptr));
 }
