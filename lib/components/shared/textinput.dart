@@ -12,6 +12,9 @@ class TextInputField extends StatefulWidget {
       required this.keyboardType,
       required this.validator,
       required this.updateFormStatus,
+      this.prefix,
+      this.suffix,
+      this.contentPadding,
       this.inputFormatters,
       this.controller,
       this.textCapitalization,
@@ -29,21 +32,27 @@ class TextInputField extends StatefulWidget {
   final Color? labelColor;
   final Color? color;
   final void Function() updateFormStatus;
+  final EdgeInsets? contentPadding;
+  final Widget? prefix, suffix;
   @override
   State<TextInputField> createState() => _TextInputFieldState();
 }
 
 class _TextInputFieldState extends State<TextInputField> {
   static const _borderRadius = BorderRadius.all(Radius.circular(8));
-  static const _contentPadding = EdgeInsets.all(16);
   InputDecoration _buildTextfieldDecoration(
-          {String title = "", String helper = "", String hint = ""}) =>
+          {String title = "",
+          String helper = "",
+          String hint = "",
+          EdgeInsets? contentPadding}) =>
       InputDecoration(
           helperText: helper,
           hintText: hint,
           filled: true,
           fillColor: ThemeColors.gray2,
-          contentPadding: _contentPadding,
+          prefixIcon: widget.prefix,
+          suffix: widget.suffix,
+          contentPadding: contentPadding,
           errorStyle:
               const TextStyle(fontFamily: Fonts.rubik, color: ThemeColors.red),
           hintStyle: const TextStyle(
@@ -108,7 +117,10 @@ class _TextInputFieldState extends State<TextInputField> {
           textCapitalization:
               widget.textCapitalization ?? TextCapitalization.none,
           decoration: _buildTextfieldDecoration(
-              title: widget.title, helper: widget.helper, hint: widget.hint),
+              title: widget.title,
+              helper: widget.helper,
+              hint: widget.hint,
+              contentPadding: widget.contentPadding),
         ),
       ],
     );
