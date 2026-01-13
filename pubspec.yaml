@@ -3,7 +3,7 @@ description: A new Flutter project.
 publish_to: none
 version: 0.5.8+41
 environment:
-  sdk: '>=3.2.6 <4.0.0'
+  sdk: ">=3.2.6 <4.0.0"
 dependencies:
   flutter:
     sdk: flutter
@@ -12,7 +12,7 @@ dependencies:
   flutter_native_splash: ^2.3.10
   flutter_secure_storage: ^9.2.4
   fluttertoast: ^9.0.0
-  sentry_flutter: ^9.7.0
+  sentry_flutter: ^9.9.2
   package_info_plus: ^9.0.0
   pointycastle: ^4.0.0
   path_provider: ^2.1.3
