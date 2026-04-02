@@ -117,8 +117,8 @@ class _AddNewCardFormState extends State<AddNewCardForm> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: TextInputField(
-                    title: "CVV",
-                    helper: "All good!",
+                    title: "CVV(Optional)",
+                    helper: _cvvController.text.isNotEmpty ? "All good!" : "",
                     hint: "XXX",
                     contentPadding: padding,
                     validator: CardFieldsValidator.cvv,

@@ -49,7 +49,7 @@ class _CardViewState extends State<CardView> {
           : widget.card.getNumberView();
       String cvvView = prefsNotifier.prefs.maskCVV
           ? widget.card.getMaskedCVV()
-          : widget.card.getCVV();
+          : widget.card.getCVVOrEmpty();
       return GestureDetector(
         onTap: () async {
           if (widget.card.cardNumberType == CardNumberType.last4) {
@@ -62,11 +62,13 @@ class _CardViewState extends State<CardView> {
           await _incrementUsedCount();
           Clipboard.setData(ClipboardData(text: widget.card.getNumber()));
           String notificationTitle = "Card details: ${widget.card.getTitle()}";
-          String notificationBody =
-              "Expiry: ${widget.card.getExpiryView()} | CVV: ${widget.card.getCVV()}\nCard number is copied to clipboard.";
+          String notificationBody = widget.card.hasCVV()
+              ? "Expiry: ${widget.card.getExpiryView()} | CVV: ${widget.card.getCVV()}\nCard number is copied to clipboard."
+              : "Expiry: ${widget.card.getExpiryView()}\nCard number is copied to clipboard.";
           if (PlatformService.isAndroid()) {
-            notificationBody =
-                "Expiry: <strong>${widget.card.getExpiryView()}</strong> | CVV: <strong>${widget.card.getCVV()}</strong><br/><i>Card number is copied to clipboard.</i>";
+            notificationBody = widget.card.hasCVV()
+                ? "Expiry: <strong>${widget.card.getExpiryView()}</strong> | CVV: <strong>${widget.card.getCVV()}</strong><br/><i>Card number is copied to clipboard.</i>"
+                : "Expiry: <strong>${widget.card.getExpiryView()}</strong><br/><i>Card number is copied to clipboard.</i>";
           }
           ToastService.show(
               message: "Number copied to clipboard",

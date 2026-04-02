@@ -92,7 +92,7 @@ class CardModel extends Model {
     _numberView = buf.toString();
   }
 
-  void setCVV(String cvv) {
+  void setCVV(String? cvv) {
     this.cvv = cvv;
   }
 
@@ -191,11 +191,23 @@ class CardModel extends Model {
     return sb.toString();
   }
 
-  String getCVV() {
+  String? getCVV() {
+    return cvv;
+  }
+
+  /// Returns the CVV value, or empty string if not set.
+  /// Use this when you need a non-null string for display/formatting.
+  String getCVVOrEmpty() {
     return cvv ?? "";
   }
 
+  /// Returns true if CVV is set (not null and not empty).
+  bool hasCVV() {
+    return cvv != null && cvv!.isNotEmpty;
+  }
+
   String getMaskedCVV() {
+    if (cvv == null || cvv!.isEmpty) return "";
     StringBuffer sb = StringBuffer();
     int haveTo = 3;
     String maskChar = '*';

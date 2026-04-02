@@ -48,11 +48,8 @@ class CardFieldsValidator {
   }
 
   static String? cvv(String? maybeCvv) {
-    if (maybeCvv == null || maybeCvv.isEmpty) {
-      return "shouldn't be empty";
-    }
-    String processedCvv = StringUtils.removeAll(maybeCvv, ' ');
-    if (processedCvv.length != 3) {
+    String processedCvv = StringUtils.removeAll(maybeCvv ?? "", ' ');
+    if (processedCvv.isNotEmpty && processedCvv.length != 3) {
       return "should be 3 digits";
     }
     for (int i = 0; i < processedCvv.length; ++i) {
