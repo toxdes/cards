@@ -56,13 +56,15 @@ class CardModelJsonEncoder implements Encoder<CardModel, String> {
       ..setNumber((record['number'] ?? '') as String)
       ..setProvider(CardUtils.getCardProviderFromString(
           (record['provider'] ?? 'Unknown') as String))
-      ..setCVV((record['cvv'] ?? '') as String)
       ..setExpiry((record['expiry'] ?? '') as String)
       ..setCardType(CardUtils.getCardTypeFromString(
           (record['type'] ?? 'Unknown') as String))
       ..setTitle((record['title'] ?? '') as String)
       ..setCardNumberType(cardNumberType)
       ..setOwnerName((record['ownerName'] ?? '') as String);
+    if (record['cvv'] != null) {
+      card.setCVV(record['cvv'] as String);
+    }
     if (createdAt != null) {
       card.setCreatedAt(
           DateTime.fromMicrosecondsSinceEpoch(createdAt, isUtc: true));

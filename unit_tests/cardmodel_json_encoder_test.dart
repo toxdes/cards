@@ -65,4 +65,38 @@ void main() {
     assert(!decodedCard.hasCVV());
     assert(decodedCard.getCVV() == null);
   });
+
+  test('decoder handles empty string CVV from old backups', () {
+    // Old backups may have empty string for CVV when it wasn't set
+    String cardJson = '{'
+        '"title":"Test Card",'
+        '"number":"1234567890123456",'
+        '"cvv":"",'
+        '"expiry":"1225"'
+        '}';
+    CardModelJsonEncoder encoder = CardModelJsonEncoder();
+    CardModel decodedCard = encoder.decode(cardJson);
+
+    // Empty string CVV should be preserved
+    assert(!decodedCard.hasCVV());
+    assert(decodedCard.getCVV() == "");
+    assert(decodedCard.getCVVOrEmpty().isEmpty);
+  });
+
+  test('decoder handles explicit null CVV in JSON', () {
+    // Explicit null CVV should remain null
+    String cardJson = '{'
+        '"title":"Test Card",'
+        '"number":"1234567890123456",'
+        '"cvv":null,'
+        '"expiry":"1225"'
+        '}';
+    CardModelJsonEncoder encoder = CardModelJsonEncoder();
+    CardModel decodedCard = encoder.decode(cardJson);
+
+    // Null CVV should be preserved
+    assert(!decodedCard.hasCVV());
+    assert(decodedCard.getCVV() == null);
+    assert(decodedCard.getCVVOrEmpty().isEmpty);
+  });
 }
