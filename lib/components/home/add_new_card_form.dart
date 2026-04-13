@@ -1,4 +1,6 @@
 import 'package:cards/components/home/card_number_input.dart';
+import 'package:cards/components/home/card_type_selector.dart';
+import 'package:cards/components/home/card_type_picker_modal.dart';
 import 'package:cards/components/shared/button.dart';
 import 'package:cards/components/shared/textinput.dart';
 import 'package:cards/config/colors.dart';
@@ -136,6 +138,12 @@ class _AddNewCardFormState extends State<AddNewCardForm> {
               onCardNumberChanged: () => _onCardNumberChanged(_numberController.text),
             ),
             const SizedBox(height: 8),
+            CardTypeSelector(
+              title: "Card type",
+              selectedProvider: _selectedProvider,
+              onTap: () => _toggleCardTypePicker(true),
+            ),
+            const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -218,7 +226,15 @@ class _AddNewCardFormState extends State<AddNewCardForm> {
                 disabled: !_isFormValid,
                 alignment: Alignment.center,
                 height: 48,
-                label: "Save card")
+                label: "Save card"),
+            CardTypePickerModal(
+              title: "Select Card Type",
+              closeLabel: "Close",
+              onClose: () => _toggleCardTypePicker(false),
+              isVisible: _isCardTypePickerVisible,
+              currentProvider: _selectedProvider,
+              onProviderSelected: _onProviderSelected,
+            ),
           ],
         ),
       ),
