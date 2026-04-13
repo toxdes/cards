@@ -133,6 +133,7 @@ class _AddNewCardFormState extends State<AddNewCardForm> {
               updateFormStatus: updateFormValidationStatus,
               isCompleteCardNumber: _isCompleteCardNumber,
               onToggleCompleteCardNumber: onToggleCompleteCardNumber,
+              onCardNumberChanged: () => _onCardNumberChanged(_numberController.text),
             ),
             const SizedBox(height: 8),
             Row(
