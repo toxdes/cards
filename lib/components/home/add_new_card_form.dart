@@ -22,6 +22,9 @@ class _AddNewCardFormState extends State<AddNewCardForm> {
   final _formKey = GlobalKey<FormState>();
   bool _isFormValid = false;
   bool _isCompleteCardNumber = true;
+  CardProvider _selectedProvider = CardProvider.unknown;
+  bool _isProviderManuallySelected = false;
+  bool _isCardTypePickerVisible = false;
 
   final CardNumberFormatter _cardNumberFormatter =
       CardFieldsFormatter.numberFormatter();
