@@ -15,6 +15,7 @@ class CardNumberInput extends StatelessWidget {
   final VoidCallback updateFormStatus;
   final VoidCallback onToggleCompleteCardNumber;
   final bool isCompleteCardNumber;
+  final VoidCallback? onCardNumberChanged;
   const CardNumberInput(
       {super.key,
       required this.title,
@@ -26,7 +27,8 @@ class CardNumberInput extends StatelessWidget {
       required this.controller,
       required this.updateFormStatus,
       required this.onToggleCompleteCardNumber,
-      required this.isCompleteCardNumber});
+      required this.isCompleteCardNumber,
+      this.onCardNumberChanged});
 
   Widget get prefix => Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -71,6 +73,7 @@ class CardNumberInput extends StatelessWidget {
         validator: validator,
         prefix: prefix,
         controller: controller,
-        updateFormStatus: updateFormStatus);
+        updateFormStatus: updateFormStatus,
+        onChanged: onCardNumberChanged);
   }
 }

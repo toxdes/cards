@@ -19,7 +19,8 @@ class TextInputField extends StatefulWidget {
       this.controller,
       this.textCapitalization,
       this.labelColor,
-      this.color});
+      this.color,
+      this.onChanged});
 
   final String title;
   final String helper;
@@ -32,6 +33,7 @@ class TextInputField extends StatefulWidget {
   final Color? labelColor;
   final Color? color;
   final void Function() updateFormStatus;
+  final VoidCallback? onChanged;
   final EdgeInsets? contentPadding;
   final Widget? prefix, suffix;
   @override
@@ -107,6 +109,7 @@ class _TextInputFieldState extends State<TextInputField> {
           },
           onChanged: (String? value) {
             widget.updateFormStatus();
+            widget.onChanged?.call();
           },
           selectionControls: null,
           style: _buildTextStyle(widget.color),
