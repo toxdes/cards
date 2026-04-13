@@ -68,10 +68,44 @@ class _AddNewCardFormState extends State<AddNewCardForm> {
     }
   }
 
+  void _onCardNumberChanged(String _) {
+    if (!_isProviderManuallySelected && _isCompleteCardNumber) {
+      final cleanNumber = StringUtils.removeAll(_numberController.text, ' ');
+      final detected = CardUtils.getProviderFromNumber(cleanNumber);
+      if (detected != _selectedProvider) {
+        setState(() {
+          _selectedProvider = detected;
+        });
+      }
+    }
+  }
+
+  void _onProviderSelected(CardProvider provider) {
+    setState(() {
+      _selectedProvider = provider;
+      _isProviderManuallySelected = true;
+    });
+    _toggleCardTypePicker(false);
+  }
+
+  void _resetProvider() {
+    setState(() {
+      _selectedProvider = CardProvider.unknown;
+      _isProviderManuallySelected = false;
+    });
+  }
+
+  void _toggleCardTypePicker(bool? visibility) {
+    setState(() {
+      _isCardTypePickerVisible = visibility ?? !_isCardTypePickerVisible;
+    });
+  }
+
   void onToggleCompleteCardNumber() {
     CardFieldsValidator.setIsCompleteCardNumber(!_isCompleteCardNumber);
     _cardNumberFormatter.setIsCompleteCardNumber(!_isCompleteCardNumber);
     _numberController.text = "";
+    _resetProvider();
     setState(() {
       _isCompleteCardNumber = !_isCompleteCardNumber;
     });
