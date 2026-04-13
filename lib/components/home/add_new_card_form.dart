@@ -1,16 +1,16 @@
 import 'package:cards/components/home/card_number_input.dart';
 import 'package:cards/components/home/card_type_selector.dart';
+import 'package:cards/components/home/card_type_picker_modal.dart';
 import 'package:cards/components/shared/button.dart';
 import 'package:cards/components/shared/textinput.dart';
 import 'package:cards/config/colors.dart';
-import 'package:cards/config/fonts.dart';
 import 'package:cards/models/card/card.dart';
 import 'package:cards/models/card/card_factory.dart';
 import 'package:cards/models/card/card_fields_formatter.dart';
 import 'package:cards/models/card/card_fields_validator.dart';
 import 'package:cards/utils/card_utils.dart';
 import 'package:cards/utils/string_utils.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide BottomSheet;
 import 'package:flutter/services.dart';
 
 class AddNewCardForm extends StatefulWidget {
@@ -90,77 +90,9 @@ class _AddNewCardFormState extends State<AddNewCardForm> {
   }
 
   void _toggleCardTypePicker(bool? visibility) {
-    if (visibility == true || (visibility == null && !_isCardTypePickerVisible)) {
-      showDialog(
-        context: context,
-        builder: (BuildContext dialogContext) {
-          return Dialog(
-            backgroundColor: ThemeColors.gray1,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Container(
-              constraints: const BoxConstraints(maxWidth: 400, maxHeight: 500),
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Select Card Type",
-                        style: const TextStyle(
-                          fontFamily: Fonts.rubik,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: ThemeColors.white2,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => Navigator.of(dialogContext).pop(),
-                        child: const Icon(
-                          Icons.close,
-                          color: ThemeColors.white3,
-                          size: 24,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Expanded(
-                    child: GridView.count(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 12,
-                      crossAxisSpacing: 12,
-                      children: [
-                        _buildCardTypeOption(dialogContext, "Visa", CardProvider.visa, Icons.credit_card),
-                        _buildCardTypeOption(dialogContext, "MasterCard", CardProvider.mastercard, Icons.credit_card),
-                        _buildCardTypeOption(dialogContext, "Amex", CardProvider.amex, Icons.credit_card),
-                        _buildCardTypeOption(dialogContext, "Discover", CardProvider.discover, Icons.credit_card),
-                        _buildCardTypeOption(dialogContext, "RuPay", CardProvider.rupay, Icons.credit_card),
-                        _buildCardTypeOption(dialogContext, "Unknown", CardProvider.unknown, Icons.help_outline),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ).then((_) {
-        setState(() {
-          _isCardTypePickerVisible = false;
-        });
-      });
-      setState(() {
-        _isCardTypePickerVisible = true;
-      });
-    } else {
-      setState(() {
-        _isCardTypePickerVisible = false;
-      });
-    }
+    setState(() {
+      _isCardTypePickerVisible = visibility ?? !_isCardTypePickerVisible;
+    });
   }
 
   void onToggleCompleteCardNumber() {
@@ -171,51 +103,6 @@ class _AddNewCardFormState extends State<AddNewCardForm> {
     setState(() {
       _isCompleteCardNumber = !_isCompleteCardNumber;
     });
-  }
-
-  Widget _buildCardTypeOption(BuildContext dialogContext, String label, CardProvider provider, IconData icon) {
-    final isSelected = _selectedProvider == provider;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedProvider = provider;
-          _isProviderManuallySelected = true;
-        });
-        Navigator.of(dialogContext).pop();
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: isSelected
-              ? ThemeColors.blue.withValues(alpha: 0.2)
-              : ThemeColors.gray2,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? ThemeColors.blue : ThemeColors.gray3,
-            width: isSelected ? 2 : 1,
-          ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? ThemeColors.blue : ThemeColors.white3,
-              size: 32,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: TextStyle(
-                fontFamily: Fonts.rubik,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: isSelected ? ThemeColors.blue : ThemeColors.white2,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   @override
@@ -328,6 +215,20 @@ class _AddNewCardFormState extends State<AddNewCardForm> {
                 alignment: Alignment.center,
                 height: 48,
                 label: "Save card"),
+            CardTypePickerModal(
+              title: "Select Card Type",
+              closeLabel: "Close",
+              onClose: () => _toggleCardTypePicker(false),
+              isVisible: _isCardTypePickerVisible,
+              currentProvider: _selectedProvider,
+              onProviderSelected: (provider) {
+                setState(() {
+                  _selectedProvider = provider;
+                  _isProviderManuallySelected = true;
+                });
+                _toggleCardTypePicker(false);
+              },
+            ),
           ],
         ),
       ),

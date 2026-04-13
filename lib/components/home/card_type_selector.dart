@@ -15,20 +15,20 @@ class CardTypeSelector extends StatelessWidget {
     required this.onTap,
   });
 
-  String _getProviderLabel() {
+  String _getCardTypeImage() {
     switch (selectedProvider) {
       case CardProvider.visa:
-        return "Visa";
+        return 'assets/card_types/visa.png';
       case CardProvider.mastercard:
-        return "MasterCard";
+        return 'assets/card_types/mastercard.png';
       case CardProvider.amex:
-        return "Amex";
+        return 'assets/card_types/amex.png';
       case CardProvider.discover:
-        return "Discover";
+        return 'assets/card_types/discover.png';
       case CardProvider.rupay:
-        return "RuPay";
+        return 'assets/card_types/rupay.png';
       case CardProvider.unknown:
-        return "Unknown";
+        return 'assets/card_types/unknown.png';
     }
   }
 
@@ -66,13 +66,18 @@ class CardTypeSelector extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  _getProviderLabel(),
-                  style: const TextStyle(
-                    fontFamily: Fonts.rubik,
-                    fontSize: 16,
-                    color: ThemeColors.white2,
-                  ),
+                Image.asset(
+                  _getCardTypeImage(),
+                  width: 60,
+                  height: 40,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(
+                      Icons.credit_card,
+                      color: ThemeColors.white2,
+                      size: 32,
+                    );
+                  },
                 ),
                 Icon(
                   Icons.expand_more,

@@ -1,7 +1,6 @@
-import 'package:cards/components/shared/select_from_options.dart';
-import 'package:cards/models/card/card.dart';
-import 'package:cards/utils/card_utils.dart';
 import 'package:cards/components/shared/bottom_sheet.dart';
+import 'package:cards/config/colors.dart';
+import 'package:cards/models/card/card.dart';
 import 'package:flutter/material.dart' hide BottomSheet;
 
 class CardTypePickerModal extends StatelessWidget {
@@ -22,38 +21,81 @@ class CardTypePickerModal extends StatelessWidget {
     required this.onProviderSelected,
   });
 
-  SelectOption? _findSelectedOption() {
-    final providerKey = CardUtils.cardProviderToKey(currentProvider);
-    final options = CardUtils.getCardProviderOptions();
-
-    for (final option in options) {
-      if (option.key == providerKey) {
-        return option;
-      }
+  String _getCardTypeImage(CardProvider provider) {
+    switch (provider) {
+      case CardProvider.visa:
+        return 'assets/card_types/visa.png';
+      case CardProvider.mastercard:
+        return 'assets/card_types/mastercard.png';
+      case CardProvider.amex:
+        return 'assets/card_types/amex.png';
+      case CardProvider.discover:
+        return 'assets/card_types/discover.png';
+      case CardProvider.rupay:
+        return 'assets/card_types/rupay.png';
+      case CardProvider.unknown:
+        return 'assets/card_types/unknown.png';
     }
-    return null;
   }
 
-  void _handleOptionSelection(SelectOption selectedOption) {
-    final provider = CardUtils.keyToCardProvider(selectedOption.key);
-    onProviderSelected(provider);
+  Widget _buildCardTypeOption(CardProvider provider) {
+    final isSelected = currentProvider == provider;
+    return GestureDetector(
+      onTap: () => onProviderSelected(provider),
+      child: Container(
+        decoration: BoxDecoration(
+          color: isSelected
+              ? ThemeColors.blue.withValues(alpha: 0.2)
+              : ThemeColors.gray2,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? ThemeColors.blue : ThemeColors.gray3,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              _getCardTypeImage(provider),
+              width: 60,
+              height: 40,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                return Icon(
+                  Icons.credit_card,
+                  color: isSelected ? ThemeColors.blue : ThemeColors.white3,
+                  size: 40,
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final selectedOption = _findSelectedOption();
-
     return BottomSheet(
       title: title,
       closeLabel: closeLabel,
       onClose: onClose,
       isVisible: isVisible,
-      maxHeightFactor: 0.6,
-      child: SelectFromOptions(
-        options: CardUtils.getCardProviderOptions(),
-        selectedOption: selectedOption,
-        onSelectOption: _handleOptionSelection,
-        vertical: true,
+      maxHeightFactor: 0.4,
+      child: GridView.count(
+        crossAxisCount: 4,
+        mainAxisSpacing: 16,
+        crossAxisSpacing: 16,
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+        children: [
+          _buildCardTypeOption(CardProvider.visa),
+          _buildCardTypeOption(CardProvider.mastercard),
+          _buildCardTypeOption(CardProvider.amex),
+          _buildCardTypeOption(CardProvider.discover),
+          _buildCardTypeOption(CardProvider.rupay),
+          _buildCardTypeOption(CardProvider.unknown),
+        ],
       ),
     );
   }
