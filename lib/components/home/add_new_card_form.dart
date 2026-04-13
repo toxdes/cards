@@ -211,11 +211,7 @@ class _AddNewCardFormState extends State<AddNewCardForm> {
                           StringUtils.removeAll(_numberController.text, ' '))
                       ..setExpiry(_expiryController.text)
                       ..setOwnerName(_ownerNameController.text)
-                      ..setProvider(_isCompleteCardNumber
-                          ? CardUtils.getCardProviderFromString(
-                              StringUtils.removeAll(
-                                  _numberController.text, ' '))
-                          : CardProvider.unknown)
+                      ..setProvider(_selectedProvider)
                       ..setCVV(_cvvController.text)
                       ..setCardNumberType(_isCompleteCardNumber
                           ? CardNumberType.complete
