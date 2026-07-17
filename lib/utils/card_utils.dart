@@ -1,4 +1,6 @@
+import 'package:cards/components/shared/select_from_options.dart';
 import 'package:cards/models/card/card.dart';
+import 'package:flutter/material.dart';
 
 class CardUtils {
   static CardProvider getProviderFromNumber(String number) {
@@ -44,6 +46,16 @@ class CardUtils {
     return CardProvider.unknown;
   }
 
+  static CardNumberType getCardNumberTypeFromString(String type) {
+    switch (type) {
+      case "Last4":
+        return CardNumberType.last4;
+      case "Complete":
+      default:
+        return CardNumberType.complete;
+    }
+  }
+
   static CardType getCardTypeFromString(String type) {
     switch (type) {
       case "Debit":
@@ -70,5 +82,51 @@ class CardUtils {
       default:
         return CardProvider.unknown;
     }
+  }
+
+  static String cardProviderToKey(CardProvider provider) {
+    return provider.toString().split('.').last;
+  }
+
+  static CardProvider keyToCardProvider(String key) {
+    return CardProvider.values.firstWhere(
+      (p) => cardProviderToKey(p) == key,
+      orElse: () => CardProvider.unknown,
+    );
+  }
+
+  static List<SelectOption> getCardProviderOptions() {
+    return [
+      SelectOption(
+        key: 'visa',
+        label: 'Visa',
+        icon: Icons.credit_card,
+      ),
+      SelectOption(
+        key: 'mastercard',
+        label: 'MasterCard',
+        icon: Icons.credit_card,
+      ),
+      SelectOption(
+        key: 'amex',
+        label: 'Amex',
+        icon: Icons.credit_card,
+      ),
+      SelectOption(
+        key: 'discover',
+        label: 'Discover',
+        icon: Icons.credit_card,
+      ),
+      SelectOption(
+        key: 'rupay',
+        label: 'RuPay',
+        icon: Icons.credit_card,
+      ),
+      SelectOption(
+        key: 'unknown',
+        label: 'Unknown',
+        icon: Icons.help_outline,
+      ),
+    ];
   }
 }

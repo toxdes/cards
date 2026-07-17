@@ -29,6 +29,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> with TrayListener, WindowListener {
   bool _addNewCardFormVisible = false;
   bool _sortAndFilterModalVisible = false;
+  bool _isExiting = false; // Flag to prevent window operations during exit
 
   Menu getContextMenuItems() {
     return Menu(
@@ -58,15 +59,20 @@ class _HomeState extends State<Home> with TrayListener, WindowListener {
 
   @override
   void dispose() {
+    // Remove listeners first to prevent callbacks after dispose
     trayManager.removeListener(this);
     windowManager.removeListener(this);
+    // Don't perform any window operations here as the window may be destroyed
     super.dispose();
   }
 
   @override
   void onWindowClose() async {
-    await windowManager.setSkipTaskbar(true);
-    await windowManager.hide();
+    // Don't manipulate window during exit process to avoid GTK assertions
+    if (!_isExiting) {
+      await windowManager.setSkipTaskbar(true);
+      await windowManager.hide();
+    }
   }
 
   @override
@@ -82,11 +88,18 @@ class _HomeState extends State<Home> with TrayListener, WindowListener {
   @override
   void onTrayMenuItemClick(MenuItem menuItem) async {
     if (menuItem.key == 'show_window') {
+      _isExiting = false; // Reset flag when showing window again
       await windowManager.show();
       await windowManager.focus();
     } else if (menuItem.key == 'exit') {
+      // Set flag to prevent onWindowClose from manipulating window during exit
+      _isExiting = true;
+      // Make window closable first
       await windowManager.setClosable(true);
+      // Close the window first before destroying to avoid GTK issues
       await windowManager.close();
+      // Small delay to ensure close completes before destroy
+      await Future.delayed(const Duration(milliseconds: 100));
       await windowManager.destroy();
     }
   }

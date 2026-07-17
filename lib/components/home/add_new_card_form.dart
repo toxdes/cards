@@ -1,3 +1,6 @@
+import 'package:cards/components/home/card_number_input.dart';
+import 'package:cards/components/home/card_type_selector.dart';
+import 'package:cards/components/home/card_type_picker_modal.dart';
 import 'package:cards/components/shared/button.dart';
 import 'package:cards/components/shared/textinput.dart';
 import 'package:cards/config/colors.dart';
@@ -5,6 +8,7 @@ import 'package:cards/models/card/card.dart';
 import 'package:cards/models/card/card_factory.dart';
 import 'package:cards/models/card/card_fields_formatter.dart';
 import 'package:cards/models/card/card_fields_validator.dart';
+import 'package:cards/utils/card_utils.dart';
 import 'package:cards/utils/string_utils.dart';
 import 'package:flutter/material.dart' hide BottomSheet;
 import 'package:flutter/services.dart';
@@ -19,8 +23,12 @@ class AddNewCardForm extends StatefulWidget {
 class _AddNewCardFormState extends State<AddNewCardForm> {
   final _formKey = GlobalKey<FormState>();
   bool _isFormValid = false;
+  bool _isCompleteCardNumber = true;
+  CardProvider _selectedProvider = CardProvider.unknown;
+  bool _isProviderManuallySelected = false;
+  bool _isCardTypePickerVisible = false;
 
-  final TextInputFormatter _cardNumberFormatter =
+  final CardNumberFormatter _cardNumberFormatter =
       CardFieldsFormatter.numberFormatter();
   final TextInputFormatter _expiryFormatter =
       CardFieldsFormatter.expiryFormatter();
@@ -33,6 +41,13 @@ class _AddNewCardFormState extends State<AddNewCardForm> {
   final TextEditingController _expiryController = TextEditingController();
   final TextEditingController _cvvController = TextEditingController();
   final TextEditingController _ownerNameController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _cardNumberFormatter.setIsCompleteCardNumber(_isCompleteCardNumber);
+    CardFieldsValidator.setIsCompleteCardNumber(_isCompleteCardNumber);
+  }
 
   @override
   void dispose() {
@@ -55,8 +70,44 @@ class _AddNewCardFormState extends State<AddNewCardForm> {
     }
   }
 
+  void _onCardNumberChanged(String _) {
+    if (!_isProviderManuallySelected && _isCompleteCardNumber) {
+      final cleanNumber = StringUtils.removeAll(_numberController.text, ' ');
+      final detected = CardUtils.getProviderFromNumber(cleanNumber);
+      if (detected != _selectedProvider) {
+        setState(() {
+          _selectedProvider = detected;
+        });
+      }
+    }
+  }
+
+  void _resetProvider() {
+    setState(() {
+      _selectedProvider = CardProvider.unknown;
+      _isProviderManuallySelected = false;
+    });
+  }
+
+  void _toggleCardTypePicker(bool? visibility) {
+    setState(() {
+      _isCardTypePickerVisible = visibility ?? !_isCardTypePickerVisible;
+    });
+  }
+
+  void onToggleCompleteCardNumber() {
+    CardFieldsValidator.setIsCompleteCardNumber(!_isCompleteCardNumber);
+    _cardNumberFormatter.setIsCompleteCardNumber(!_isCompleteCardNumber);
+    _numberController.text = "";
+    _resetProvider();
+    setState(() {
+      _isCompleteCardNumber = !_isCompleteCardNumber;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    const EdgeInsets padding = EdgeInsets.all(16);
     return Form(
       key: _formKey,
       child: Container(
@@ -65,7 +116,7 @@ class _AddNewCardFormState extends State<AddNewCardForm> {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TextInputField(
+            CardNumberInput(
               title: "Card number",
               helper: "All good!",
               hint: "XXXX XXXX XXXX XXXX",
@@ -74,6 +125,15 @@ class _AddNewCardFormState extends State<AddNewCardForm> {
               validator: CardFieldsValidator.number,
               controller: _numberController,
               updateFormStatus: updateFormValidationStatus,
+              isCompleteCardNumber: _isCompleteCardNumber,
+              onToggleCompleteCardNumber: onToggleCompleteCardNumber,
+              onCardNumberChanged: () => _onCardNumberChanged(_numberController.text),
+            ),
+            const SizedBox(height: 8),
+            CardTypeSelector(
+              title: "Card type",
+              selectedProvider: _selectedProvider,
+              onTap: () => _toggleCardTypePicker(true),
             ),
             const SizedBox(height: 8),
             Row(
@@ -88,15 +148,17 @@ class _AddNewCardFormState extends State<AddNewCardForm> {
                     inputFormatters: [_expiryFormatter],
                     validator: CardFieldsValidator.expiry,
                     controller: _expiryController,
+                    contentPadding: padding,
                     updateFormStatus: updateFormValidationStatus,
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: TextInputField(
-                    title: "CVV",
-                    helper: "All good!",
+                    title: "CVV(Optional)",
+                    helper: _cvvController.text.isNotEmpty ? "All good!" : "",
                     hint: "XXX",
+                    contentPadding: padding,
                     validator: CardFieldsValidator.cvv,
                     inputFormatters: [_cvvFormatter],
                     keyboardType: TextInputType.number,
@@ -141,14 +203,32 @@ class _AddNewCardFormState extends State<AddNewCardForm> {
                           StringUtils.removeAll(_numberController.text, ' '))
                       ..setExpiry(_expiryController.text)
                       ..setOwnerName(_ownerNameController.text)
-                      ..setCVV(_cvvController.text);
+                      ..setProvider(_selectedProvider)
+                      ..setCVV(_cvvController.text)
+                      ..setCardNumberType(_isCompleteCardNumber
+                          ? CardNumberType.complete
+                          : CardNumberType.last4);
                     widget.onSubmit(card);
                   }
                 },
                 disabled: !_isFormValid,
                 alignment: Alignment.center,
                 height: 48,
-                label: "Save card")
+                label: "Save card"),
+            CardTypePickerModal(
+              title: "Select Card Type",
+              closeLabel: "Close",
+              onClose: () => _toggleCardTypePicker(false),
+              isVisible: _isCardTypePickerVisible,
+              currentProvider: _selectedProvider,
+              onProviderSelected: (provider) {
+                setState(() {
+                  _selectedProvider = provider;
+                  _isProviderManuallySelected = true;
+                });
+                _toggleCardTypePicker(false);
+              },
+            ),
           ],
         ),
       ),

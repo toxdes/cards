@@ -1,11 +1,16 @@
 import 'package:cards/utils/string_utils.dart';
 
 class CardFieldsValidator {
+  static bool _isCompleteCardNumber = true;
   static String? title(String? maybeTitle) {
     if (maybeTitle == null || maybeTitle.isEmpty) {
       return "title shouldn't be empty";
     }
     return null;
+  }
+
+  static void setIsCompleteCardNumber(bool newValue) {
+    _isCompleteCardNumber = newValue;
   }
 
   static String? number(String? maybeNumber) {
@@ -15,8 +20,9 @@ class CardFieldsValidator {
     if (!StringUtils.isOnlyDigits(maybeNumber)) {
       return "number should only contain digits";
     }
-    if (StringUtils.removeAll(maybeNumber, ' ').length != 16) {
-      return "number should be exactly 16 digits";
+    int maxLen = _isCompleteCardNumber ? 16 : 4;
+    if (StringUtils.removeAll(maybeNumber, ' ').length != maxLen) {
+      return "number should be exactly $maxLen digits";
     }
     return null;
   }
@@ -42,11 +48,8 @@ class CardFieldsValidator {
   }
 
   static String? cvv(String? maybeCvv) {
-    if (maybeCvv == null || maybeCvv.isEmpty) {
-      return "shouldn't be empty";
-    }
-    String processedCvv = StringUtils.removeAll(maybeCvv, ' ');
-    if (processedCvv.length != 3) {
+    String processedCvv = StringUtils.removeAll(maybeCvv ?? "", ' ');
+    if (processedCvv.isNotEmpty && processedCvv.length != 3) {
       return "should be 3 digits";
     }
     for (int i = 0; i < processedCvv.length; ++i) {
