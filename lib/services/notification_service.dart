@@ -52,7 +52,8 @@ class NotificationService {
         macOS: initializationSettingsDarwin,
         linux: initializationSettingsLinux);
 
-    await _notificationPlugin?.initialize(initializationSettings,
+    await _notificationPlugin?.initialize(
+        settings: initializationSettings,
         onDidReceiveNotificationResponse: _onDidReceiveNotificationResponse,
         onDidReceiveBackgroundNotificationResponse:
             _onDidReceiveBackgroundNotificationResponse);

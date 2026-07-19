@@ -8,15 +8,14 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_animate: ^4.5.0
-  flutter_local_notifications: ^19.4.2
+  flutter_local_notifications: ^22.1.0
   flutter_native_splash: ^2.3.10
-  flutter_secure_storage: ^9.2.4
-  fluttertoast: ^9.0.0
-  sentry_flutter: ^9.7.0
-  package_info_plus: ^9.0.0
+  flutter_secure_storage: ^10.3.1
+  sentry_flutter: ^9.24.0
+  package_info_plus: ^10.2.1
   pointycastle: ^4.0.0
   path_provider: ^2.1.3
-  share_plus: ^12.0.0
+  share_plus: ^13.2.1
   file_selector: ^1.0.3
   tray_manager: ^0.5.2
   window_manager: ^0.5.1
@@ -29,7 +28,7 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   integration_test:
     sdk: flutter
-  test: ^1.26.2
+  test: ^1.31.0
 flutter:
   uses-material-design: true
   assets:
