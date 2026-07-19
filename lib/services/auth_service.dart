@@ -1,5 +1,4 @@
 import 'package:cards/services/platform_service.dart';
-import 'package:cards/services/sentry_service.dart';
 import 'package:local_auth/local_auth.dart';
 
 class AuthServiceErrorCodes {
@@ -46,8 +45,7 @@ class AuthService {
     _requireInit();
     try {
       return await _auth!.authenticate(localizedReason: "Unlock");
-    } catch (e, stackTrace) {
-      SentryService.error(e, stackTrace);
+    } catch (e) {
       // TODO: show toast here based on what error we get?
     }
     return false;
