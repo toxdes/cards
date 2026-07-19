@@ -77,11 +77,7 @@ public class CardsForegroundService extends Service {
 
         // Parse HTML in body text
         Spanned styledBody;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            styledBody = Html.fromHtml(body, Html.FROM_HTML_MODE_LEGACY);
-        } else {
-            styledBody = Html.fromHtml(body);
-        }
+        styledBody = Html.fromHtml(body, Html.FROM_HTML_MODE_LEGACY);
 
         return new NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(title)
