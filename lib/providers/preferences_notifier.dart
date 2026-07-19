@@ -1,6 +1,5 @@
 import 'package:cards/models/preferences/preferences.dart';
 import 'package:cards/repositories/preferences_repository.dart';
-import 'package:cards/services/sentry_service.dart';
 import 'package:cards/utils/secure_storage.dart';
 import 'package:flutter/foundation.dart';
 
@@ -20,8 +19,7 @@ class PreferencesNotifier extends ChangeNotifier {
     _prefsRepo.readFromStorage().then((_) {
       _loaded = true;
       notifyListeners();
-    }).catchError((e, stackTrace) {
-      SentryService.error(e, stackTrace);
+    }).catchError((e) {
       _loaded = false;
       notifyListeners();
     });

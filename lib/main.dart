@@ -11,7 +11,6 @@ import 'package:cards/services/backup_service.dart';
 import 'package:cards/services/migrations_service.dart';
 import 'package:cards/services/notification_service.dart';
 import 'package:cards/services/platform_service.dart';
-import 'package:cards/services/sentry_service.dart';
 import 'package:cards/utils/crypto/crypto_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -39,7 +38,6 @@ Widget app = MultiProvider(
           },
         ),
         backgroundColor: ThemeColors.gray1),
-    navigatorObservers: [SentryService.getNavigatorObserver()],
   ),
 );
 
@@ -50,8 +48,6 @@ void main() async {
   await NotificationService.init();
   await CryptoUtils.init();
   await MigrationsService.runMigrations();
-  // TODO: enable sentry after security hardening
-  // await SentryService.init();
   await BackupService.init();
 
   if (PlatformService.isDesktop()) {

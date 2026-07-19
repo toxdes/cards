@@ -7,7 +7,6 @@ import 'package:cards/models/card/card.dart';
 import 'package:cards/providers/card_sort_strategies.dart';
 import 'package:cards/repositories/card_repository.dart';
 import 'package:cards/services/toast_service.dart';
-import 'package:cards/services/sentry_service.dart';
 import 'package:cards/utils/secure_storage.dart';
 
 /// Notifier for managing cards list state
@@ -122,8 +121,7 @@ class CardsNotifier extends ChangeNotifier {
       await _cardRepo.save();
       ToastService.show(status: ToastStatus.success, message: "card saved");
       notifyListeners();
-    } catch (e, stackTrace) {
-      SentryService.error(e, stackTrace);
+    } catch (e) {
       String message = "couldn't save card";
       if (e is CardRepositoryException) {
         if (e.errorCode == CardRepositoryErrorCodes.notUnique) {
@@ -142,8 +140,7 @@ class CardsNotifier extends ChangeNotifier {
       await _cardRepo.save();
       ToastService.show(status: ToastStatus.success, message: "card deleted");
       notifyListeners();
-    } catch (e, stackTrace) {
-      SentryService.error(e, stackTrace);
+    } catch (e) {
       String message = "couldn't delete card";
       if (e is CardRepositoryException) {
         if (e.errorCode == CardRepositoryErrorCodes.doesNotExist) {
@@ -173,8 +170,7 @@ class CardsNotifier extends ChangeNotifier {
       });
       await _cardRepo.save();
       notifyListeners();
-    } catch (e, stackTrace) {
-      SentryService.error(e, stackTrace);
+    } catch (e) {
       rethrow;
     }
   }
