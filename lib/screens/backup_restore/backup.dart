@@ -125,7 +125,9 @@ class _BackupScreenState extends State<BackupScreen> {
     await Future.delayed(const Duration(milliseconds: 2000));
     // generate backup
     Uint8List encrypted = await BackupService.encrypt(
-        key: _key, data: StringUtils.toBytes(cardsNotifier.toJsonString()), salt: _secret);
+        key: _key,
+        data: StringUtils.toBytes(cardsNotifier.toJsonString()),
+        salt: _secret);
 
     // write to file
     final Directory documentsDir = await getApplicationDocumentsDirectory();

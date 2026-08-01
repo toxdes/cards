@@ -74,24 +74,24 @@ class AboutScreen extends StatelessWidget {
                       ),
                       MenuItem(
                           title: "Feedback",
-                          icon:Icons.feedback_outlined,
-                          desc: "Request Features and Report Bugs", 
+                          icon: Icons.feedback_outlined,
+                          desc: "Request Features and Report Bugs",
                           onTap: () {
-                            UrlService.openUrl(URLRepo.feedback);
+                            UrlService.openUrl(UrlRepo.feedback);
                           }),
                       MenuItem(
                           title: "Source Code",
                           icon: Icons.code,
                           desc: "View Source Code on GitHub",
                           onTap: () {
-                            UrlService.openUrl(URLRepo.sourceCode);
+                            UrlService.openUrl(UrlRepo.sourceCode);
                           }),
                       MenuItem(
                           title: "Privacy",
-                          desc: "View privacy policy", 
+                          desc: "View privacy policy",
                           icon: Icons.privacy_tip_outlined,
                           onTap: () {
-                            UrlService.openUrl(URLRepo.privacyPolicy);
+                            UrlService.openUrl(UrlRepo.privacyPolicy);
                           }),
                     ],
                   ),

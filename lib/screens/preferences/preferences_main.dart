@@ -90,7 +90,8 @@ class PreferencesScreen extends StatelessWidget {
                             },
                           ),
                           MenuItemWithSwitch(
-                              checked: prefsNotifier.prefs.useDeviceAuth,
+                              checked: AuthService.isAuthSupported() &&
+                                  prefsNotifier.prefs.useDeviceAuth,
                               icon: Icons.lock_outlined,
                               title: "Use screen lock",
                               desc: PlatformService.isAndroid() &&
@@ -126,15 +127,15 @@ class PreferencesScreen extends StatelessWidget {
                             title: "Support the dev",
                             icon: Icons.local_cafe_outlined,
                             iconColor: ThemeColors.red,
-                            onTap: () => UrlService.openUrl(URLRepo.support),
+                            onTap: () => UrlService.openUrl(UrlRepo.support),
                           ),
                           MenuItem(
                             title: "About",
                             icon: Icons.info_outlined,
-                            onTap: () => {
+                            onTap: () {
                               Navigator.of(context).push(CupertinoPageRoute(
                                   title: "About",
-                                  builder: (context) => const AboutScreen()))
+                                  builder: (context) => const AboutScreen()));
                             },
                           ),
                         ],

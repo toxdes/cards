@@ -144,7 +144,7 @@ class MenuItem extends StatelessWidget {
           children: [
             icon != null
                 ? Icon(icon, color: iconColor)
-                : SizedBox.shrink(),
+                : const SizedBox.shrink(),
             SizedBox(width: 12),
             Column(
                 mainAxisSize: MainAxisSize.max,
@@ -164,7 +164,7 @@ class MenuItem extends StatelessWidget {
                     ),
                     textAlign: TextAlign.left,
                   ),
-                  desc != null ? const SizedBox(height: 4) : SizedBox.shrink(),
+                  desc != null ? const SizedBox(height: 4) : const SizedBox.shrink(),
                   desc != null
                       ? Text(
                           desc!,
@@ -182,11 +182,13 @@ class MenuItem extends StatelessWidget {
                 ]),
           ],
         ),
-        hideRightIcon  ? SizedBox.shrink(): Icon(
-          Icons.chevron_right_outlined,
-          color: ThemeColors.white2,
-          size: 18,
-        ),
+        hideRightIcon
+            ? const SizedBox.shrink()
+            : Icon(
+                Icons.chevron_right_outlined,
+                color: ThemeColors.white2,
+                size: 18,
+              ),
       ]),
     );
   }

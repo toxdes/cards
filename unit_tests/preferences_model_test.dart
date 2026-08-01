@@ -51,7 +51,7 @@ void main() {
     prefs.setMaskCardNumber(false);
     assert(prefs.maskCardNumber == false);
     assert(prefs.maskCVV == true);
-    
+
     prefs.setEnableNotifications(false);
     assert(prefs.enableNotifications == false);
     assert(prefs.maskCVV == true);
@@ -60,12 +60,12 @@ void main() {
 
   test('all boolean preferences can be toggled independently', () {
     PreferencesModel prefs = PreferencesModel();
-    
+
     prefs.setMaskCardNumber(false);
     prefs.setMaskCVV(false);
     prefs.setEnableNotifications(false);
     prefs.setUseDeviceAuth(false);
-    
+
     assert(prefs.maskCardNumber == false);
     assert(prefs.maskCVV == false);
     assert(prefs.enableNotifications == false);
