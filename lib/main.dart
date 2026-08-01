@@ -10,6 +10,7 @@ import 'package:cards/services/auth_service.dart';
 import 'package:cards/services/backup_service.dart';
 import 'package:cards/services/migrations_service.dart';
 import 'package:cards/services/notification_service.dart';
+import 'package:cards/services/package_info_service.dart';
 import 'package:cards/services/platform_service.dart';
 import 'package:cards/utils/crypto/crypto_utils.dart';
 import 'package:flutter/material.dart';
@@ -44,6 +45,7 @@ Widget app = MultiProvider(
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // TODO: refactor this so there is no "implicit" order between services, if possible
+  await PackageInfoService.init();
   await AuthService.init();
   await NotificationService.init();
   await CryptoUtils.init();
