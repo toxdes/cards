@@ -1,4 +1,5 @@
 import 'package:cards/models/preferences/preferences.dart';
+import 'package:cards/services/auth_service.dart';
 
 class PreferencesFactory {
   static PreferencesModel defaultPrefs() {
@@ -6,7 +7,7 @@ class PreferencesFactory {
       ..setMaskCardNumber(true)
       ..setMaskCVV(true)
       ..setEnableNotifications(true)
-      ..setUseDeviceAuth(true);
+      ..setUseDeviceAuth(AuthService.isAuthSupported());
   }
 
   static PreferencesModel fromSchema(int schemaVersion) {
