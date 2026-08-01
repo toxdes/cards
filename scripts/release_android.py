@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Build and release Android APKs to GitHub."""
 
+import argparse
 import re
 from pathlib import Path
 
@@ -23,9 +24,18 @@ def build_apks() -> tuple[Path, Path]:
 
 
 def upload_apks(
-    github: GitHub, release_id: int, dev_dir: Path, prod_dir: Path, version: str
+    github: GitHub,
+    release_id: int,
+    dev_dir: Path,
+    prod_dir: Path,
+    version: str,
+    all: bool = False,
 ) -> None:
-    """Upload all APKs to release."""
+    """Upload APKs to release.
+
+    Default uploads only arm64-v8a (prod + dev) and prod universal.
+    Pass ``all`` to upload every ABI and universal APK for both flavors.
+    """
     # Upload prod APKs (arch-specific)
     for apk in sorted(prod_dir.glob("app-prod-*-release.apk")):
         if "universal" in apk.name:
@@ -34,6 +44,8 @@ def upload_apks(
         match = re.search(r"app-prod-(.+?)-release\.apk", apk.name)
         if match:
             arch = match.group(1)
+            if not all and arch != "arm64-v8a":
+                continue
             asset_name = f"cards-{arch}-{version}.apk"
             github.upload(release_id, str(apk), asset_name, asset_name)
 
@@ -51,18 +63,35 @@ def upload_apks(
         match = re.search(r"app-dev-(.+?)-release\.apk", apk.name)
         if match:
             arch = match.group(1)
+            if not all and arch != "arm64-v8a":
+                continue
             asset_name = f"dev-cards-{arch}-{version}.apk"
             github.upload(release_id, str(apk), asset_name, asset_name)
 
-    # Upload dev universal APK
-    dev_universal = dev_dir / "app-dev-universal-release.apk"
-    if dev_universal.exists():
-        asset_name = f"dev-cards-universal-{version}.apk"
-        github.upload(release_id, str(dev_universal), asset_name, asset_name)
+    # Upload dev universal APK (full release only)
+    if all:
+        dev_universal = dev_dir / "app-dev-universal-release.apk"
+        if dev_universal.exists():
+            asset_name = f"dev-cards-universal-{version}.apk"
+            github.upload(release_id, str(dev_universal), asset_name, asset_name)
 
 
 def main() -> None:
     """Build and upload Android APKs to existing release."""
+    parser = argparse.ArgumentParser(
+        description="Build and upload Android APKs to an existing release."
+    )
+    parser.add_argument(
+        "--all",
+        dest="all",
+        action="store_true",
+        help=(
+            "Upload the complete APK set (all ABIs + universal for both flavors). "
+            "By default only prod arm64, prod universal, and dev arm64 are uploaded."
+        ),
+    )
+    args = parser.parse_args()
+
     try:
         config = Config()
         github = GitHub(config.gh_token)
@@ -80,10 +109,10 @@ def main() -> None:
         dev_dir, prod_dir = build_apks()
 
         # Upload APKs
-        upload_apks(github, release_id, dev_dir, prod_dir, version_fmt)
+        upload_apks(github, release_id, dev_dir, prod_dir, version_fmt, args.all)
 
         log_info("release_android: SUCCESS")
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - any failure should be logged and exit
         log_error(str(e))
 
 
