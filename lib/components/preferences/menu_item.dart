@@ -123,12 +123,14 @@ class MenuItem extends StatelessWidget {
     this.borderColor = ThemeColors.gray3,
     this.descColor = ThemeColors.white3,
     this.disabled = false,
+    this.hideRightIcon = false,
   });
   final VoidCallback onTap;
   final String title;
   final String? desc;
   final IconData? icon;
   final bool disabled;
+  final bool hideRightIcon;
   final Color fgColor, bgColor, iconColor, borderColor, descColor;
   @override
   Widget build(BuildContext context) {
@@ -141,8 +143,8 @@ class MenuItem extends StatelessWidget {
         Row(
           children: [
             icon != null
-                ? Icon(icon, color: ThemeColors.white2)
-                : SizedBox.shrink(),
+                ? Icon(icon, color: iconColor)
+                : const SizedBox.shrink(),
             SizedBox(width: 12),
             Column(
                 mainAxisSize: MainAxisSize.max,
@@ -162,7 +164,7 @@ class MenuItem extends StatelessWidget {
                     ),
                     textAlign: TextAlign.left,
                   ),
-                  desc != null ? const SizedBox(height: 4) : SizedBox.shrink(),
+                  desc != null ? const SizedBox(height: 4) : const SizedBox.shrink(),
                   desc != null
                       ? Text(
                           desc!,
@@ -180,11 +182,13 @@ class MenuItem extends StatelessWidget {
                 ]),
           ],
         ),
-        Icon(
-          Icons.chevron_right_outlined,
-          color: ThemeColors.white2,
-          size: 18,
-        ),
+        hideRightIcon
+            ? const SizedBox.shrink()
+            : Icon(
+                Icons.chevron_right_outlined,
+                color: ThemeColors.white2,
+                size: 18,
+              ),
       ]),
     );
   }

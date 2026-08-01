@@ -210,7 +210,7 @@ class _CardViewState extends State<CardView> {
                             fontFamily: Fonts.rubik,
                             fontWeight: FontWeight.w400,
                             fontSize: 12))
-                    : SizedBox.shrink(),
+                    : const SizedBox.shrink(),
                 Expanded(
                     child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,

@@ -120,8 +120,8 @@ class _BottomSheetState extends State<BottomSheet>
                                                   100)
                                               .clamp(0, double.infinity)),
                                       child: SingleChildScrollView(
-                                        child:
-                                            widget.child ?? SizedBox.shrink(),
+                                        child: widget.child ??
+                                            const SizedBox.shrink(),
                                       ),
                                     ),
                                   ],

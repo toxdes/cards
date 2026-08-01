@@ -15,7 +15,7 @@ class NotificationService {
 
   static Future<void> init() async {
     // Initialize action string with correct package name for the flavor
-    _packageInfo = await PackageInfoService.getPackageInfo();
+    _packageInfo = PackageInfoService.getPackageInfo();
     String packageName = _packageInfo!.packageName;
     _clearNotificationAction = "$packageName.action.CLEAR_CLIPBOARD";
     if (PlatformService.isAndroid()) {

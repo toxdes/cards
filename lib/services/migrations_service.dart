@@ -22,12 +22,12 @@ class MigrationsService {
     context.addMigration(AddBillingCycleMigration(id: 2));
     context.addMigration(RedoCardTypeMigration(id: 3));
     context.addMigration(AddUsedCountMigration(id: 4));
-    
+
     CardRepository cardRepository = CardRepository(
         storage: const SecureStorage(),
         storageKey: CardRepositoryStorageKeys.mainStorage);
     await cardRepository.readFromStorage();
-    
+
     UnmodifiableListView<CardModel> cards = cardRepository.getAll();
     if (cards.isEmpty) return;
     if (CardModelFactory.blank().schemaVersion != cards[0].schemaVersion) {

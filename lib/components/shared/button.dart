@@ -105,8 +105,10 @@ class _ButtonState extends State<Button> {
                         size: 16,
                         color: widget.labelColor,
                       )
-                    : SizedBox.shrink(),
-                widget.label != null ? SizedBox(width: 4) : SizedBox.shrink(),
+                    : const SizedBox.shrink(),
+                widget.label != null
+                    ? const SizedBox(width: 4)
+                    : const SizedBox.shrink(),
                 Text(widget.label ?? "",
                     textDirection: TextDirection.ltr,
                     textAlign: TextAlign.center,

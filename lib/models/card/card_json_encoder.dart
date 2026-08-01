@@ -10,7 +10,7 @@ class CardModelJsonEncoder implements Encoder<CardModel, String> {
   CardModel decode(String encodedInput) {
     Map<String, dynamic> record =
         jsonDecode(encodedInput) as Map<String, dynamic>;
-    
+
     // Handle both old (string) and new (int) formats for backward compatibility
     int? schemaVersion;
     final schemaVersionValue = record['schemaVersion'];
@@ -51,11 +51,12 @@ class CardModelJsonEncoder implements Encoder<CardModel, String> {
 
     card
       ..setNumber((record['number'] ?? '') as String)
-      ..setProvider(
-          CardUtils.getCardProviderFromString((record['provider'] ?? 'Unknown') as String))
+      ..setProvider(CardUtils.getCardProviderFromString(
+          (record['provider'] ?? 'Unknown') as String))
       ..setCVV((record['cvv'] ?? '') as String)
       ..setExpiry((record['expiry'] ?? '') as String)
-      ..setCardType(CardUtils.getCardTypeFromString((record['type'] ?? 'Unknown') as String))
+      ..setCardType(CardUtils.getCardTypeFromString(
+          (record['type'] ?? 'Unknown') as String))
       ..setTitle((record['title'] ?? '') as String)
       ..setOwnerName((record['ownerName'] ?? '') as String);
     if (createdAt != null) {
