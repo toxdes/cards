@@ -5,9 +5,11 @@ import 'package:cards/config/colors.dart';
 import 'package:cards/config/fonts.dart';
 import 'package:cards/providers/preferences_notifier.dart';
 import 'package:cards/screens/backup_restore/backup_main.dart';
+import 'package:cards/screens/preferences/about.dart';
 import 'package:cards/services/auth_service.dart';
 import 'package:cards/services/platform_service.dart';
 import 'package:cards/services/toast_service.dart';
+import 'package:cards/services/url_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Icons;
 import 'package:provider/provider.dart';
@@ -18,13 +20,15 @@ class PreferencesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-        child: Container(
-            decoration: const BoxDecoration(color: ThemeColors.gray1),
+      child: Container(
+        decoration: const BoxDecoration(color: ThemeColors.gray1),
+        child: Center(
+          child: Container(
             constraints: const BoxConstraints(maxWidth: 600),
             padding: const EdgeInsets.fromLTRB(0, 0, 0, 12),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
                     padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
@@ -119,18 +123,30 @@ class PreferencesScreen extends StatelessWidget {
                             },
                           ),
                           MenuItem(
-                            title: "Feedback",
-                            icon: Icons.feedback_outlined,
-                            onTap: () {
-                              ToastService.todo();
+                            title: "Support the dev",
+                            icon: Icons.local_cafe_outlined,
+                            iconColor: ThemeColors.red,
+                            onTap: () => UrlService.openUrl(URLRepo.support),
+                          ),
+                          MenuItem(
+                            title: "About",
+                            icon: Icons.info_outlined,
+                            onTap: () => {
+                              Navigator.of(context).push(CupertinoPageRoute(
+                                  title: "About",
+                                  builder: (context) => const AboutScreen()))
                             },
                           ),
                         ],
                       ),
                     );
                   },
-                )
+                ),
               ],
-            )));
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

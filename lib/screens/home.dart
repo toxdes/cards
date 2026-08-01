@@ -7,12 +7,10 @@ import 'package:cards/components/home/sort_and_filter_modal.dart';
 import 'package:cards/components/shared/button.dart';
 import 'package:cards/components/shared/cardview.dart';
 import 'package:cards/config/colors.dart';
-import 'package:cards/config/fonts.dart';
 import 'package:cards/core/db/sort.dart';
 import 'package:cards/models/card/card.dart';
 import 'package:cards/providers/card_filters.dart';
 import 'package:cards/providers/cards_notifier.dart';
-import 'package:cards/services/flavor_service.dart';
 import 'package:cards/services/platform_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -222,17 +220,6 @@ class _HomeState extends State<Home> with TrayListener, WindowListener {
                       });
                     },
                     onApplyFilter: _onApplyFilter,
-                  ),
-                  Positioned(
-                    bottom: 4,
-                    right: 4,
-                    child: Text(FlavorService.getFlavor().getLabel(),
-                        textAlign: TextAlign.left,
-                        style: const TextStyle(
-                            fontFamily: Fonts.rubik,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: ThemeColors.yellow)),
                   ),
                 ])),
           ),

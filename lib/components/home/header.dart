@@ -3,7 +3,7 @@ import 'package:cards/components/shared/icon_button.dart';
 import 'package:cards/config/colors.dart';
 import 'package:cards/config/fonts.dart';
 import 'package:cards/screens/backup_restore/backup_main.dart';
-import 'package:cards/screens/preferences.dart';
+import 'package:cards/screens/preferences/preferences_main.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide IconButton;
