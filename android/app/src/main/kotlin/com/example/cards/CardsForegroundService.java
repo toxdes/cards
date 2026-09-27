@@ -7,11 +7,17 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ClipboardManager;
+import android.content.ClipData;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.SystemClock;
 import android.text.Html;
 import android.text.Spanned;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 public class CardsForegroundService extends Service {
 
@@ -21,6 +27,32 @@ public class CardsForegroundService extends Service {
     public static final int NOTIFICATION_ID = 1;
     public static final String EXTRA_TITLE = "title";
     public static final String EXTRA_BODY = "body";
+    private static final int COUNTDOWN_SECONDS = 60;
+    private static final long COUNTDOWN_DURATION_MS = COUNTDOWN_SECONDS * 1000L;
+
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private long clipboardClearAt;
+    private String notificationTitle = "Cards";
+    private String notificationBody = "";
+    private boolean foregroundStarted;
+
+    private final Runnable countdownTick = new Runnable() {
+        @Override
+        public void run() {
+            long remainingMs = clipboardClearAt - SystemClock.elapsedRealtime();
+            if (remainingMs <= 0) {
+                clearClipboard();
+                stopForeground(true);
+                stopSelf();
+                return;
+            }
+
+            int remainingSeconds = (int) ((remainingMs + 999) / 1000);
+            NotificationManagerCompat.from(CardsForegroundService.this)
+                .notify(NOTIFICATION_ID, createNotification(remainingSeconds));
+            handler.postDelayed(this, Math.min(1000L, remainingMs));
+        }
+    };
 
     @Override
     public void onCreate() {
@@ -30,20 +62,23 @@ public class CardsForegroundService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        String title = "Cards";
-        String body = "";
-        
-        if (intent != null) {
-            title = intent.getStringExtra(EXTRA_TITLE);
-            body = intent.getStringExtra(EXTRA_BODY);
-            if (title == null) title = "Cards";
-            if (body == null) body = "";
+        if (intent == null) {
+            stopSelf(startId);
+            return START_NOT_STICKY;
         }
 
-        Notification notification = createNotification(title, body);
-        startForeground(NOTIFICATION_ID, notification);
+        notificationTitle = intent.getStringExtra(EXTRA_TITLE);
+        notificationBody = intent.getStringExtra(EXTRA_BODY);
+        if (notificationTitle == null) notificationTitle = "Cards";
+        if (notificationBody == null) notificationBody = "";
 
-        return START_STICKY;
+        handler.removeCallbacks(countdownTick);
+        clipboardClearAt = SystemClock.elapsedRealtime() + COUNTDOWN_DURATION_MS;
+        startForeground(NOTIFICATION_ID, createNotification(COUNTDOWN_SECONDS));
+        foregroundStarted = true;
+        handler.postDelayed(countdownTick, 1000L);
+
+        return START_NOT_STICKY;
     }
 
     @Override
@@ -51,7 +86,16 @@ public class CardsForegroundService extends Service {
         return null;
     }
 
-    private Notification createNotification(String title, String body) {
+    @Override
+    public void onDestroy() {
+        handler.removeCallbacks(countdownTick);
+        if (foregroundStarted) {
+            stopForeground(true);
+        }
+        super.onDestroy();
+    }
+
+    private Notification createNotification(int remainingSeconds) {
         String packageName = getApplicationContext().getPackageName();
         String clearAction = packageName + ".action.CLEAR_CLIPBOARD";
 
@@ -75,16 +119,18 @@ public class CardsForegroundService extends Service {
             PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT
         );
 
-        // Parse HTML in body text
-        Spanned styledBody;
-        styledBody = Html.fromHtml(body, Html.FROM_HTML_MODE_LEGACY);
+        String countdown = "Clipboard clears in " + remainingSeconds + "s";
+        String fullBody = countdown + "<br/>" + notificationBody;
+        Spanned styledBody = Html.fromHtml(fullBody, Html.FROM_HTML_MODE_LEGACY);
 
         return new NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(title)
-            .setContentText(styledBody)
+            .setContentTitle(notificationTitle)
+            .setContentText(countdown)
             .setStyle(new NotificationCompat.BigTextStyle().bigText(styledBody))
             .setSmallIcon(R.mipmap.ic_launcher)
             .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setOnlyAlertOnce(true)
+            .setProgress(COUNTDOWN_SECONDS, COUNTDOWN_SECONDS - remainingSeconds, false)
             .setOngoing(true)
             .setContentIntent(tapPendingIntent)
             .addAction(
@@ -93,6 +139,18 @@ public class CardsForegroundService extends Service {
                 clearPendingIntent
             )
             .build();
+    }
+
+    private void clearClipboard() {
+        ClipboardManager clipboardManager =
+            (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        if (clipboardManager == null) return;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            clipboardManager.clearPrimaryClip();
+        } else {
+            clipboardManager.setPrimaryClip(ClipData.newPlainText("", ""));
+        }
     }
 
     private void createNotificationChannel() {

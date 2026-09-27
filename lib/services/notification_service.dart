@@ -77,10 +77,6 @@ class NotificationService {
   static Future<void> _onDidReceiveNotificationResponse(
       NotificationResponse response) async {
     if (response.actionId == _clearNotificationAction) {
-      _notificationPlugin
-          ?.resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>()
-          ?.stopForegroundService();
       _clearClipboardData();
     }
   }
@@ -114,8 +110,7 @@ class NotificationService {
   static Future<void> showPersistentNotification(
       {required String title,
       String body = "",
-      String? payload,
-      int removeAfterMs = -1}) async {
+      String? payload}) async {
     if (PlatformService.isAndroid()) {
       // Use native method for proper action handling
       try {
@@ -135,14 +130,5 @@ class NotificationService {
           status: ToastStatus.error);
     }
 
-    if (removeAfterMs != -1) {
-      Future.delayed(Duration(milliseconds: removeAfterMs), () {
-        _notificationPlugin
-            ?.resolvePlatformSpecificImplementation<
-                AndroidFlutterLocalNotificationsPlugin>()
-            ?.stopForegroundService();
-        _clearClipboardData();
-      });
-    }
   }
 }
