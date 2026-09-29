@@ -42,7 +42,7 @@ public class CardsForegroundService extends Service {
             long remainingMs = clipboardClearAt - SystemClock.elapsedRealtime();
             if (remainingMs <= 0) {
                 clearClipboard();
-                stopForeground(true);
+                stopForegroundAndRemoveNotification();
                 stopSelf();
                 return;
             }
@@ -90,9 +90,18 @@ public class CardsForegroundService extends Service {
     public void onDestroy() {
         handler.removeCallbacks(countdownTick);
         if (foregroundStarted) {
-            stopForeground(true);
+            stopForegroundAndRemoveNotification();
         }
         super.onDestroy();
+    }
+
+    @SuppressWarnings("deprecation")
+    private void stopForegroundAndRemoveNotification() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            stopForeground(STOP_FOREGROUND_REMOVE);
+        } else {
+            stopForeground(true);
+        }
     }
 
     private Notification createNotification(int remainingSeconds) {
