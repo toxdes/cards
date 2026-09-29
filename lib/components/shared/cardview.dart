@@ -53,7 +53,7 @@ class _CardViewState extends State<CardView> {
       return GestureDetector(
         onTap: () async {
           await _incrementUsedCount();
-          Clipboard.setData(ClipboardData(text: widget.card.getNumber()));
+          await Clipboard.setData(ClipboardData(text: widget.card.getNumber()));
           String notificationTitle = "Card details: ${widget.card.getTitle()}";
           String notificationBody =
               "Expiry: ${widget.card.getExpiryView()} | CVV: ${widget.card.getCVV()}\nCard number is copied to clipboard.";
@@ -65,7 +65,7 @@ class _CardViewState extends State<CardView> {
               message: "Number copied to clipboard",
               status: ToastStatus.success);
           if (prefsNotifier.prefs.enableNotifications) {
-            NotificationService.showNotification(
+            await NotificationService.showNotification(
                 title: notificationTitle, body: notificationBody);
           }
         },

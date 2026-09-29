@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cards/components/home/add_new_card_modal.dart';
 import 'package:cards/components/home/cardlist_empty.dart';
 import 'package:cards/components/home/filter_controls.dart';
@@ -24,39 +26,91 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> with TrayListener, WindowListener {
+class _HomeState extends State<Home> with WindowListener {
   bool _addNewCardFormVisible = false;
   bool _sortAndFilterModalVisible = false;
+  TrayIcon? _trayIcon;
+  Menu? _trayMenu;
+  final List<MenuItem> _trayMenuItems = [];
 
-  Menu getContextMenuItems() {
-    return Menu(
-      items: [
-        MenuItem(
-          key: "show_window",
-          label: 'Show Cards',
-        ),
-        MenuItem(label: "Exit", key: 'exit')
-      ],
+  void _initializeTray() {
+    final trayIcon = TrayIcon.create();
+    final trayMenu = Menu.create();
+    final showWindowItem =
+        MenuItem.createWithLabelAndType('Show Cards', MenuItemType.normal);
+    final exitItem =
+        MenuItem.createWithLabelAndType('Exit', MenuItemType.normal);
+
+    if (trayIcon == null ||
+        trayMenu == null ||
+        showWindowItem == null ||
+        exitItem == null) {
+      trayIcon?.dispose();
+      trayMenu?.dispose();
+      showWindowItem?.dispose();
+      exitItem?.dispose();
+      return;
+    }
+
+    _trayIcon = trayIcon;
+    _trayMenu = trayMenu;
+    _trayMenuItems.addAll([showWindowItem, exitItem]);
+
+    showWindowItem.addListener((event) {
+      if (event is MenuItemClickedEvent) {
+        unawaited(_showWindowFromTray());
+      }
+    });
+    exitItem.addListener((event) {
+      if (event is MenuItemClickedEvent) {
+        unawaited(_exitFromTray());
+      }
+    });
+
+    trayMenu.addItem(showWindowItem);
+    trayMenu.addItem(exitItem);
+    trayIcon.icon = ImageAsset.fromAsset(
+      PlatformService.isWindows() ? 'assets/icon48.ico' : 'assets/icon48.png',
     );
+    trayIcon.setTooltip('Cards');
+    trayIcon.setContextMenu(trayMenu);
+    trayIcon.setContextMenuTrigger(ContextMenuTrigger.rightClicked);
+    trayIcon.addListener((event) {
+      if (event is TrayIconClickedEvent) {
+        trayIcon.openContextMenu();
+      }
+    });
+    trayIcon.setVisible(true);
+  }
+
+  Future<void> _showWindowFromTray() async {
+    await windowManager.show();
+    await windowManager.focus();
+  }
+
+  Future<void> _exitFromTray() async {
+    await windowManager.setClosable(true);
+    await windowManager.close();
+    await windowManager.destroy();
   }
 
   @override
   void initState() {
     super.initState();
     if (PlatformService.isDesktop()) {
-      trayManager.addListener(this);
       windowManager.addListener(this);
       windowManager.setPreventClose(true);
-      trayManager.setIcon(PlatformService.isWindows()
-          ? 'assets/icon48.ico'
-          : 'assets/icon48.png');
-      trayManager.setContextMenu(getContextMenuItems());
+      _initializeTray();
     }
   }
 
   @override
   void dispose() {
-    trayManager.removeListener(this);
+    _trayIcon?.dispose();
+    _trayMenu?.dispose();
+    for (final menuItem in _trayMenuItems) {
+      menuItem.dispose();
+    }
     windowManager.removeListener(this);
     super.dispose();
   }
@@ -65,28 +119,6 @@ class _HomeState extends State<Home> with TrayListener, WindowListener {
   void onWindowClose() async {
     await windowManager.setSkipTaskbar(true);
     await windowManager.hide();
-  }
-
-  @override
-  void onTrayIconMouseDown() {
-    trayManager.popUpContextMenu();
-  }
-
-  @override
-  void onTrayIconRightMouseDown() {
-    trayManager.popUpContextMenu();
-  }
-
-  @override
-  void onTrayMenuItemClick(MenuItem menuItem) async {
-    if (menuItem.key == 'show_window') {
-      await windowManager.show();
-      await windowManager.focus();
-    } else if (menuItem.key == 'exit') {
-      await windowManager.setClosable(true);
-      await windowManager.close();
-      await windowManager.destroy();
-    }
   }
 
   void _onApplyFilter(
